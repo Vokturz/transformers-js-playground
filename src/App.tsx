@@ -1,4 +1,3 @@
-// src/App.tsx
 import { useState } from "react";
 import PipelineSelector from "./components/PipelineSelector";
 import ZeroShotClassification from "./components/ZeroShotClassification";

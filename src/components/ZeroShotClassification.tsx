@@ -45,6 +45,7 @@ function ZeroShotClassification() {
   );
 
   const [status, setStatus] = useState<string>("idle");
+  const [progress, setProgress] = useState<number>(0);
 
   // Create a reference to the worker object.
   const worker = useRef<Worker | null>(null);
@@ -68,6 +69,10 @@ function ZeroShotClassification() {
         setStatus("loading");
       } else if (status === "ready") {
         setStatus("ready");
+      } else if (status === "progress") {
+        setStatus("progress");
+        if (e.data.output.progress && (e.data.output.file as string).startsWith('onnx'))
+          setProgress(e.data.output.progress)
       } else if (status === "output") {
         const { sequence, labels, scores } = e.data.output!;
 
@@ -86,6 +91,7 @@ function ZeroShotClassification() {
         });
       } else if (status === "complete") {
         setStatus("idle");
+        setProgress(100)
       }
     };
 
@@ -166,6 +172,11 @@ function ZeroShotClassification() {
               ? "Model loading..."
               : "Processing"}
         </button>
+        {  status === "progress" &&
+          <div className="text-sm font-medium">
+            {progress}%
+          </div>
+        }
         <div className="flex gap-1">
           <button
             className="border py-1 px-2 bg-green-400 rounded text-white text-sm font-medium cursor-pointer"

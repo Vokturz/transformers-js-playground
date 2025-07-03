@@ -22,7 +22,7 @@ self.addEventListener("message", async (event) => {
   const classifier = await MyTextClassificationPipeline.getInstance((x) => {
     // We also add a progress callback to the pipeline so that we can
     // track model loading.
-    self.postMessage(x);
+    self.postMessage({ status: "progress", output: x });
   });
 
   const { text } = event.data;

@@ -18,6 +18,7 @@ function SentimentAnalysis() {
   const [text, setText] = useState<string>(PLACEHOLDER_TEXTS.join("\n"));
   const [results, setResults] = useState<ClassificationOutput[]>([]);
   const [status, setStatus] = useState<string>("idle");
+  const [progress, setProgress] = useState<number>(0);
 
   // Create a reference to the worker object.
   const worker = useRef<Worker | null>(null);
@@ -41,11 +42,16 @@ function SentimentAnalysis() {
         setStatus("loading");
       } else if (status === "ready") {
         setStatus("ready");
+      } else if (status === "progress") {
+        setStatus("progress");
+        if (e.data.output.progress && (e.data.output.file as string).startsWith('onnx'))
+          setProgress(e.data.output.progress)
       } else if (status === "output") {
         const result = e.data.output!;
         setResults((prevResults) => [...prevResults, result]);
       } else if (status === "complete") {
         setStatus("idle");
+        setProgress(100)
       }
     };
 
@@ -126,7 +132,11 @@ function SentimentAnalysis() {
                   ? "Model loading..."
                   : "Processing..."}
             </button>
-            
+            {  status === "progress" &&
+              <div className="text-sm font-medium">
+                {progress}%
+              </div>
+            }
             <button
               className="py-2 px-4 bg-gray-500 hover:bg-gray-600 rounded text-white font-medium transition-colors"
               onClick={handleClear}

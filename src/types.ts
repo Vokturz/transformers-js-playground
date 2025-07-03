@@ -12,7 +12,7 @@ export interface ClassificationOutput {
 
 
 export interface WorkerMessage {
-  status: 'initiate' | 'ready' | 'output' | 'complete';
+  status: 'initiate' | 'ready' | 'output' | 'complete' | 'progress';
   output?: any;
 }
 

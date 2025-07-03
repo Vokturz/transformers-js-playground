@@ -29,7 +29,7 @@ self.addEventListener("message", async (event) => {
   const pipe = await PipelineFactory.getInstance((x) => {
     // We also add a progress callback to the pipeline so that we can
     // track model loading.
-    self.postMessage(x);
+    self.postMessage({ status: "progress", data: x });
   });
 
   // Run the pipeline
