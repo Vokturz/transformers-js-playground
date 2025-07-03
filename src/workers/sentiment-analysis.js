@@ -36,8 +36,8 @@ self.addEventListener("message", async (event) => {
         status: "output", 
         output: {
           sequence: line,
-          label: output[0].label,
-          score: output[0].score
+          labels: [output[0].label],
+          scores: [output[0].score]
         }
       });
     }

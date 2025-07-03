@@ -1,19 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-
-interface ClassificationResult {
-  sequence: string;
-  label: string;
-  score: number;
-}
-
-interface TextClassificationWorkerMessage {
-  status: "initiate" | "ready" | "output" | "complete";
-  output?: ClassificationResult;
-}
-
-interface TextClassificationWorkerInput {
-  text: string;
-}
+import { ClassificationOutput, SentimentAnalysisWorkerInput, WorkerMessage } from "../types";
 
 const PLACEHOLDER_TEXTS: string[] = [
   "I absolutely love this product! It exceeded all my expectations.",
@@ -28,9 +14,9 @@ const PLACEHOLDER_TEXTS: string[] = [
   "Outstanding! This company really knows how to treat their customers.",
 ].sort(() => Math.random() - 0.5);
 
-function TextClassification() {
+function SentimentAnalysis() {
   const [text, setText] = useState<string>(PLACEHOLDER_TEXTS.join("\n"));
-  const [results, setResults] = useState<ClassificationResult[]>([]);
+  const [results, setResults] = useState<ClassificationOutput[]>([]);
   const [status, setStatus] = useState<string>("idle");
 
   // Create a reference to the worker object.
@@ -41,7 +27,7 @@ function TextClassification() {
     if (!worker.current) {
       // Create the worker if it does not yet exist.
       worker.current = new Worker(
-        new URL("../workers/text-classification.js", import.meta.url),
+        new URL("../workers/sentiment-analysis.js", import.meta.url),
         {
           type: "module",
         }
@@ -49,7 +35,7 @@ function TextClassification() {
     }
 
     // Create a callback function for messages from the worker thread.
-    const onMessageReceived = (e: MessageEvent<TextClassificationWorkerMessage>) => {
+    const onMessageReceived = (e: MessageEvent<WorkerMessage>) => {
       const status = e.data.status;
       if (status === "initiate") {
         setStatus("loading");
@@ -74,7 +60,7 @@ function TextClassification() {
   const classify = useCallback(() => {
     setStatus("processing");
     setResults([]); // Clear previous results
-    const message: TextClassificationWorkerInput = { text };
+    const message: SentimentAnalysisWorkerInput = { text };
     worker.current?.postMessage(message);
   }, [text]);
 
@@ -166,14 +152,14 @@ function TextClassification() {
                 {results.map((result, index) => (
                   <div
                     key={index}
-                    className={`p-3 rounded border-2 ${getSentimentColor(result.label)}`}
+                    className={`p-3 rounded border-2 ${getSentimentColor(result.labels[0])}`}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <span className="font-semibold text-sm">
-                        {formatLabel(result.label)}
+                        {formatLabel(result.labels[0])}
                       </span>
                       <span className="text-sm font-mono">
-                        {(result.score * 100).toFixed(1)}%
+                        {(result.scores[0] * 100).toFixed(1)}%
                       </span>
                     </div>
                     <div className="text-sm text-gray-700">
@@ -190,4 +176,4 @@ function TextClassification() {
   );
 }
 
-export default TextClassification;
+export default SentimentAnalysis;

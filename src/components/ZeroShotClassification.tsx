@@ -1,6 +1,6 @@
 // src/App.tsx
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Section, WorkerMessage, WorkerInput } from "../types";
+import { Section, WorkerMessage, ZeroShotWorkerInput } from "../types";
 
 const PLACEHOLDER_REVIEWS: string[] = [
   // battery/charging problems
@@ -70,7 +70,7 @@ function ZeroShotClassification() {
         setStatus("ready");
       } else if (status === "output") {
         const { sequence, labels, scores } = e.data.output!;
-        
+
         // Threshold for classification
         const label = scores[0] > 0.5 ? labels[0] : "Other";
 
@@ -99,7 +99,7 @@ function ZeroShotClassification() {
 
   const classify = useCallback(() => {
     setStatus("processing");
-    const message: WorkerInput = {
+    const message: ZeroShotWorkerInput = {
       text,
       labels: sections
         .slice(0, sections.length - 1)
