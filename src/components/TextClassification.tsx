@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { ClassificationOutput, SentimentAnalysisWorkerInput, WorkerMessage } from "../types";
+import { ClassificationOutput, TextClassificationWorkerInput, WorkerMessage } from "../types";
 
 const PLACEHOLDER_TEXTS: string[] = [
   "I absolutely love this product! It exceeded all my expectations.",
@@ -14,7 +14,7 @@ const PLACEHOLDER_TEXTS: string[] = [
   "Outstanding! This company really knows how to treat their customers.",
 ].sort(() => Math.random() - 0.5);
 
-function SentimentAnalysis() {
+function TextClassification() {
   const [text, setText] = useState<string>(PLACEHOLDER_TEXTS.join("\n"));
   const [results, setResults] = useState<ClassificationOutput[]>([]);
   const [status, setStatus] = useState<string>("idle");
@@ -44,14 +44,18 @@ function SentimentAnalysis() {
         setStatus("ready");
       } else if (status === "progress") {
         setStatus("progress");
-        if (e.data.output.progress && (e.data.output.file as string).startsWith('onnx'))
-          setProgress(e.data.output.progress)
+        if (
+          e.data.output.progress &&
+          (e.data.output.file as string).startsWith("onnx")
+        )
+          setProgress(e.data.output.progress);
       } else if (status === "output") {
         const result = e.data.output!;
         setResults((prevResults) => [...prevResults, result]);
+        console.log(result);
       } else if (status === "complete") {
         setStatus("idle");
-        setProgress(100)
+        setProgress(100);
       }
     };
 
@@ -66,7 +70,7 @@ function SentimentAnalysis() {
   const classify = useCallback(() => {
     setStatus("processing");
     setResults([]); // Clear previous results
-    const message: SentimentAnalysisWorkerInput = { text };
+    const message: TextClassificationWorkerInput = { text };
     worker.current?.postMessage(message);
   }, [text]);
 
@@ -76,39 +80,11 @@ function SentimentAnalysis() {
     setResults([]);
   };
 
-  const getSentimentColor = (label: string): string => {
-    switch (label.toLowerCase()) {
-      case "positive":
-      case "label_2":
-        return "bg-green-100 border-green-300";
-      case "negative":
-      case "label_0":
-        return "bg-red-100 border-red-300";
-      case "neutral":
-      case "label_1":
-        return "bg-yellow-100 border-yellow-300";
-      default:
-        return "bg-gray-100 border-gray-300";
-    }
-  };
-
-  const formatLabel = (label: string): string => {
-    switch (label) {
-      case "LABEL_0":
-        return "Negative";
-      case "LABEL_1":
-        return "Neutral";
-      case "LABEL_2":
-        return "Positive";
-      default:
-        return label;
-    }
-  };
 
   return (
-    <div className="flex flex-col h-screen w-screen p-4">
+    <div className="flex flex-col h-[40vh] max-h-[80vh] w-full p-4">
       <h1 className="text-2xl font-bold mb-4">Text Classification</h1>
-      
+
       <div className="flex flex-col lg:flex-row gap-4 h-full">
         {/* Input Section */}
         <div className="flex flex-col w-full lg:w-1/2">
@@ -119,7 +95,7 @@ function SentimentAnalysis() {
             onChange={(e) => setText(e.target.value)}
             placeholder="Enter text to classify (one per line)..."
           />
-          
+
           <div className="flex gap-2 mt-4">
             <button
               className="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -129,14 +105,12 @@ function SentimentAnalysis() {
               {!busy
                 ? "Classify Text"
                 : status === "loading"
-                  ? "Model loading..."
-                  : "Processing..."}
+                ? "Model loading..."
+                : "Processing..."}
             </button>
-            {  status === "progress" &&
-              <div className="text-sm font-medium">
-                {progress}%
-              </div>
-            }
+            {status === "progress" && (
+              <div className="text-sm font-medium">{progress}%</div>
+            )}
             <button
               className="py-2 px-4 bg-gray-500 hover:bg-gray-600 rounded text-white font-medium transition-colors"
               onClick={handleClear}
@@ -151,7 +125,7 @@ function SentimentAnalysis() {
           <label className="text-lg font-medium mb-2">
             Classification Results ({results.length}):
           </label>
-          
+
           <div className="border border-gray-300 rounded p-3 flex-grow overflow-y-auto">
             {results.length === 0 ? (
               <div className="text-gray-500 text-center py-8">
@@ -162,11 +136,11 @@ function SentimentAnalysis() {
                 {results.map((result, index) => (
                   <div
                     key={index}
-                    className={`p-3 rounded border-2 ${getSentimentColor(result.labels[0])}`}
+                    className="p-3 rounded border-2"
                   >
                     <div className="flex justify-between items-start mb-2">
                       <span className="font-semibold text-sm">
-                        {formatLabel(result.labels[0])}
+                        {result.labels[0]}
                       </span>
                       <span className="text-sm font-mono">
                         {(result.scores[0] * 100).toFixed(1)}%
@@ -186,4 +160,4 @@ function SentimentAnalysis() {
   );
 }
 
-export default SentimentAnalysis;
+export default TextClassification;

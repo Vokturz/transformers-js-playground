@@ -2,7 +2,7 @@ import React from 'react';
 
 const pipelines = [
   'zero-shot-classification',
-  'sentiment-analysis',
+  'text-classification',
   'image-classification',
   'question-answering',
   'translation',

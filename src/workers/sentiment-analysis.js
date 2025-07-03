@@ -2,8 +2,8 @@
 import { pipeline } from "@huggingface/transformers";
 
 class MyTextClassificationPipeline {
-  static task = "sentiment-analysis";
-  static model = 'Xenova/bert-base-multilingual-uncased-sentiment';
+  static task = "text-classification";
+  static model = "Xenova/bert-base-multilingual-uncased-sentiment";
   static instance = null;
 
   static async getInstance(progress_callback = null) {

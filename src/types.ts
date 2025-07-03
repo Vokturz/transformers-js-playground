@@ -22,7 +22,7 @@ export interface ZeroShotWorkerInput {
 }
 
 
-export interface SentimentAnalysisWorkerInput {
+export interface TextClassificationWorkerInput {
   text: string;
 }
 

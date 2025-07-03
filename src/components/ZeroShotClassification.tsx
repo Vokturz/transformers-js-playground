@@ -154,7 +154,7 @@ function ZeroShotClassification() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen p-1">
+    <div className="flex flex-col h-screen w-full p-1">
       <textarea
         className="border w-full p-1 h-1/2"
         value={text}
