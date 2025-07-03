@@ -4,9 +4,11 @@ import ZeroShotClassification from './components/ZeroShotClassification';
 import TextClassification from './components/TextClassification';
 import Header from './Header';
 import Footer from './Footer';
+import { useModel } from './contexts/ModelContext';
 
 function App() {
   const [pipeline, setPipeline] = useState('zero-shot-classification');
+  const { progress, status, model } = useModel();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -20,6 +22,47 @@ function App() {
               Choose a Pipeline
             </h2>
             <PipelineSelector pipeline={pipeline} setPipeline={setPipeline} />
+
+            {/* Model Loading Progress */}
+            {status === 'progress' && (
+              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="animate-spin h-5 w-5 text-blue-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-900">
+                      Loading Model...
+                    </p>
+                    <div className="mt-2 bg-blue-200 rounded-full h-2">
+                      <div
+                        className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${progress.toFixed(2)}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-xs text-blue-700 mt-1">{progress.toFixed(2)}%</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Pipeline Description */}
             <div className="mt-4 p-4 bg-gray-50 rounded-lg">
@@ -42,6 +85,11 @@ function App() {
                     {pipeline === 'zero-shot-classification'
                       ? 'Zero-Shot Classification'
                       : 'Text-Classification'}
+                    {model && (
+                      <span className="ml-2 text-xs text-gray-500 font-normal">
+                        ({model})
+                      </span>
+                    )}
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">
                     {pipeline === 'zero-shot-classification'

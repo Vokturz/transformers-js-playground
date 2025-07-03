@@ -1,6 +1,7 @@
 // src/App.tsx
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Section, WorkerMessage, ZeroShotWorkerInput } from '../types';
+import { useModel } from '../contexts/ModelContext';
 
 const PLACEHOLDER_REVIEWS: string[] = [
   // battery/charging problems
@@ -44,8 +45,8 @@ function ZeroShotClassification() {
     PLACEHOLDER_SECTIONS.map((title) => ({ title, items: [] }))
   );
 
-  const [status, setStatus] = useState<string>('idle');
-  const [progress, setProgress] = useState<number>(0);
+  const { setProgress, status, setStatus, setModel } = useModel();
+  setModel('MoritzLaurer/deberta-v3-xsmall-zeroshot-v1.1-all-33')
 
   // Create a reference to the worker object.
   const worker = useRef<Worker | null>(null);
@@ -77,6 +78,7 @@ function ZeroShotClassification() {
         )
           setProgress(e.data.output.progress);
       } else if (status === 'output') {
+        setStatus('output');
         const { sequence, labels, scores } = e.data.output!;
 
         // Threshold for classification
@@ -175,9 +177,6 @@ function ZeroShotClassification() {
               ? 'Model loading...'
               : 'Processing'}
         </button>
-        {status === 'progress' && (
-          <div className="text-sm font-medium">{progress}%</div>
-        )}
         <div className="flex gap-1">
           <button
             className="border py-1 px-2 bg-green-400 rounded text-white text-sm font-medium cursor-pointer"

@@ -4,6 +4,8 @@ import {
   TextClassificationWorkerInput,
   WorkerMessage
 } from '../types';
+import { useModel } from '../contexts/ModelContext';
+
 
 const PLACEHOLDER_TEXTS: string[] = [
   'I absolutely love this product! It exceeded all my expectations.',
@@ -21,8 +23,8 @@ const PLACEHOLDER_TEXTS: string[] = [
 function TextClassification() {
   const [text, setText] = useState<string>(PLACEHOLDER_TEXTS.join('\n'));
   const [results, setResults] = useState<ClassificationOutput[]>([]);
-  const [status, setStatus] = useState<string>('idle');
-  const [progress, setProgress] = useState<number>(0);
+  const { setProgress, status, setStatus, setModel } = useModel();
+  setModel('Xenova/bert-base-multilingual-uncased-sentiment')
 
   // Create a reference to the worker object.
   const worker = useRef<Worker | null>(null);
@@ -54,6 +56,7 @@ function TextClassification() {
         )
           setProgress(e.data.output.progress);
       } else if (status === 'output') {
+        setStatus('output');
         const result = e.data.output!;
         setResults((prevResults) => [...prevResults, result]);
         console.log(result);
@@ -111,9 +114,6 @@ function TextClassification() {
                 ? 'Model loading...'
                 : 'Processing...'}
             </button>
-            {status === 'progress' && (
-              <div className="text-sm font-medium">{progress}%</div>
-            )}
             <button
               className="py-2 px-4 bg-gray-500 hover:bg-gray-600 rounded text-white font-medium transition-colors"
               onClick={handleClear}
