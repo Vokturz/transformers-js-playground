@@ -2,6 +2,7 @@
 import React from 'react';
 
 const pipelines = [
+  'zero-shot-classification',
   'text-classification',
   'image-classification',
   'question-answering',
@@ -9,16 +10,16 @@ const pipelines = [
 ];
 
 interface PipelineSelectorProps {
-  onPipelineSelect: (pipeline: string) => void;
+  pipeline: string;
+  setPipeline: (pipeline: string) => void;
 }
 
-const PipelineSelector: React.FC<PipelineSelectorProps> = ({ onPipelineSelect }) => {
+const PipelineSelector: React.FC<PipelineSelectorProps> = ({ pipeline, setPipeline }) => {
   return (
-    <select onChange={(e) => onPipelineSelect(e.target.value)}>
-      <option value="">Select a pipeline</option>
-      {pipelines.map((pipeline) => (
-        <option key={pipeline} value={pipeline}>
-          {pipeline}
+    <select value={pipeline} onChange={(e) => setPipeline(e.target.value)}>
+      {pipelines.map((p) => (
+        <option key={p} value={p}>
+          {p}
         </option>
       ))}
     </select>

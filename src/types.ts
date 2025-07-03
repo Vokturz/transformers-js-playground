@@ -11,7 +11,7 @@ export interface ClassificationOutput {
 
 export interface WorkerMessage {
   status: 'initiate' | 'ready' | 'output' | 'complete';
-  output?: ClassificationOutput;
+  output?: any;
 }
 
 export interface WorkerInput {
