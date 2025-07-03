@@ -1,10 +1,10 @@
 // src/App.tsx
-import { useState, useRef, useEffect, useCallback } from "react";
-import { Section, WorkerMessage, ZeroShotWorkerInput } from "../types";
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Section, WorkerMessage, ZeroShotWorkerInput } from '../types';
 
 const PLACEHOLDER_REVIEWS: string[] = [
   // battery/charging problems
-  "Disappointed with the battery life! The phone barely lasts half a day with regular use. Considering how much I paid for it, I expected better performance in this department.",
+  'Disappointed with the battery life! The phone barely lasts half a day with regular use. Considering how much I paid for it, I expected better performance in this department.',
   "I bought this phone a week ago, and I'm already frustrated with the battery life. It barely lasts half a day with normal usage. I expected more from a supposedly high-end device",
   "The charging port is so finicky. Sometimes it takes forever to charge, and other times it doesn't even recognize the charger. Frustrating experience!",
 
@@ -14,37 +14,37 @@ const PLACEHOLDER_REVIEWS: string[] = [
   "Forget about a heatwave outside; my phone's got its own. It's like a little portable heater. Not what I signed up for.",
 
   // poor build quality
-  "I dropped the phone from a short distance, and the screen cracked easily. Not as durable as I expected from a flagship device.",
-  "Took a slight bump in my bag, and the frame got dinged. Are we back in the flip phone era?",
+  'I dropped the phone from a short distance, and the screen cracked easily. Not as durable as I expected from a flagship device.',
+  'Took a slight bump in my bag, and the frame got dinged. Are we back in the flip phone era?',
   "So, my phone's been in my pocket with just keys – no ninja moves or anything. Still, it managed to get some scratches. Disappointed with the build quality.",
 
   // software
-  "The software updates are a nightmare. Each update seems to introduce new bugs, and it takes forever for them to be fixed.",
-  "Constant crashes and freezes make me want to throw it into a black hole.",
+  'The software updates are a nightmare. Each update seems to introduce new bugs, and it takes forever for them to be fixed.',
+  'Constant crashes and freezes make me want to throw it into a black hole.',
   "Every time I open Instagram, my phone freezes and crashes. It's so frustrating!",
 
   // other
   "I'm not sure what to make of this phone. It's not bad, but it's not great either. I'm on the fence about it.",
   "I hate the color of this phone. It's so ugly!",
-  "This phone sucks! I'm returning it.",
+  "This phone sucks! I'm returning it."
 ].sort(() => Math.random() - 0.5);
 
 const PLACEHOLDER_SECTIONS: string[] = [
-  "Battery and charging problems",
-  "Overheating",
-  "Poor build quality",
-  "Software issues",
-  "Other",
+  'Battery and charging problems',
+  'Overheating',
+  'Poor build quality',
+  'Software issues',
+  'Other'
 ];
 
 function ZeroShotClassification() {
-  const [text, setText] = useState<string>(PLACEHOLDER_REVIEWS.join("\n"));
+  const [text, setText] = useState<string>(PLACEHOLDER_REVIEWS.join('\n'));
 
   const [sections, setSections] = useState<Section[]>(
-    PLACEHOLDER_SECTIONS.map((title) => ({ title, items: [] })),
+    PLACEHOLDER_SECTIONS.map((title) => ({ title, items: [] }))
   );
 
-  const [status, setStatus] = useState<string>("idle");
+  const [status, setStatus] = useState<string>('idle');
   const [progress, setProgress] = useState<number>(0);
 
   // Create a reference to the worker object.
@@ -55,9 +55,9 @@ function ZeroShotClassification() {
     if (!worker.current) {
       // Create the worker if it does not yet exist.
       worker.current = new Worker(
-        new URL("../workers/zero-shot.js", import.meta.url),
+        new URL('../workers/zero-shot.js', import.meta.url),
         {
-          type: "module",
+          type: 'module'
         }
       );
     }
@@ -65,19 +65,22 @@ function ZeroShotClassification() {
     // Create a callback function for messages from the worker thread.
     const onMessageReceived = (e: MessageEvent<WorkerMessage>) => {
       const status = e.data.status;
-      if (status === "initiate") {
-        setStatus("loading");
-      } else if (status === "ready") {
-        setStatus("ready");
-      } else if (status === "progress") {
-        setStatus("progress");
-        if (e.data.output.progress && (e.data.output.file as string).startsWith('onnx'))
-          setProgress(e.data.output.progress)
-      } else if (status === "output") {
+      if (status === 'initiate') {
+        setStatus('loading');
+      } else if (status === 'ready') {
+        setStatus('ready');
+      } else if (status === 'progress') {
+        setStatus('progress');
+        if (
+          e.data.output.progress &&
+          (e.data.output.file as string).startsWith('onnx')
+        )
+          setProgress(e.data.output.progress);
+      } else if (status === 'output') {
         const { sequence, labels, scores } = e.data.output!;
 
         // Threshold for classification
-        const label = scores[0] > 0.5 ? labels[0] : "Other";
+        const label = scores[0] > 0.5 ? labels[0] : 'Other';
 
         const sectionID =
           sections.map((x) => x.title).indexOf(label) ?? sections.length - 1;
@@ -85,44 +88,44 @@ function ZeroShotClassification() {
           const newSections = [...sections];
           newSections[sectionID] = {
             ...newSections[sectionID],
-            items: [...newSections[sectionID].items, sequence],
+            items: [...newSections[sectionID].items, sequence]
           };
           return newSections;
         });
-      } else if (status === "complete") {
-        setStatus("idle");
-        setProgress(100)
+      } else if (status === 'complete') {
+        setStatus('idle');
+        setProgress(100);
       }
     };
 
     // Attach the callback function as an event listener.
-    worker.current.addEventListener("message", onMessageReceived);
+    worker.current.addEventListener('message', onMessageReceived);
 
     // Define a cleanup function for when the component is unmounted.
     return () =>
-      worker.current?.removeEventListener("message", onMessageReceived);
+      worker.current?.removeEventListener('message', onMessageReceived);
   }, [sections]);
 
   const classify = useCallback(() => {
-    setStatus("processing");
+    setStatus('processing');
     const message: ZeroShotWorkerInput = {
       text,
       labels: sections
         .slice(0, sections.length - 1)
-        .map((section) => section.title),
+        .map((section) => section.title)
     };
     worker.current?.postMessage(message);
   }, [text, sections]);
 
-  const busy: boolean = status !== "idle";
+  const busy: boolean = status !== 'idle';
 
   const handleAddCategory = (): void => {
     setSections((sections) => {
       const newSections = [...sections];
       // add at position 2 from the end
       newSections.splice(newSections.length - 1, 0, {
-        title: "New Category",
-        items: [],
+        title: 'New Category',
+        items: []
       });
       return newSections;
     });
@@ -140,8 +143,8 @@ function ZeroShotClassification() {
     setSections((sections) =>
       sections.map((section) => ({
         ...section,
-        items: [],
-      })),
+        items: []
+      }))
     );
   };
 
@@ -167,16 +170,14 @@ function ZeroShotClassification() {
           onClick={classify}
         >
           {!busy
-            ? "Categorize"
-            : status === "loading"
-              ? "Model loading..."
-              : "Processing"}
+            ? 'Categorize'
+            : status === 'loading'
+              ? 'Model loading...'
+              : 'Processing'}
         </button>
-        {  status === "progress" &&
-          <div className="text-sm font-medium">
-            {progress}%
-          </div>
-        }
+        {status === 'progress' && (
+          <div className="text-sm font-medium">{progress}%</div>
+        )}
         <div className="flex gap-1">
           <button
             className="border py-1 px-2 bg-green-400 rounded text-white text-sm font-medium cursor-pointer"
@@ -204,7 +205,7 @@ function ZeroShotClassification() {
         {sections.map((section, index) => (
           <div key={index} className="flex flex-col w-full">
             <input
-              disabled={section.title === "Other"}
+              disabled={section.title === 'Other'}
               className="w-full border px-1 text-center"
               value={section.title}
               onChange={(e) => handleSectionTitleChange(index, e.target.value)}

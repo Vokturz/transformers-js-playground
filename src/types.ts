@@ -9,8 +9,6 @@ export interface ClassificationOutput {
   scores: number[];
 }
 
-
-
 export interface WorkerMessage {
   status: 'initiate' | 'ready' | 'output' | 'complete' | 'progress';
   output?: any;
@@ -20,7 +18,6 @@ export interface ZeroShotWorkerInput {
   text: string;
   labels: string[];
 }
-
 
 export interface TextClassificationWorkerInput {
   text: string;

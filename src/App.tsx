@@ -1,12 +1,12 @@
-import { useState } from "react";
-import PipelineSelector from "./components/PipelineSelector";
-import ZeroShotClassification from "./components/ZeroShotClassification";
-import TextClassification from "./components/TextClassification";
-import Header from "./Header";
-import Footer from "./Footer";
+import { useState } from 'react';
+import PipelineSelector from './components/PipelineSelector';
+import ZeroShotClassification from './components/ZeroShotClassification';
+import TextClassification from './components/TextClassification';
+import Header from './Header';
+import Footer from './Footer';
 
 function App() {
-  const [pipeline, setPipeline] = useState("zero-shot-classification");
+  const [pipeline, setPipeline] = useState('zero-shot-classification');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -39,14 +39,14 @@ function App() {
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-900">
-                    {pipeline === "zero-shot-classification"
-                      ? "Zero-Shot Classification"
-                      : "Text-Classification"}
+                    {pipeline === 'zero-shot-classification'
+                      ? 'Zero-Shot Classification'
+                      : 'Text-Classification'}
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">
-                    {pipeline === "zero-shot-classification"
-                      ? "Classify text into custom categories without training data. Perfect for organizing content, routing messages, or analyzing feedback."
-                      : "Classify text into predefined categories. Ideal for sentiment analysis, spam detection, or topic categorization."}
+                    {pipeline === 'zero-shot-classification'
+                      ? 'Classify text into custom categories without training data. Perfect for organizing content, routing messages, or analyzing feedback.'
+                      : 'Classify text into predefined categories. Ideal for sentiment analysis, spam detection, or topic categorization.'}
                   </p>
                 </div>
               </div>
@@ -56,10 +56,10 @@ function App() {
 
         {/* Pipeline Component */}
         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-          {pipeline === "zero-shot-classification" && (
+          {pipeline === 'zero-shot-classification' && (
             <ZeroShotClassification />
           )}
-          {pipeline === "text-classification" && <TextClassification />}
+          {pipeline === 'text-classification' && <TextClassification />}
         </div>
       </main>
 

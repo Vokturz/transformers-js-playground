@@ -5,7 +5,7 @@ const pipelines = [
   'text-classification',
   'image-classification',
   'question-answering',
-  'translation',
+  'translation'
 ];
 
 interface PipelineSelectorProps {
@@ -13,7 +13,10 @@ interface PipelineSelectorProps {
   setPipeline: (pipeline: string) => void;
 }
 
-const PipelineSelector: React.FC<PipelineSelectorProps> = ({ pipeline, setPipeline }) => {
+const PipelineSelector: React.FC<PipelineSelectorProps> = ({
+  pipeline,
+  setPipeline
+}) => {
   return (
     <select value={pipeline} onChange={(e) => setPipeline(e.target.value)}>
       {pipelines.map((p) => (

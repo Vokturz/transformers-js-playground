@@ -6,7 +6,11 @@ interface ModelSelectorProps {
   models: string[];
 }
 
-const ModelSelector: React.FC<ModelSelectorProps> = ({ model, setModel, models }) => {
+const ModelSelector: React.FC<ModelSelectorProps> = ({
+  model,
+  setModel,
+  models
+}) => {
   return (
     <select value={model} onChange={(e) => setModel(e.target.value)}>
       {models.map((m) => (

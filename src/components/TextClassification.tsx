@@ -1,23 +1,27 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { ClassificationOutput, TextClassificationWorkerInput, WorkerMessage } from "../types";
+import { useState, useRef, useEffect, useCallback } from 'react';
+import {
+  ClassificationOutput,
+  TextClassificationWorkerInput,
+  WorkerMessage
+} from '../types';
 
 const PLACEHOLDER_TEXTS: string[] = [
-  "I absolutely love this product! It exceeded all my expectations.",
+  'I absolutely love this product! It exceeded all my expectations.',
   "This is the worst purchase I've ever made. Complete waste of money.",
-  "The service was okay, nothing special but not terrible either.",
-  "Amazing quality and fast delivery. Highly recommended!",
+  'The service was okay, nothing special but not terrible either.',
+  'Amazing quality and fast delivery. Highly recommended!',
   "I'm not sure how I feel about this. It's decent but could be better.",
-  "Terrible customer service. They were rude and unhelpful.",
+  'Terrible customer service. They were rude and unhelpful.',
   "Great value for money. I'm very satisfied with my purchase.",
-  "The product arrived damaged and the return process was a nightmare.",
-  "Pretty good overall. A few minor issues but mostly positive experience.",
-  "Outstanding! This company really knows how to treat their customers.",
+  'The product arrived damaged and the return process was a nightmare.',
+  'Pretty good overall. A few minor issues but mostly positive experience.',
+  'Outstanding! This company really knows how to treat their customers.'
 ].sort(() => Math.random() - 0.5);
 
 function TextClassification() {
-  const [text, setText] = useState<string>(PLACEHOLDER_TEXTS.join("\n"));
+  const [text, setText] = useState<string>(PLACEHOLDER_TEXTS.join('\n'));
   const [results, setResults] = useState<ClassificationOutput[]>([]);
-  const [status, setStatus] = useState<string>("idle");
+  const [status, setStatus] = useState<string>('idle');
   const [progress, setProgress] = useState<number>(0);
 
   // Create a reference to the worker object.
@@ -28,9 +32,9 @@ function TextClassification() {
     if (!worker.current) {
       // Create the worker if it does not yet exist.
       worker.current = new Worker(
-        new URL("../workers/sentiment-analysis.js", import.meta.url),
+        new URL('../workers/text-classification.js', import.meta.url),
         {
-          type: "module",
+          type: 'module'
         }
       );
     }
@@ -38,48 +42,47 @@ function TextClassification() {
     // Create a callback function for messages from the worker thread.
     const onMessageReceived = (e: MessageEvent<WorkerMessage>) => {
       const status = e.data.status;
-      if (status === "initiate") {
-        setStatus("loading");
-      } else if (status === "ready") {
-        setStatus("ready");
-      } else if (status === "progress") {
-        setStatus("progress");
+      if (status === 'initiate') {
+        setStatus('loading');
+      } else if (status === 'ready') {
+        setStatus('ready');
+      } else if (status === 'progress') {
+        setStatus('progress');
         if (
           e.data.output.progress &&
-          (e.data.output.file as string).startsWith("onnx")
+          (e.data.output.file as string).startsWith('onnx')
         )
           setProgress(e.data.output.progress);
-      } else if (status === "output") {
+      } else if (status === 'output') {
         const result = e.data.output!;
         setResults((prevResults) => [...prevResults, result]);
         console.log(result);
-      } else if (status === "complete") {
-        setStatus("idle");
+      } else if (status === 'complete') {
+        setStatus('idle');
         setProgress(100);
       }
     };
 
     // Attach the callback function as an event listener.
-    worker.current.addEventListener("message", onMessageReceived);
+    worker.current.addEventListener('message', onMessageReceived);
 
     // Define a cleanup function for when the component is unmounted.
     return () =>
-      worker.current?.removeEventListener("message", onMessageReceived);
+      worker.current?.removeEventListener('message', onMessageReceived);
   }, []);
 
   const classify = useCallback(() => {
-    setStatus("processing");
+    setStatus('processing');
     setResults([]); // Clear previous results
     const message: TextClassificationWorkerInput = { text };
     worker.current?.postMessage(message);
   }, [text]);
 
-  const busy: boolean = status !== "idle";
+  const busy: boolean = status !== 'idle';
 
   const handleClear = (): void => {
     setResults([]);
   };
-
 
   return (
     <div className="flex flex-col h-[40vh] max-h-[80vh] w-full p-4">
@@ -103,12 +106,12 @@ function TextClassification() {
               onClick={classify}
             >
               {!busy
-                ? "Classify Text"
-                : status === "loading"
-                ? "Model loading..."
-                : "Processing..."}
+                ? 'Classify Text'
+                : status === 'loading'
+                ? 'Model loading...'
+                : 'Processing...'}
             </button>
-            {status === "progress" && (
+            {status === 'progress' && (
               <div className="text-sm font-medium">{progress}%</div>
             )}
             <button
@@ -134,10 +137,7 @@ function TextClassification() {
             ) : (
               <div className="space-y-3">
                 {results.map((result, index) => (
-                  <div
-                    key={index}
-                    className="p-3 rounded border-2"
-                  >
+                  <div key={index} className="p-3 rounded border-2">
                     <div className="flex justify-between items-start mb-2">
                       <span className="font-semibold text-sm">
                         {result.labels[0]}

@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-import { pipeline } from "@huggingface/transformers";
+import { pipeline } from '@huggingface/transformers';
 
 class PipelineFactory {
   static task = null;
@@ -9,7 +9,7 @@ class PipelineFactory {
   static async getInstance(progress_callback = null) {
     if (this.instance === null) {
       this.instance = pipeline(this.task, this.model, {
-        progress_callback,
+        progress_callback
       });
     }
 
@@ -18,7 +18,7 @@ class PipelineFactory {
 }
 
 // Listen for messages from the main thread
-self.addEventListener("message", async (event) => {
+self.addEventListener('message', async (event) => {
   const { task, model, input } = event.data;
 
   PipelineFactory.task = task;
@@ -29,15 +29,15 @@ self.addEventListener("message", async (event) => {
   const pipe = await PipelineFactory.getInstance((x) => {
     // We also add a progress callback to the pipeline so that we can
     // track model loading.
-    self.postMessage({ status: "progress", data: x });
+    self.postMessage({ status: 'progress', data: x });
   });
 
   // Run the pipeline
   const output = await pipe(...input);
 
   // Send the output back to the main thread
-  self.postMessage({ status: "output", output });
+  self.postMessage({ status: 'output', output });
 
   // Send the output back to the main thread
-  self.postMessage({ status: "complete" });
+  self.postMessage({ status: 'complete' });
 });
