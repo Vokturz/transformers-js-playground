@@ -1,7 +1,13 @@
 // src/App.tsx
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { Section, WorkerMessage, ZeroShotWorkerInput } from '../types';
-import { useModel } from '../contexts/ModelContext';
+import { useState, useRef, useEffect, useCallback } from 'react'
+import {
+  Section,
+  WorkerMessage,
+  ZeroShotWorkerInput,
+  ModelInfo
+} from '../types'
+import { useModel } from '../contexts/ModelContext'
+import { getModelInfo } from '../lib/huggingface'
 
 const PLACEHOLDER_REVIEWS: string[] = [
   // battery/charging problems
@@ -28,7 +34,7 @@ const PLACEHOLDER_REVIEWS: string[] = [
   "I'm not sure what to make of this phone. It's not bad, but it's not great either. I'm on the fence about it.",
   "I hate the color of this phone. It's so ugly!",
   "This phone sucks! I'm returning it."
-].sort(() => Math.random() - 0.5);
+].sort(() => Math.random() - 0.5)
 
 const PLACEHOLDER_SECTIONS: string[] = [
   'Battery and charging problems',
@@ -36,20 +42,48 @@ const PLACEHOLDER_SECTIONS: string[] = [
   'Poor build quality',
   'Software issues',
   'Other'
-];
+]
 
 function ZeroShotClassification() {
-  const [text, setText] = useState<string>(PLACEHOLDER_REVIEWS.join('\n'));
+  const [text, setText] = useState<string>(PLACEHOLDER_REVIEWS.join('\n'))
 
   const [sections, setSections] = useState<Section[]>(
     PLACEHOLDER_SECTIONS.map((title) => ({ title, items: [] }))
-  );
+  )
 
-  const { setProgress, status, setStatus, setModel } = useModel();
-  setModel('MoritzLaurer/deberta-v3-xsmall-zeroshot-v1.1-all-33')
+  const { setProgress, status, setStatus, modelInfo, setModelInfo } = useModel()
+  useEffect(() => {
+    const modelName = 'MoritzLaurer/deberta-v3-xsmall-zeroshot-v1.1-all-33'
+    const fetchModelInfo = async () => {
+      try {
+        const modelInfoResponse = await getModelInfo(modelName)
+        console.log(modelInfoResponse)
+        let parameters = 0
+        if (modelInfoResponse.safetensors) {
+          const safetensors = modelInfoResponse.safetensors
+          parameters =
+            safetensors.parameters.F16 ||
+            safetensors.parameters.F32 ||
+            safetensors.parameters.total ||
+            0
+        }
+        setModelInfo({
+          name: modelName,
+          architecture: modelInfoResponse.config.architectures[0],
+          parameters,
+          likes: modelInfoResponse.likes,
+          downloads: modelInfoResponse.downloads
+        })
+      } catch (error) {
+        console.error('Error fetching model info:', error)
+      }
+    }
+
+    fetchModelInfo()
+  }, [setModelInfo])
 
   // Create a reference to the worker object.
-  const worker = useRef<Worker | null>(null);
+  const worker = useRef<Worker | null>(null)
 
   // We use the `useEffect` hook to setup the worker as soon as the `App` component is mounted.
   useEffect(() => {
@@ -60,86 +94,90 @@ function ZeroShotClassification() {
         {
           type: 'module'
         }
-      );
+      )
     }
 
     // Create a callback function for messages from the worker thread.
     const onMessageReceived = (e: MessageEvent<WorkerMessage>) => {
-      const status = e.data.status;
+      const status = e.data.status
       if (status === 'initiate') {
-        setStatus('loading');
+        setStatus('loading')
       } else if (status === 'ready') {
-        setStatus('ready');
+        setStatus('ready')
       } else if (status === 'progress') {
-        setStatus('progress');
+        setStatus('progress')
         if (
           e.data.output.progress &&
           (e.data.output.file as string).startsWith('onnx')
         )
-          setProgress(e.data.output.progress);
+          setProgress(e.data.output.progress)
       } else if (status === 'output') {
-        setStatus('output');
-        const { sequence, labels, scores } = e.data.output!;
+        setStatus('output')
+        const { sequence, labels, scores } = e.data.output!
 
         // Threshold for classification
-        const label = scores[0] > 0.5 ? labels[0] : 'Other';
+        const label = scores[0] > 0.5 ? labels[0] : 'Other'
 
         const sectionID =
-          sections.map((x) => x.title).indexOf(label) ?? sections.length - 1;
+          sections.map((x) => x.title).indexOf(label) ?? sections.length - 1
         setSections((sections) => {
-          const newSections = [...sections];
+          const newSections = [...sections]
           newSections[sectionID] = {
             ...newSections[sectionID],
             items: [...newSections[sectionID].items, sequence]
-          };
-          return newSections;
-        });
+          }
+          return newSections
+        })
       } else if (status === 'complete') {
-        setStatus('idle');
-        setProgress(100);
+        setStatus('idle')
+        setProgress(100)
+      } else if (status === 'error') {
+        setStatus('error')
+        console.error(e.data.output)
       }
-    };
+    }
 
     // Attach the callback function as an event listener.
-    worker.current.addEventListener('message', onMessageReceived);
+    worker.current.addEventListener('message', onMessageReceived)
 
     // Define a cleanup function for when the component is unmounted.
     return () =>
-      worker.current?.removeEventListener('message', onMessageReceived);
-  }, [sections]);
+      worker.current?.removeEventListener('message', onMessageReceived)
+  }, [sections])
 
   const classify = useCallback(() => {
-    setStatus('processing');
+    setStatus('processing')
     const message: ZeroShotWorkerInput = {
       text,
       labels: sections
         .slice(0, sections.length - 1)
-        .map((section) => section.title)
-    };
-    worker.current?.postMessage(message);
-  }, [text, sections]);
+        .map((section) => section.title),
+      model: modelInfo.name
+    }
+    worker.current?.postMessage(message)
+  }, [text, sections, modelInfo.name])
 
-  const busy: boolean = status !== 'idle';
+  const busy: boolean = status !== 'idle'
 
   const handleAddCategory = (): void => {
     setSections((sections) => {
-      const newSections = [...sections];
+      const newSections = [...sections]
       // add at position 2 from the end
       newSections.splice(newSections.length - 1, 0, {
         title: 'New Category',
         items: []
-      });
-      return newSections;
-    });
-  };
+      })
+      return newSections
+    })
+  }
 
   const handleRemoveCategory = (): void => {
     setSections((sections) => {
-      const newSections = [...sections];
-      newSections.splice(newSections.length - 2, 1); // Remove second last element
-      return newSections;
-    });
-  };
+      const newSections = [...sections]
+      newSections.splice(newSections.length - 2, 1) // Remove second last element
+      return newSections
+    })
+  }
 
   const handleClear = (): void => {
     setSections((sections) =>
@@ -147,16 +185,16 @@ function ZeroShotClassification() {
         ...section,
         items: []
       }))
-    );
-  };
+    )
+  }
 
   const handleSectionTitleChange = (index: number, newTitle: string): void => {
     setSections((sections) => {
-      const newSections = [...sections];
-      newSections[index].title = newTitle;
-      return newSections;
-    });
-  };
+      const newSections = [...sections]
+      newSections[index].title = newTitle
+      return newSections
+    })
+  }
 
   return (
     <div className="flex flex-col h-screen w-full p-1">
@@ -174,8 +212,8 @@ function ZeroShotClassification() {
           {!busy
             ? 'Categorize'
             : status === 'loading'
-              ? 'Model loading...'
-              : 'Processing'}
+            ? 'Model loading...'
+            : 'Processing'}
         </button>
         <div className="flex gap-1">
           <button
@@ -223,7 +261,7 @@ function ZeroShotClassification() {
         ))}
       </div>
     </div>
-  );
+  )
 }
 
-export default ZeroShotClassification;
+export default ZeroShotClassification

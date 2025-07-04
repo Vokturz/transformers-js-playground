@@ -3,11 +3,10 @@ import { pipeline } from '@huggingface/transformers';
 
 class MyTextClassificationPipeline {
   static task = 'text-classification';
-  static model = 'Xenova/bert-base-multilingual-uncased-sentiment';
   static instance = null;
 
-  static async getInstance(progress_callback = null) {
-    this.instance ??= pipeline(this.task, this.model, {
+  static async getInstance(model, progress_callback = null) {
+    this.instance ??= pipeline(this.task, model, {
       progress_callback
     });
 
@@ -17,15 +16,24 @@ class MyTextClassificationPipeline {
 
 // Listen for messages from the main thread
 self.addEventListener('message', async (event) => {
+  const { text, model } = event.data;
+  if (!model) {
+    self.postMessage({
+      status: 'error',
+      output: 'No model provided'
+    });
+    return;
+  }
+
   // Retrieve the pipeline. When called for the first time,
   // this will load the pipeline and save it for future use.
-  const classifier = await MyTextClassificationPipeline.getInstance((x) => {
+  const classifier = await MyTextClassificationPipeline.getInstance(model, (x) => {
     // We also add a progress callback to the pipeline so that we can
     // track model loading.
     self.postMessage({ status: 'progress', output: x });
   });
 
-  const { text } = event.data;
+
 
   const split = text.split('\n');
   for (const line of split) {
