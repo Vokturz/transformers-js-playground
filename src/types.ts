@@ -28,9 +28,38 @@ export interface TextClassificationWorkerInput {
 export type AppStatus = 'idle' | 'loading' | 'processing'
 
 export interface ModelInfo {
+  id: string
   name: string
   architecture: string
   parameters: number
+  likes: number
+  downloads: number
+  createdAt: string
+}
+
+
+export interface ModelInfoResponse {
+  id: string
+  createdAt: string
+  config?: {
+    architectures: string[]
+    model_type: string
+  }
+  lastModified: string
+  pipeline_tag: string
+  tags: string[]
+  transformersInfo: {
+    pipeline_tag: string
+    auto_model: string
+    processor: string
+  }
+  safetensors?: {
+    parameters: {
+      F16?: number
+      F32?: number
+      total?: number
+    }
+  }
   likes: number
   downloads: number
 }

@@ -3,6 +3,10 @@ import React from 'react';
 const pipelines = [
   'zero-shot-classification',
   'text-classification',
+  'text-generation',
+  'summarization',
+  'feature-extraction',
+  'sentiment-analysis',
   'image-classification',
   'question-answering',
   'translation'

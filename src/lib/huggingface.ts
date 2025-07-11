@@ -1,27 +1,5 @@
-interface ModelInfoResponse {
-  id: string
-  config: {
-    architectures: string[]
-    model_type: string
-  }
-  lastModified: string
-  pipeline_tag: string
-  tags: string[]
-  transformersInfo: {
-    pipeline_tag: string
-    auto_model: string
-    processor: string
-  }
-  safetensors?: {
-    parameters: {
-      F16?: number
-      F32?: number
-      total?: number
-    }
-  }
-  likes: number
-  downloads: number
-}
+import { Mode } from "fs"
+import { ModelInfoResponse } from "../types"
 
 const getModelInfo = async (modelName: string): Promise<ModelInfoResponse> => {
   const token = process.env.REACT_APP_HUGGINGFACE_TOKEN
@@ -46,6 +24,37 @@ const getModelInfo = async (modelName: string): Promise<ModelInfoResponse> => {
     throw new Error(`Failed to fetch model info: ${response.statusText}`)
   }
   return response.json()
+}
+
+const getModelsByPipeline = async (
+  pipeline_tag: string
+): Promise<ModelInfoResponse[]> => {
+  const token = process.env.REACT_APP_HUGGINGFACE_TOKEN
+
+  if (!token) {
+    throw new Error(
+      'Hugging Face token not found. Please set REACT_APP_HUGGINGFACE_TOKEN in your .env file'
+    )
+  }
+
+  const response = await fetch(
+    `https://huggingface.co/api/models?filter=${pipeline_tag}&filter=transformers.js&sort=downloads`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  )
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch models for pipeline: ${response.statusText}`)
+  }
+  const models = await response.json()
+  if (pipeline_tag === 'text-classification') {
+    return models.filter((model: ModelInfoResponse) => !model.tags.includes('reranker') && !model.id.includes('reranker')).slice(0, 10)
+  }
+  return models.slice(0, 10)
 }
 
 // Define the possible quantization types for clarity and type safety
@@ -81,5 +90,5 @@ function getModelSize(
 }
 
 
-export { getModelInfo, getModelSize }
+export { getModelInfo, getModelSize, getModelsByPipeline }
 

@@ -68,11 +68,13 @@ function ZeroShotClassification() {
             0
         }
         setModelInfo({
+          id: modelInfoResponse.id,
           name: modelName,
-          architecture: modelInfoResponse.config.architectures[0],
+          architecture: modelInfoResponse.config?.architectures[0] ?? '',
           parameters,
           likes: modelInfoResponse.likes,
-          downloads: modelInfoResponse.downloads
+          downloads: modelInfoResponse.downloads,
+          createdAt: modelInfoResponse.createdAt,
         })
       } catch (error) {
         console.error('Error fetching model info:', error)

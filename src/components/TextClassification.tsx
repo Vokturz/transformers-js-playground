@@ -3,7 +3,6 @@ import {
   ClassificationOutput,
   TextClassificationWorkerInput,
   WorkerMessage,
-  ModelInfo
 } from '../types';
 import { useModel } from '../contexts/ModelContext';
 import { getModelInfo } from '../lib/huggingface';
@@ -25,13 +24,14 @@ const PLACEHOLDER_TEXTS: string[] = [
 function TextClassification() {
   const [text, setText] = useState<string>(PLACEHOLDER_TEXTS.join('\n'))
   const [results, setResults] = useState<ClassificationOutput[]>([])
-  const { setProgress, status, setStatus, modelInfo, setModelInfo} = useModel()
+  const { setProgress, status, setStatus, modelInfo, setModelInfo, models, setModels} = useModel()
+
+
   useEffect(() => {
-    const modelName = 'distilbert/distilbert-base-uncased-finetuned-sst-2-english'
+    if (!modelInfo.id) return;
     const fetchModelInfo = async () => {
       try {
-        const modelInfoResponse = await getModelInfo(modelName)
-        console.log(modelInfoResponse)
+        const modelInfoResponse = await getModelInfo(modelInfo.id)
         let parameters = 0
         if (modelInfoResponse.safetensors) {
           const safetensors = modelInfoResponse.safetensors
@@ -42,8 +42,8 @@ function TextClassification() {
               0)
         }
         setModelInfo({
-          name: modelName,
-          architecture: modelInfoResponse.config.architectures[0],
+          ...modelInfo,
+          architecture: modelInfoResponse.config?.architectures[0] ?? '',
           parameters,
           likes: modelInfoResponse.likes,
           downloads: modelInfoResponse.downloads
@@ -54,7 +54,7 @@ function TextClassification() {
     }
 
     fetchModelInfo()
-  }, [setModelInfo])
+  }, [modelInfo.id, setModelInfo])
 
   // Create a reference to the worker object.
   const worker = useRef<Worker | null>(null)
@@ -110,9 +110,9 @@ function TextClassification() {
   const classify = useCallback(() => {
     setStatus('processing')
     setResults([]) // Clear previous results
-    const message: TextClassificationWorkerInput = { text, model: modelInfo.name }
+    const message: TextClassificationWorkerInput = { text, model: modelInfo.id }
     worker.current?.postMessage(message)
-  }, [text, modelInfo.name])
+  }, [text, modelInfo.id])
 
   const busy: boolean = status !== 'idle'
 
