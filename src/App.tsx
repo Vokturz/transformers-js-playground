@@ -1,15 +1,16 @@
-import { useState } from 'react';
-import PipelineSelector from './components/PipelineSelector';
-import ZeroShotClassification from './components/ZeroShotClassification';
-import TextClassification from './components/TextClassification';
-import Header from './Header';
-import Footer from './Footer';
-import { useModel } from './contexts/ModelContext';
-import { Bot, Heart, Download, Cpu } from 'lucide-react';
+import { useState } from 'react'
+import PipelineSelector from './components/PipelineSelector'
+import ZeroShotClassification from './components/ZeroShotClassification'
+import TextClassification from './components/TextClassification'
+import Header from './Header'
+import Footer from './Footer'
+import { useModel } from './contexts/ModelContext'
+import { Bot, Heart, Download, Cpu, DatabaseIcon } from 'lucide-react'
+import { getModelSize } from './lib/huggingface'
 
 function App() {
-  const [pipeline, setPipeline] = useState('zero-shot-classification');
-  const { progress, status, modelInfo } = useModel();
+  const [pipeline, setPipeline] = useState('zero-shot-classification')
+  const { progress, status, modelInfo } = useModel()
 
   const formatNumber = (num: number) => {
     if (num >= 1000000000) {
@@ -19,8 +20,8 @@ function App() {
     } else if (num >= 1000) {
       return (num / 1000).toFixed(1) + 'K'
     }
-    return num.toString();
-  };
+    return num.toString()
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -34,43 +35,59 @@ function App() {
               <h2 className="text-lg font-semibold text-gray-900">
                 Choose a Pipeline
               </h2>
-              
+
               {/* Model Info Display */}
               {modelInfo.name && (
-                <div className="flex items-center space-x-4 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-2 rounded-lg border border-blue-200">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 rounded-lg border border-blue-200 space-y-2">
+                  {/* Model Name Row */}
                   <div className="flex items-center space-x-2">
                     <Bot className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm font-medium text-gray-700 truncate max-w-80" title={modelInfo.name}>
+                    <span
+                      className="text-sm font-medium text-gray-700 truncate max-w-100"
+                      title={modelInfo.name}
+                    >
                       {modelInfo.name.split('/').pop()}
                     </span>
                   </div>
-                  
-                  <div className="flex items-center space-x-4 text-xs text-gray-600">
+
+                  {/* Stats Row */}
+                  <div className="flex items-center justify-self-end space-x-4 text-xs text-gray-600">
                     {modelInfo.likes > 0 && (
                       <div className="flex items-center space-x-1">
                         <Heart className="w-3 h-3 text-red-500" />
                         <span>{formatNumber(modelInfo.likes)}</span>
                       </div>
                     )}
-                    
+
                     {modelInfo.downloads > 0 && (
                       <div className="flex items-center space-x-1">
                         <Download className="w-3 h-3 text-green-500" />
                         <span>{formatNumber(modelInfo.downloads)}</span>
                       </div>
                     )}
-                    
+
                     {modelInfo.parameters > 0 && (
                       <div className="flex items-center space-x-1">
                         <Cpu className="w-3 h-3 text-purple-500" />
                         <span>{formatNumber(modelInfo.parameters)}</span>
                       </div>
                     )}
+
+                    {modelInfo.parameters > 0 && (
+                      <div className="flex items-center space-x-1">
+                        <DatabaseIcon className="w-3 h-3 text-purple-500" />
+                        <span>
+                          {`~${getModelSize(modelInfo.parameters, 'INT8').toFixed(
+                            1
+                          )}MB`}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
             </div>
-            
+
             <PipelineSelector pipeline={pipeline} setPipeline={setPipeline} />
 
             {/* Model Loading Progress */}
@@ -108,7 +125,9 @@ function App() {
                         style={{ width: `${progress.toFixed(2)}%` }}
                       ></div>
                     </div>
-                    <p className="text-xs text-blue-700 mt-1">{progress.toFixed(2)}%</p>
+                    <p className="text-xs text-blue-700 mt-1">
+                      {progress.toFixed(2)}%
+                    </p>
                   </div>
                 </div>
               </div>
@@ -158,7 +177,7 @@ function App() {
 
       <Footer />
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

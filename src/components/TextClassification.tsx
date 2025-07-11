@@ -27,7 +27,7 @@ function TextClassification() {
   const [results, setResults] = useState<ClassificationOutput[]>([])
   const { setProgress, status, setStatus, modelInfo, setModelInfo} = useModel()
   useEffect(() => {
-    const modelName = 'Xenova/distilbert-base-uncased-finetuned-sst-2-english'
+    const modelName = 'distilbert/distilbert-base-uncased-finetuned-sst-2-english'
     const fetchModelInfo = async () => {
       try {
         const modelInfoResponse = await getModelInfo(modelName)

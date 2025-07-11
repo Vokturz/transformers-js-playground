@@ -53,7 +53,7 @@ function ZeroShotClassification() {
 
   const { setProgress, status, setStatus, modelInfo, setModelInfo } = useModel()
   useEffect(() => {
-    const modelName = 'MoritzLaurer/deberta-v3-xsmall-zeroshot-v1.1-all-33'
+    const modelName = 'lxyuan/distilbert-base-multilingual-cased-sentiments-student'
     const fetchModelInfo = async () => {
       try {
         const modelInfoResponse = await getModelInfo(modelName)
