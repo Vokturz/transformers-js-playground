@@ -52,37 +52,6 @@ function ZeroShotClassification() {
   )
 
   const { setProgress, status, setStatus, modelInfo, setModelInfo } = useModel()
-  useEffect(() => {
-    const modelName = 'lxyuan/distilbert-base-multilingual-cased-sentiments-student'
-    const fetchModelInfo = async () => {
-      try {
-        const modelInfoResponse = await getModelInfo(modelName)
-        console.log(modelInfoResponse)
-        let parameters = 0
-        if (modelInfoResponse.safetensors) {
-          const safetensors = modelInfoResponse.safetensors
-          parameters =
-            safetensors.parameters.F16 ||
-            safetensors.parameters.F32 ||
-            safetensors.parameters.total ||
-            0
-        }
-        setModelInfo({
-          id: modelInfoResponse.id,
-          name: modelName,
-          architecture: modelInfoResponse.config?.architectures[0] ?? '',
-          parameters,
-          likes: modelInfoResponse.likes,
-          downloads: modelInfoResponse.downloads,
-          createdAt: modelInfoResponse.createdAt,
-        })
-      } catch (error) {
-        console.error('Error fetching model info:', error)
-      }
-    }
-
-    fetchModelInfo()
-  }, [setModelInfo])
 
   // Create a reference to the worker object.
   const worker = useRef<Worker | null>(null)

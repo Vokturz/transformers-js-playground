@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { ModelInfo, ModelInfoResponse } from '../types'
+import { ModelInfo, ModelInfoResponse, QuantizationType } from '../types'
 
 interface ModelContextType {
   progress: number
@@ -12,6 +12,8 @@ interface ModelContextType {
   setPipeline: (pipeline: string) => void
   models: ModelInfoResponse[]
   setModels: (models: ModelInfoResponse[]) => void
+  selectedQuantization: QuantizationType
+  setSelectedQuantization: (quantization: QuantizationType) => void
 }
 
 const ModelContext = createContext<ModelContextType | undefined>(undefined)
@@ -22,6 +24,7 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
   const [modelInfo, setModelInfo] = useState<ModelInfo>({} as ModelInfo)
   const [models, setModels] = useState<ModelInfoResponse[]>([] as ModelInfoResponse[])
   const [pipeline, setPipeline] = useState<string>('zero-shot-classification')
+  const [selectedQuantization, setSelectedQuantization] = useState<QuantizationType>('int8')
 
   // set progress to 0 when model is changed
   useEffect(() => {
@@ -41,6 +44,8 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
         setModels,
         pipeline,
         setPipeline,
+        selectedQuantization,
+        setSelectedQuantization,
       }}
     >
       {children}

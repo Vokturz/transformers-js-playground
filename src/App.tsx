@@ -5,31 +5,22 @@ import TextClassification from './components/TextClassification'
 import Header from './Header'
 import Footer from './Footer'
 import { useModel } from './contexts/ModelContext'
-import { Bot, Heart, Download, Cpu, DatabaseIcon } from 'lucide-react'
-import { getModelsByPipeline, getModelSize } from './lib/huggingface'
+import { getModelsByPipeline } from './lib/huggingface'
 import ModelSelector from './components/ModelSelector'
+import ModelInfo from './components/ModelInfo'
 
 function App() {
-  const { pipeline, setPipeline, progress, status, modelInfo, setModels } = useModel()
+  const { pipeline, setPipeline, progress, status, modelInfo, setModels } =
+    useModel()
 
-  const formatNumber = (num: number) => {
-    if (num >= 1000000000) {
-      return (num / 1000000000).toFixed(1) + 'B'
-    } else if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M'
-    } else if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K'
+  useEffect(() => {
+    const fetchModels = async () => {
+      const fetchedModels = await getModelsByPipeline(pipeline)
+      setModels(fetchedModels)
+      console.log(fetchedModels)
     }
-    return num.toString()
-  }
-
-    useEffect(() => {
-      const fetchModels = async () => {
-        const fetchedModels = await getModelsByPipeline(pipeline);
-        setModels(fetchedModels);
-      };
-      fetchModels();
-    }, [setModels, pipeline]);
+    fetchModels()
+  }, [setModels, pipeline])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -40,66 +31,27 @@ function App() {
         <div className="mb-8">
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="flex items-center justify-between mb-4">
-              {/* Model Info Display */}
-              {modelInfo.name && (
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 rounded-lg border border-blue-200 space-y-2">
-                  {/* Model Name Row */}
-                  <div className="flex items-center space-x-2">
-                    <Bot className="w-4 h-4 text-blue-600" />
-                    <span
-                      className="text-sm font-medium text-gray-700 truncate max-w-100"
-                      title={modelInfo.name}
-                    >
-                      {modelInfo.name.split('/').pop()}
-                    </span>
-                  </div>
-
-                  {/* Stats Row */}
-                  <div className="flex items-center justify-self-end space-x-4 text-xs text-gray-600">
-                    {modelInfo.likes > 0 && (
-                      <div className="flex items-center space-x-1">
-                        <Heart className="w-3 h-3 text-red-500" />
-                        <span>{formatNumber(modelInfo.likes)}</span>
-                      </div>
-                    )}
-
-                    {modelInfo.downloads > 0 && (
-                      <div className="flex items-center space-x-1">
-                        <Download className="w-3 h-3 text-green-500" />
-                        <span>{formatNumber(modelInfo.downloads)}</span>
-                      </div>
-                    )}
-
-                    {modelInfo.parameters > 0 && (
-                      <div className="flex items-center space-x-1">
-                        <Cpu className="w-3 h-3 text-purple-500" />
-                        <span>{formatNumber(modelInfo.parameters)}</span>
-                      </div>
-                    )}
-
-                    {modelInfo.parameters > 0 && (
-                      <div className="flex items-center space-x-1">
-                        <DatabaseIcon className="w-3 h-3 text-purple-500" />
-                        <span>
-                          {`~${getModelSize(
-                            modelInfo.parameters,
-                            'INT8'
-                          ).toFixed(1)}MB`}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+              <ModelInfo />
             </div>
 
-            <div className="flex flex-row items-center space-x-4">
-              <span className="text-lg font-semibold text-gray-900">
-                Choose a Pipeline
-              </span>
-              <PipelineSelector pipeline={pipeline} setPipeline={setPipeline} />
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
+              <div className="space-y-2">
+                <span className="text-lg font-semibold text-gray-900 block">
+                  Choose a Pipeline
+                </span>
+                <PipelineSelector
+                  pipeline={pipeline}
+                  setPipeline={setPipeline}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <span className="text-lg font-semibold text-gray-900 block">
+                  Select Model
+                </span>
+                <ModelSelector />
+              </div>
             </div>
-            <ModelSelector />
 
             {/* Model Loading Progress */}
             {status === 'progress' && (

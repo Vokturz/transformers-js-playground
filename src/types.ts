@@ -27,6 +27,14 @@ export interface TextClassificationWorkerInput {
 
 export type AppStatus = 'idle' | 'loading' | 'processing'
 
+type q8 = 'q8' | 'int8' | 'bnb8' | 'uint8'
+type q4 = 'q4' | 'bnb4'
+type fp16 = 'fp16'
+type fp32 = 'fp32'
+
+export type QuantizationType = q8 | q4 | fp16 | fp32
+
+
 export interface ModelInfo {
   id: string
   name: string
@@ -35,6 +43,10 @@ export interface ModelInfo {
   likes: number
   downloads: number
   createdAt: string
+  isCompatible?: boolean
+  incompatibilityReason?: string
+  supportedQuantizations: QuantizationType[]
+  baseId?: string
 }
 
 
@@ -48,6 +60,10 @@ export interface ModelInfoResponse {
   lastModified: string
   pipeline_tag: string
   tags: string[]
+  cardData?: {
+    base_model: string
+  }
+  baseId?: string
   transformersInfo: {
     pipeline_tag: string
     auto_model: string
@@ -55,11 +71,19 @@ export interface ModelInfoResponse {
   }
   safetensors?: {
     parameters: {
+      BF16?: number
       F16?: number
       F32?: number
       total?: number
     }
   }
+  siblings?: {
+    rfilename: string
+  }[]
+  modelId?: string
+  isCompatible: boolean
+  incompatibilityReason?: string
+  supportedQuantizations: QuantizationType[]
   likes: number
   downloads: number
 }

@@ -1,5 +1,4 @@
-import { Mode } from "fs"
-import { ModelInfoResponse } from "../types"
+import { ModelInfoResponse, QuantizationType } from "../types"
 
 const getModelInfo = async (modelName: string): Promise<ModelInfoResponse> => {
   const token = process.env.REACT_APP_HUGGINGFACE_TOKEN
@@ -23,7 +22,70 @@ const getModelInfo = async (modelName: string): Promise<ModelInfoResponse> => {
   if (!response.ok) {
     throw new Error(`Failed to fetch model info: ${response.statusText}`)
   }
-  return response.json()
+  
+  const modelData: ModelInfoResponse = await response.json()
+  
+  const requiredFiles = [
+    'config.json',
+    'tokenizer.json',
+    'tokenizer_config.json',
+  ]
+  
+  const siblingFiles = modelData.siblings?.map(s => s.rfilename) || []
+  const isCompatible =
+    requiredFiles.every((file) => siblingFiles.includes(file)) &&
+    siblingFiles.some((file) => file.endsWith('.onnx') && file.startsWith('onnx/'))
+  const incompatibilityReason = isCompatible
+    ? ''
+    : `Missing required files: ${requiredFiles
+        .filter(file => !siblingFiles.includes(file))
+        .join(', ')}`
+  const supportedQuantizations = siblingFiles
+      .filter((file) => file.endsWith('.onnx') && file.includes('_'))
+      .map((file) => file.split('/')[1].split('_')[1].split('.')[0])
+      .filter((q) => q !== 'quantized')
+  const uniqueSupportedQuantizations = Array.from(new Set(supportedQuantizations))
+  uniqueSupportedQuantizations.sort((a, b) => {
+    const getNumericValue = (str: string) => {
+      const match = str.match(/(\d+)/)
+      return match ? parseInt(match[1]) : Infinity
+    }
+    return getNumericValue(a) - getNumericValue(b)
+  })
+
+  // If there's a base model, fetch its info and merge with compatibility data
+  const baseModel = modelData.cardData?.base_model ?? modelData.modelId 
+  if (baseModel && !modelData.safetensors) {
+    const baseModelResponse = await fetch(
+      `https://huggingface.co/api/models/${baseModel}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+
+    if (baseModelResponse.ok) {
+      const baseModelData: ModelInfoResponse = await baseModelResponse.json()
+      
+      return {
+        ...baseModelData,
+        id: modelData.id,
+        baseId: baseModel,
+        isCompatible,
+        incompatibilityReason,
+        supportedQuantizations: uniqueSupportedQuantizations as QuantizationType[]
+      }
+    }
+  }
+  
+  return {
+    ...modelData,
+    isCompatible,
+    incompatibilityReason,
+    supportedQuantizations: uniqueSupportedQuantizations as QuantizationType[]
+  }
 }
 
 const getModelsByPipeline = async (
@@ -57,8 +119,6 @@ const getModelsByPipeline = async (
   return models.slice(0, 10)
 }
 
-// Define the possible quantization types for clarity and type safety
-type QuantizationType = 'FP32' | 'FP16' | 'INT8' | 'Q4'
 function getModelSize(
   parameters: number,
   quantization: QuantizationType
@@ -66,20 +126,23 @@ function getModelSize(
   let bytesPerParameter: number
 
   switch (quantization) {
-    case 'FP32':
+    case 'fp32':
       // 32-bit floating point uses 4 bytes
       bytesPerParameter = 4
       break
-    case 'FP16':
+    case 'fp16':
       bytesPerParameter = 2
       break
-    case 'INT8':
+    case 'int8':
+    case 'bnb8':
+    case 'uint8':
+    case 'q8':
       bytesPerParameter = 1
       break
-    case 'Q4':
+    case 'bnb4':
+    case 'q4': 
       bytesPerParameter = 0.5
-      const theoreticalSize = (parameters * bytesPerParameter) / (1024 * 1024)
-      return theoreticalSize
+    break
   }
 
   // There are 1,024 * 1,024 bytes in a megabyte
@@ -91,4 +154,3 @@ function getModelSize(
 
 
 export { getModelInfo, getModelSize, getModelsByPipeline }
-
