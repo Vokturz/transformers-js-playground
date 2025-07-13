@@ -10,7 +10,9 @@ export interface ClassificationOutput {
 }
 
 export interface WorkerMessage {
-  status: 'initiate' | 'ready' | 'output' | 'complete' | 'progress'
+  status: 'initiate' | 'ready' | 'output' | 'complete' | 'progress' | 'error'
+  progress?: number
+  error?: string
   output?: any
 }
 
@@ -21,6 +23,7 @@ export interface ZeroShotWorkerInput {
 }
 
 export interface TextClassificationWorkerInput {
+  type: 'classify'
   text: string
   model: string
 }

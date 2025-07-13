@@ -8,7 +8,7 @@ type SortOption = 'likes' | 'downloads' | 'createdAt' | 'name'
 
 const ModelSelector: React.FC = () => {
   const { models, setModelInfo, modelInfo, pipeline } = useModel()
-  const [sortBy, setSortBy] = useState<SortOption>('likes')
+  const [sortBy, setSortBy] = useState<SortOption>('downloads')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
   const formatNumber = (num: number) => {

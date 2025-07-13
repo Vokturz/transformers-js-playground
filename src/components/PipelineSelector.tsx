@@ -9,8 +9,8 @@ import {
 import { ChevronDown, Check } from 'lucide-react';
 
 const pipelines = [
-  'zero-shot-classification',
   'text-classification',
+  'zero-shot-classification',
   'text-generation',
   'summarization',
   'feature-extraction',

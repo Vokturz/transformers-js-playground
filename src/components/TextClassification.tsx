@@ -6,6 +6,7 @@ import {
 } from '../types';
 import { useModel } from '../contexts/ModelContext';
 import { getModelInfo } from '../lib/huggingface';
+import { getWorker } from '../lib/workerManager';
 
 
 const PLACEHOLDER_TEXTS: string[] = [
@@ -24,7 +25,8 @@ const PLACEHOLDER_TEXTS: string[] = [
 function TextClassification() {
   const [text, setText] = useState<string>(PLACEHOLDER_TEXTS.join('\n'))
   const [results, setResults] = useState<ClassificationOutput[]>([])
-  const { setProgress, status, setStatus, modelInfo, setModelInfo, models, setModels} = useModel()
+  const { setProgress, status, setStatus, modelInfo, setModelInfo, workerLoaded} = useModel()
+  const workerRef = useRef<Worker | null>(null)
 
 
   useEffect(() => {
@@ -56,43 +58,23 @@ function TextClassification() {
     fetchModelInfo()
   }, [modelInfo.id, setModelInfo])
 
-  // Create a reference to the worker object.
-  const worker = useRef<Worker | null>(null)
-
   // We use the `useEffect` hook to setup the worker as soon as the component is mounted.
   useEffect(() => {
-    if (!worker.current) {
-      // Create the worker if it does not yet exist.
-      worker.current = new Worker(
-        new URL('../workers/text-classification.js', import.meta.url),
-        {
-          type: 'module'
-        }
-      )
+    if(!workerRef.current) {
+      workerRef.current = getWorker('text-classification')
     }
+
 
     // Create a callback function for messages from the worker thread.
     const onMessageReceived = (e: MessageEvent<WorkerMessage>) => {
       const status = e.data.status
-      if (status === 'initiate') {
-        setStatus('loading')
-      } else if (status === 'ready') {
-        setStatus('ready')
-      } else if (status === 'progress') {
-        setStatus('progress')
-        if (
-          e.data.output.progress &&
-          (e.data.output.file as string).startsWith('onnx')
-        )
-          setProgress(e.data.output.progress)
-      } else if (status === 'output') {
+      if (status === 'output') {
         setStatus('output')
         const result = e.data.output!
         setResults((prevResults) => [...prevResults, result])
         console.log(result)
       } else if (status === 'complete') {
         setStatus('idle')
-        setProgress(100)
       } else if (status === 'error') {
         setStatus('error')
         console.error(e.data.output)
@@ -100,21 +82,26 @@ function TextClassification() {
     }
 
     // Attach the callback function as an event listener.
-    worker.current.addEventListener('message', onMessageReceived)
+    workerRef.current?.addEventListener('message', onMessageReceived)
 
     // Define a cleanup function for when the component is unmounted.
     return () =>
-      worker.current?.removeEventListener('message', onMessageReceived)
+      workerRef.current?.removeEventListener('message', onMessageReceived)
   }, [])
 
   const classify = useCallback(() => {
     setStatus('processing')
     setResults([]) // Clear previous results
-    const message: TextClassificationWorkerInput = { text, model: modelInfo.id }
-    worker.current?.postMessage(message)
+    const message: TextClassificationWorkerInput = {
+      type: 'classify',
+      text,
+      model: modelInfo.id
+    }
+    workerRef.current?.postMessage(message)
   }, [text, modelInfo.id])
 
-  const busy: boolean = status !== 'idle'
+  const busy: boolean = status !== 'ready'
+
 
   const handleClear = (): void => {
     setResults([])
@@ -138,14 +125,14 @@ function TextClassification() {
           <div className="flex gap-2 mt-4">
             <button
               className="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              disabled={busy}
+              disabled={busy || !workerLoaded}
               onClick={classify}
             >
-              {!busy
+              {workerLoaded ? (!busy
                 ? 'Classify Text'
                 : status === 'loading'
                 ? 'Model loading...'
-                : 'Processing...'}
+                : 'Processing...') : 'Load model first'}
             </button>
             <button
               className="py-2 px-4 bg-gray-500 hover:bg-gray-600 rounded text-white font-medium transition-colors"

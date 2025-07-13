@@ -59,13 +59,14 @@ function ZeroShotClassification() {
   // We use the `useEffect` hook to setup the worker as soon as the `App` component is mounted.
   useEffect(() => {
     if (!worker.current) {
+      return
       // Create the worker if it does not yet exist.
-      worker.current = new Worker(
-        new URL('../workers/zero-shot.js', import.meta.url),
-        {
-          type: 'module'
-        }
-      )
+      // worker.current = new Worker(
+      //   new URL('../workers/zero-shot-classification.js', import.meta.url),
+      //   {
+      //     type: 'module'
+      //   }
+      // )
     }
 
     // Create a callback function for messages from the worker thread.
