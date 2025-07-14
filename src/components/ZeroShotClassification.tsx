@@ -104,6 +104,8 @@ function ZeroShotClassification() {
   }, [sections])
 
   const classify = useCallback(() => {
+    if (!modelInfo) return
+
     setStatus('loading')
     const message: ZeroShotWorkerInput = {
       text,
@@ -113,7 +115,7 @@ function ZeroShotClassification() {
       model: modelInfo.name
     }
     worker.current?.postMessage(message)
-  }, [text, sections, modelInfo.name])
+  }, [text, sections, modelInfo])
 
   const busy: boolean = status !== 'ready'
 

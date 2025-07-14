@@ -58,6 +58,7 @@ function TextClassification() {
   }, [setStatus])
 
   const classify = useCallback(() => {
+    if (!modelInfo) return
     setStatus('loading')
     setResults([]) // Clear previous results
     const message: TextClassificationWorkerInput = {
@@ -66,7 +67,7 @@ function TextClassification() {
       model: modelInfo.id
     }
     workerRef.current?.postMessage(message)
-  }, [text, modelInfo.id, setStatus])
+  }, [text, modelInfo, setStatus])
 
   const busy: boolean = status !== 'ready'
 

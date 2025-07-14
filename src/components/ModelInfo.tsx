@@ -64,7 +64,7 @@ const ModelInfo = () => {
     </div>
   )
 
-  if (!modelInfo.name) {
+  if (!modelInfo) {
     return <ModelInfoSkeleton />
   }
 

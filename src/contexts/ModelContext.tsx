@@ -16,8 +16,8 @@ interface ModelContextType {
   setStatus: (status: WorkerStatus) => void
   progress: number
   setProgress: (progress: number) => void
-  modelInfo: ModelInfo
-  setModelInfo: (model: ModelInfo) => void
+  modelInfo: ModelInfo | null
+  setModelInfo: (model: ModelInfo | null) => void
   pipeline: string
   setPipeline: (pipeline: string) => void
   models: ModelInfoResponse[]
@@ -33,7 +33,7 @@ const ModelContext = createContext<ModelContextType | undefined>(undefined)
 export function ModelProvider({ children }: { children: React.ReactNode }) {
   const [progress, setProgress] = useState<number>(0)
   const [status, setStatus] = useState<WorkerStatus>('initiate')
-  const [modelInfo, setModelInfo] = useState<ModelInfo>({} as ModelInfo)
+  const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null)
   const [models, setModels] = useState<ModelInfoResponse[]>(
     [] as ModelInfoResponse[]
   )
@@ -45,7 +45,7 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
   // set progress to 0 when model is changed
   useEffect(() => {
     setProgress(0)
-  }, [modelInfo.name])
+  }, [modelInfo?.name])
 
   return (
     <ModelContext.Provider

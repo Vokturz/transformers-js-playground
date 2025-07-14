@@ -119,7 +119,7 @@ const ModelSelector: React.FC = () => {
   }
 
   const selectedModel =
-    models.find((model) => model.id === modelInfo.id) || models[0]
+    models.find((model) => model.id === modelInfo?.id) || models[0]
 
   return (
     <div className="relative">
@@ -132,7 +132,7 @@ const ModelSelector: React.FC = () => {
             <div className="flex items-center justify-between w-full">
               <div className="flex flex-col flex-1 min-w-0">
                 <span className="truncate font-medium">
-                  {modelInfo.id || 'Select a model'}
+                  {modelInfo?.id || 'Select a model'}
                 </span>
               </div>
 

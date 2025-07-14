@@ -3,7 +3,6 @@ import PipelineSelector from './components/PipelineSelector'
 import ZeroShotClassification from './components/ZeroShotClassification'
 import TextClassification from './components/TextClassification'
 import Header from './Header'
-import Footer from './Footer'
 import { useModel } from './contexts/ModelContext'
 import { getModelsByPipeline } from './lib/huggingface'
 import ModelSelector from './components/ModelSelector'
@@ -11,9 +10,10 @@ import ModelInfo from './components/ModelInfo'
 import ModelReadme from './components/ModelReadme'
 
 function App() {
-  const { pipeline, setPipeline, setModels, modelInfo } = useModel()
+  const { pipeline, setPipeline, setModels, setModelInfo, modelInfo } = useModel()
 
   useEffect(() => {
+    setModelInfo(null)
     const fetchModels = async () => {
       const fetchedModels = await getModelsByPipeline(pipeline)
       setModels(fetchedModels)

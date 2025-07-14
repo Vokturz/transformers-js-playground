@@ -19,6 +19,8 @@ const ModelLoader = () => {
   } = useModel()
 
   useEffect(() => {
+    if (!modelInfo) return
+
     if (modelInfo.isCompatible && modelInfo.supportedQuantizations.length > 0) {
       const quantizations = modelInfo.supportedQuantizations
       let defaultQuant: QuantizationType = 'fp32'
@@ -34,12 +36,13 @@ const ModelLoader = () => {
       setSelectedQuantization(defaultQuant)
     }
   }, [
-    modelInfo.supportedQuantizations,
-    modelInfo.isCompatible,
+    modelInfo,
     setSelectedQuantization
   ])
 
   useEffect(() => {
+    if (!modelInfo) return
+
     const newWorker = getWorker(pipeline)
     if (!newWorker) {
       return
@@ -70,10 +73,10 @@ const ModelLoader = () => {
       newWorker.removeEventListener('message', onMessageReceived)
       // terminateWorker(pipeline);
     }
-  }, [pipeline, modelInfo.name, selectedQuantization, setActiveWorker, setStatus, setProgress])
+  }, [pipeline, modelInfo, selectedQuantization, setActiveWorker, setStatus, setProgress])
 
   const loadModel = useCallback(() => {
-    if (!modelInfo.name || !selectedQuantization) return
+    if (!modelInfo || !selectedQuantization) return
 
     setStatus('loading')
     const message = {
@@ -82,12 +85,12 @@ const ModelLoader = () => {
       quantization: selectedQuantization
     }
     activeWorker?.postMessage(message)
-  }, [modelInfo.name, selectedQuantization, setStatus, activeWorker])
+  }, [modelInfo, selectedQuantization, setStatus, activeWorker])
 
    const ready: boolean = status === 'ready'
    const busy: boolean = status === 'loading'
 
-  if (!modelInfo.isCompatible || modelInfo.supportedQuantizations.length === 0) {
+  if (!modelInfo?.isCompatible || modelInfo.supportedQuantizations.length === 0) {
     return null
   }
 
