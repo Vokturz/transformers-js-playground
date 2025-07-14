@@ -1,11 +1,21 @@
-import React, { createContext, RefObject, useContext, useEffect, useRef, useState } from 'react'
-import { ModelInfo, ModelInfoResponse, QuantizationType } from '../types'
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState
+} from 'react'
+import {
+  ModelInfo,
+  ModelInfoResponse,
+  QuantizationType,
+  WorkerStatus
+} from '../types'
 
 interface ModelContextType {
+  status: WorkerStatus
+  setStatus: (status: WorkerStatus) => void
   progress: number
-  status: string
   setProgress: (progress: number) => void
-  setStatus: (status: string) => void
   modelInfo: ModelInfo
   setModelInfo: (model: ModelInfo) => void
   pipeline: string
@@ -16,22 +26,21 @@ interface ModelContextType {
   setSelectedQuantization: (quantization: QuantizationType) => void
   activeWorker: Worker | null
   setActiveWorker: (worker: Worker | null) => void
-  workerLoaded: boolean
-  setWorkerLoaded: (workerLoaded: boolean) => void
 }
 
 const ModelContext = createContext<ModelContextType | undefined>(undefined)
 
 export function ModelProvider({ children }: { children: React.ReactNode }) {
   const [progress, setProgress] = useState<number>(0)
-  const [status, setStatus] = useState<string>('idle')
+  const [status, setStatus] = useState<WorkerStatus>('initiate')
   const [modelInfo, setModelInfo] = useState<ModelInfo>({} as ModelInfo)
-  const [models, setModels] = useState<ModelInfoResponse[]>([] as ModelInfoResponse[])
+  const [models, setModels] = useState<ModelInfoResponse[]>(
+    [] as ModelInfoResponse[]
+  )
   const [pipeline, setPipeline] = useState<string>('text-classification')
-  const [selectedQuantization, setSelectedQuantization] = useState<QuantizationType>('int8')
+  const [selectedQuantization, setSelectedQuantization] =
+    useState<QuantizationType>('int8')
   const [activeWorker, setActiveWorker] = useState<Worker | null>(null)
-  const [workerLoaded, setWorkerLoaded] = useState<boolean>(false)
-  
 
   // set progress to 0 when model is changed
   useEffect(() => {
@@ -54,9 +63,7 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
         selectedQuantization,
         setSelectedQuantization,
         activeWorker,
-        setActiveWorker,
-        workerLoaded,
-        setWorkerLoaded
+        setActiveWorker
       }}
     >
       {children}

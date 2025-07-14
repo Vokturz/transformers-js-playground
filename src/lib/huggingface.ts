@@ -114,7 +114,14 @@ const getModelsByPipeline = async (
   }
   const models = await response.json()
   if (pipeline_tag === 'text-classification') {
-    return models.filter((model: ModelInfoResponse) => !model.tags.includes('reranker') && !model.id.includes('reranker')).slice(0, 10)
+    return models
+      .filter(
+        (model: ModelInfoResponse) =>
+          !model.tags.includes('reranker') &&
+          !model.id.includes('reranker') &&
+          !model.tags.includes('sentence-transformers')
+      )
+      .slice(0, 10)
   }
   return models.slice(0, 10)
 }

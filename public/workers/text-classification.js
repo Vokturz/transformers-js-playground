@@ -29,7 +29,7 @@ self.addEventListener('message', async (event) => {
   const classifier = await MyTextClassificationPipeline.getInstance(
     model,
     (x) => {
-      self.postMessage({ status: 'progress', output: x })
+      self.postMessage({ status: 'loading', output: x })
     }
   )
 
@@ -40,7 +40,7 @@ self.addEventListener('message', async (event) => {
 
   if (type === 'classify') {
     if (!text) {
-      self.postMessage({ status: 'complete' }) // Nothing to process
+      self.postMessage({ status: 'ready' }) // Nothing to process
       return
     }
     const split = text.split('\n')
@@ -57,6 +57,6 @@ self.addEventListener('message', async (event) => {
         })
       }
     }
-    self.postMessage({ status: 'complete' })
+    self.postMessage({ status: 'ready' })
   }
 })

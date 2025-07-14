@@ -1,13 +1,11 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react'
 import {
   ClassificationOutput,
   TextClassificationWorkerInput,
-  WorkerMessage,
-} from '../types';
-import { useModel } from '../contexts/ModelContext';
-import { getModelInfo } from '../lib/huggingface';
-import { getWorker } from '../lib/workerManager';
-
+  WorkerMessage
+} from '../types'
+import { useModel } from '../contexts/ModelContext'
+import { getWorker } from '../lib/workerManager'
 
 const PLACEHOLDER_TEXTS: string[] = [
   'I absolutely love this product! It exceeded all my expectations.',
@@ -20,61 +18,31 @@ const PLACEHOLDER_TEXTS: string[] = [
   'The product arrived damaged and the return process was a nightmare.',
   'Pretty good overall. A few minor issues but mostly positive experience.',
   'Outstanding! This company really knows how to treat their customers.'
-].sort(() => Math.random() - 0.5);
+].sort(() => Math.random() - 0.5)
 
 function TextClassification() {
   const [text, setText] = useState<string>(PLACEHOLDER_TEXTS.join('\n'))
   const [results, setResults] = useState<ClassificationOutput[]>([])
-  const { setProgress, status, setStatus, modelInfo, setModelInfo, workerLoaded} = useModel()
+  const { status, setStatus, modelInfo } = useModel()
   const workerRef = useRef<Worker | null>(null)
 
 
-  useEffect(() => {
-    if (!modelInfo.id) return;
-    const fetchModelInfo = async () => {
-      try {
-        const modelInfoResponse = await getModelInfo(modelInfo.id)
-        let parameters = 0
-        if (modelInfoResponse.safetensors) {
-          const safetensors = modelInfoResponse.safetensors
-          parameters =
-            (safetensors.parameters.F16 ||
-              safetensors.parameters.F32 ||
-              safetensors.parameters.total ||
-              0)
-        }
-        setModelInfo({
-          ...modelInfo,
-          architecture: modelInfoResponse.config?.architectures[0] ?? '',
-          parameters,
-          likes: modelInfoResponse.likes,
-          downloads: modelInfoResponse.downloads
-        })
-      } catch (error) {
-        console.error('Error fetching model info:', error)
-      }
-    }
-
-    fetchModelInfo()
-  }, [modelInfo.id, setModelInfo])
-
   // We use the `useEffect` hook to setup the worker as soon as the component is mounted.
   useEffect(() => {
-    if(!workerRef.current) {
+    if (!workerRef.current) {
       workerRef.current = getWorker('text-classification')
     }
-
 
     // Create a callback function for messages from the worker thread.
     const onMessageReceived = (e: MessageEvent<WorkerMessage>) => {
       const status = e.data.status
-      if (status === 'output') {
+      if (status === 'ready') {
+        setStatus('ready')
+      } else if (status === 'output') {
         setStatus('output')
         const result = e.data.output!
         setResults((prevResults) => [...prevResults, result])
         console.log(result)
-      } else if (status === 'complete') {
-        setStatus('idle')
       } else if (status === 'error') {
         setStatus('error')
         console.error(e.data.output)
@@ -87,10 +55,10 @@ function TextClassification() {
     // Define a cleanup function for when the component is unmounted.
     return () =>
       workerRef.current?.removeEventListener('message', onMessageReceived)
-  }, [])
+  }, [setStatus])
 
   const classify = useCallback(() => {
-    setStatus('processing')
+    setStatus('loading')
     setResults([]) // Clear previous results
     const message: TextClassificationWorkerInput = {
       type: 'classify',
@@ -98,17 +66,16 @@ function TextClassification() {
       model: modelInfo.id
     }
     workerRef.current?.postMessage(message)
-  }, [text, modelInfo.id])
+  }, [text, modelInfo.id, setStatus])
 
   const busy: boolean = status !== 'ready'
-
 
   const handleClear = (): void => {
     setResults([])
   }
 
   return (
-    <div className="flex flex-col h-[40vh] max-h-[80vh] w-full p-4">
+    <div className="flex flex-col h-[60vh] max-h-[100vh] w-full p-4">
       <h1 className="text-2xl font-bold mb-4">Text Classification</h1>
 
       <div className="flex flex-col lg:flex-row gap-4 h-full">
@@ -125,14 +92,14 @@ function TextClassification() {
           <div className="flex gap-2 mt-4">
             <button
               className="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              disabled={busy || !workerLoaded}
+              disabled={busy}
               onClick={classify}
             >
-              {workerLoaded ? (!busy
-                ? 'Classify Text'
-                : status === 'loading'
-                ? 'Model loading...'
-                : 'Processing...') : 'Load model first'}
+              {status === 'ready'
+                ? !busy
+                  ? 'Classify Text'
+                  : 'Processing...'
+                : 'Load model first'}
             </button>
             <button
               className="py-2 px-4 bg-gray-500 hover:bg-gray-600 rounded text-white font-medium transition-colors"
@@ -180,4 +147,4 @@ function TextClassification() {
   )
 }
 
-export default TextClassification;
+export default TextClassification

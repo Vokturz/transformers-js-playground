@@ -9,8 +9,10 @@ export interface ClassificationOutput {
   scores: number[]
 }
 
+export type WorkerStatus = 'initiate' | 'ready' | 'output' | 'loading' | 'error'
+
 export interface WorkerMessage {
-  status: 'initiate' | 'ready' | 'output' | 'complete' | 'progress' | 'error'
+  status: WorkerStatus
   progress?: number
   error?: string
   output?: any
@@ -28,7 +30,6 @@ export interface TextClassificationWorkerInput {
   model: string
 }
 
-export type AppStatus = 'idle' | 'loading' | 'processing'
 
 type q8 = 'q8' | 'int8' | 'bnb8' | 'uint8'
 type q4 = 'q4' | 'bnb4'

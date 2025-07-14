@@ -4,10 +4,8 @@ import {
   Section,
   WorkerMessage,
   ZeroShotWorkerInput,
-  ModelInfo
 } from '../types'
 import { useModel } from '../contexts/ModelContext'
-import { getModelInfo } from '../lib/huggingface'
 
 const PLACEHOLDER_REVIEWS: string[] = [
   // battery/charging problems
@@ -51,7 +49,7 @@ function ZeroShotClassification() {
     PLACEHOLDER_SECTIONS.map((title) => ({ title, items: [] }))
   )
 
-  const { setProgress, status, setStatus, modelInfo, setModelInfo } = useModel()
+  const { status, setStatus, modelInfo } = useModel()
 
   // Create a reference to the worker object.
   const worker = useRef<Worker | null>(null)
@@ -72,17 +70,8 @@ function ZeroShotClassification() {
     // Create a callback function for messages from the worker thread.
     const onMessageReceived = (e: MessageEvent<WorkerMessage>) => {
       const status = e.data.status
-      if (status === 'initiate') {
-        setStatus('loading')
-      } else if (status === 'ready') {
+      if (status === 'ready') {
         setStatus('ready')
-      } else if (status === 'progress') {
-        setStatus('progress')
-        if (
-          e.data.output.progress &&
-          (e.data.output.file as string).startsWith('onnx')
-        )
-          setProgress(e.data.output.progress)
       } else if (status === 'output') {
         setStatus('output')
         const { sequence, labels, scores } = e.data.output!
@@ -100,9 +89,6 @@ function ZeroShotClassification() {
           }
           return newSections
         })
-      } else if (status === 'complete') {
-        setStatus('idle')
-        setProgress(100)
       } else if (status === 'error') {
         setStatus('error')
         console.error(e.data.output)
@@ -118,7 +104,7 @@ function ZeroShotClassification() {
   }, [sections])
 
   const classify = useCallback(() => {
-    setStatus('processing')
+    setStatus('loading')
     const message: ZeroShotWorkerInput = {
       text,
       labels: sections
@@ -129,7 +115,7 @@ function ZeroShotClassification() {
     worker.current?.postMessage(message)
   }, [text, sections, modelInfo.name])
 
-  const busy: boolean = status !== 'idle'
+  const busy: boolean = status !== 'ready'
 
   const handleAddCategory = (): void => {
     setSections((sections) => {
