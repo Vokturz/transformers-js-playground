@@ -84,10 +84,10 @@ const ModelSelector: React.FC = () => {
           isCompatible: modelInfoResponse.isCompatible,
           incompatibilityReason: modelInfoResponse.incompatibilityReason,
           supportedQuantizations: modelInfoResponse.supportedQuantizations,
-          baseId: modelInfoResponse.baseId
+          baseId: modelInfoResponse.baseId,
+          readme: modelInfoResponse.readme
         }
 
-        console.log('Fetched model info:', modelInfoResponse)
 
         setModelInfo(modelInfo)
       } catch (error) {

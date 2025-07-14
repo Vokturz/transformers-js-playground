@@ -53,7 +53,19 @@ const getModelInfo = async (modelName: string): Promise<ModelInfoResponse> => {
     return getNumericValue(a) - getNumericValue(b)
   })
 
-  // If there's a base model, fetch its info and merge with compatibility data
+  // Fetch README content
+  const fetchReadme = async (modelId: string): Promise<string> => {
+    try {
+      const readmeResponse = await fetch(`https://huggingface.co/${modelId}/raw/main/README.md`)
+      if (readmeResponse.ok) {
+        return await readmeResponse.text()
+      }
+    } catch (error) {
+      console.warn(`Failed to fetch README for ${modelId}:`, error)
+    }
+    return ''
+  }
+
   const baseModel = modelData.cardData?.base_model ?? modelData.modelId 
   if (baseModel && !modelData.safetensors) {
     const baseModelResponse = await fetch(
@@ -68,6 +80,7 @@ const getModelInfo = async (modelName: string): Promise<ModelInfoResponse> => {
 
     if (baseModelResponse.ok) {
       const baseModelData: ModelInfoResponse = await baseModelResponse.json()
+      const readme = await fetchReadme(baseModel)
       
       return {
         ...baseModelData,
@@ -75,16 +88,20 @@ const getModelInfo = async (modelName: string): Promise<ModelInfoResponse> => {
         baseId: baseModel,
         isCompatible,
         incompatibilityReason,
-        supportedQuantizations: uniqueSupportedQuantizations as QuantizationType[]
+        supportedQuantizations: uniqueSupportedQuantizations as QuantizationType[],
+        readme
       }
     }
   }
+  
+  const readme = await fetchReadme(modelData.id)
   
   return {
     ...modelData,
     isCompatible,
     incompatibilityReason,
-    supportedQuantizations: uniqueSupportedQuantizations as QuantizationType[]
+    supportedQuantizations: uniqueSupportedQuantizations as QuantizationType[],
+    readme
   }
 }
 
@@ -119,10 +136,12 @@ const getModelsByPipeline = async (
         (model: ModelInfoResponse) =>
           !model.tags.includes('reranker') &&
           !model.id.includes('reranker') &&
-          !model.tags.includes('sentence-transformers')
+          !model.id.includes('ms-marco') &&
+          !model.id.includes('MiniLM')
       )
       .slice(0, 10)
   }
+  
   return models.slice(0, 10)
 }
 
@@ -152,7 +171,6 @@ function getModelSize(
     break
   }
 
-  // There are 1,024 * 1,024 bytes in a megabyte
   const sizeInBytes = parameters * bytesPerParameter
   const sizeInMB = sizeInBytes / (1024 * 1024)
 

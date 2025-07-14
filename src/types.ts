@@ -51,6 +51,7 @@ export interface ModelInfo {
   incompatibilityReason?: string
   supportedQuantizations: QuantizationType[]
   baseId?: string
+  readme?: string
 }
 
 
@@ -90,4 +91,5 @@ export interface ModelInfoResponse {
   supportedQuantizations: QuantizationType[]
   likes: number
   downloads: number
+  readme?: string
 }
