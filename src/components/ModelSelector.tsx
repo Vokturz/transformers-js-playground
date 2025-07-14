@@ -8,7 +8,7 @@ import {
 } from '@headlessui/react'
 import { useModel } from '../contexts/ModelContext'
 import { getModelInfo } from '../lib/huggingface'
-import { Heart, Download, ChevronDown, Check, ArrowUpDown } from 'lucide-react'
+import { Heart, Download, ChevronDown, Check, ArrowDown, ArrowUp } from 'lucide-react'
 
 type SortOption = 'likes' | 'downloads' | 'createdAt' | 'name'
 
@@ -121,6 +121,14 @@ const ModelSelector: React.FC = () => {
   const selectedModel =
     models.find((model) => model.id === modelInfo?.id) || models[0]
 
+  const SortIcon = ({ sortOrder }: { sortOrder: 'asc' | 'desc' }) => {
+    return sortOrder === 'asc' ? (
+      <ArrowUp className="w-3 h-3 ml-1" />
+    ) : (
+      <ArrowDown className="w-3 h-3 ml-1" />
+    )
+  }
+
   return (
     <div className="relative">
       <Listbox
@@ -181,7 +189,7 @@ const ModelSelector: React.FC = () => {
                     }`}
                   >
                     <span>Name</span>
-                    {sortBy === 'name' && <ArrowUpDown className="w-3 h-3" />}
+                    {sortBy === 'name' && <SortIcon sortOrder={sortOrder} />}
                   </button>
                   <button
                     onClick={() => handleSortChange('likes')}
@@ -193,7 +201,7 @@ const ModelSelector: React.FC = () => {
                   >
                     <Heart className="w-3 h-3" />
                     <span>Likes</span>
-                    {sortBy === 'likes' && <ArrowUpDown className="w-3 h-3" />}
+                    {sortBy === 'likes' && <SortIcon sortOrder={sortOrder} />}
                   </button>
                   <button
                     onClick={() => handleSortChange('downloads')}
@@ -206,7 +214,7 @@ const ModelSelector: React.FC = () => {
                     <Download className="w-3 h-3" />
                     <span>Downloads</span>
                     {sortBy === 'downloads' && (
-                      <ArrowUpDown className="w-3 h-3" />
+                      <SortIcon sortOrder={sortOrder} />
                     )}
                   </button>
                   <button
@@ -219,7 +227,7 @@ const ModelSelector: React.FC = () => {
                   >
                     <span>Date</span>
                     {sortBy === 'createdAt' && (
-                      <ArrowUpDown className="w-3 h-3" />
+                      <SortIcon sortOrder={sortOrder} />
                     )}
                   </button>
                 </div>
