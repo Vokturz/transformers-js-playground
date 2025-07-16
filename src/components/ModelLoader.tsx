@@ -64,6 +64,8 @@ const ModelLoader = () => {
 
     const onMessageReceived = (e: MessageEvent<WorkerMessage>) => {
       const { status, output } = e.data
+      console.log('Received output from worker', e.data)
+
       if (status === 'ready') {
         setStatus('ready')
         if (e.data.output) console.log(e.data.output)
@@ -81,6 +83,7 @@ const ModelLoader = () => {
         setStatus('output')
         const result = e.data.output!
         setResults((prev: any[]) => [...prev, result])
+        
         // console.log(result)
       } else if (status === 'error') {
         setStatus('error')
@@ -141,7 +144,6 @@ const ModelLoader = () => {
                   }
                   className="appearance-none bg-white border border-gray-300 rounded-md px-3 py-1 pr-8 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">Select quantization</option>
                   {modelInfo.supportedQuantizations.map((quant) => (
                     <option key={quant} value={quant}>
                       {quant}

@@ -1,4 +1,3 @@
-// src/App.tsx
 import { useState, useRef, useEffect, useCallback } from 'react'
 import {
   Section,
@@ -49,31 +48,40 @@ function ZeroShotClassification() {
     PLACEHOLDER_SECTIONS.map((title) => ({ title, items: [] }))
   )
 
-  const { status, setStatus, modelInfo } = useModel()
+  const { activeWorker, status, modelInfo, hasBeenLoaded } = useModel()
 
-  // Create a reference to the worker object.
-  const worker = useRef<Worker | null>(null)
-
-  // We use the `useEffect` hook to setup the worker as soon as the `App` component is mounted.
-  useEffect(() => {
-    if (!worker.current) {
+  const classify = useCallback(() => {
+    if (!modelInfo || !activeWorker) {
+      console.error('Model info or worker is not available')
       return
-      // Create the worker if it does not yet exist.
-      // worker.current = new Worker(
-      //   new URL('../workers/zero-shot-classification.js', import.meta.url),
-      //   {
-      //     type: 'module'
-      //   }
-      // )
     }
 
-    // Create a callback function for messages from the worker thread.
+    // Clear previous results
+    setSections((sections) =>
+      sections.map((section) => ({
+        ...section,
+        items: []
+      }))
+    )
+
+    const message: ZeroShotWorkerInput = {
+      type: 'classify',
+      text,
+      labels: sections
+        .slice(0, sections.length - 1)
+        .map((section) => section.title),
+      model: modelInfo.id
+    }
+    activeWorker.postMessage(message)
+  }, [text, sections, modelInfo, activeWorker])
+
+  // Handle worker messages
+  useEffect(() => {
+    if (!activeWorker) return
+
     const onMessageReceived = (e: MessageEvent<WorkerMessage>) => {
       const status = e.data.status
-      if (status === 'ready') {
-        setStatus('ready')
-      } else if (status === 'output') {
-        setStatus('output')
+      if (status === 'output') {
         const { sequence, labels, scores } = e.data.output!
 
         // Threshold for classification
@@ -89,33 +97,12 @@ function ZeroShotClassification() {
           }
           return newSections
         })
-      } else if (status === 'error') {
-        setStatus('error')
-        console.error(e.data.output)
       }
     }
 
-    // Attach the callback function as an event listener.
-    worker.current.addEventListener('message', onMessageReceived)
-
-    // Define a cleanup function for when the component is unmounted.
-    return () =>
-      worker.current?.removeEventListener('message', onMessageReceived)
-  }, [sections])
-
-  const classify = useCallback(() => {
-    if (!modelInfo) return
-
-    setStatus('loading')
-    const message: ZeroShotWorkerInput = {
-      text,
-      labels: sections
-        .slice(0, sections.length - 1)
-        .map((section) => section.title),
-      model: modelInfo.name
-    }
-    worker.current?.postMessage(message)
-  }, [text, sections, modelInfo])
+    activeWorker.addEventListener('message', onMessageReceived)
+    return () => activeWorker.removeEventListener('message', onMessageReceived)
+  }, [sections, activeWorker])
 
   const busy: boolean = status !== 'ready'
 
@@ -169,11 +156,10 @@ function ZeroShotClassification() {
           disabled={busy}
           onClick={classify}
         >
-          {!busy
-            ? 'Categorize'
-            : status === 'loading'
-            ? 'Model loading...'
-            : 'Processing'}
+          {hasBeenLoaded ? !busy
+              ? 'Categorize'
+              : 'Processing...'
+            : 'Load model first'}
         </button>
         <div className="flex gap-1">
           <button

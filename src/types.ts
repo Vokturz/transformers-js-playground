@@ -35,6 +35,7 @@ export interface WorkerMessage {
 }
 
 export interface ZeroShotWorkerInput {
+  type: 'classify'
   text: string
   labels: string[]
   model: string
