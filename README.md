@@ -10,49 +10,47 @@ app_file: build/index.html
 ---
 
 
-# Getting Started with Create React App
+# In-Browser AI with Hugging Face Transformers.js
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is a web-based application built with React and TypeScript that demonstrates how to run Hugging Face Transformers models directly in the browser. It leverages the power of the `transformers.js` library to perform various NLP tasks like text generation, text classification, and zero-shot classification without any server-side backend for the model inference.
 
-## Available Scripts
+The entire process, from model loading to inference, happens on the client-side, ensuring user privacy and showcasing the capabilities of modern web technologies like Web Workers and WebGPU.
 
-In the project directory, you can run:
+-----
 
-### `npm start`
+## ✨ Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+  * **Multiple Pipelines:** Supports several NLP tasks:
+      * Text Generation
+      * Text Classification
+      * Zero-Shot Classification
+  * **Dynamic Model Loading:** Fetches and runs compatible models directly from the Hugging Face Hub based on the selected pipeline.
+  * **In-Browser Inference:** All machine learning computations are performed in the user's browser using **Hugging Face Transformers.js**. No data is sent to a server.
+  * **Non-Blocking UI:** Uses **Web Workers** to run the heavy model computations in a background thread, ensuring the main UI remains responsive and smooth.
+  * **Hardware Acceleration:** Leverages **WebGPU** for significantly faster model performance on supported hardware.
+  * **Model Quantization:** Allows users to select different quantization levels (e.g., `fp32`, `int8`) to balance performance and precision.
+  * **Modern Tech Stack:** Built with **React**, **TypeScript**, and styled with **Tailwind CSS**.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+-----
 
-### `npm test`
+## 🏗️ How It Works
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+The application's architecture is designed to offload heavy machine learning tasks from the main UI thread, providing a seamless user experience.
 
-### `npm run build`
+1.  **Pipeline and Model Selection:** The user first selects an NLP pipeline (e.g., "Text Generation"). The application then calls the Hugging Face Hub API to fetch a list of compatible models for that task.
+2.  **Model Loading via Worker:** When the user selects a model and clicks "Load Model", the main application dispatches a message to a dedicated Web Worker.
+3.  **Background Processing:** The Web Worker, running in a separate thread, receives the message. It uses the `transformers.js` library to download the model files and load the pipeline. This process can be monitored on the UI via progress updates sent from the worker.
+4.  **Inference:** Once the model is loaded, the user can input text. This input is sent to the worker, which performs the inference using the loaded model and WebGPU for acceleration.
+5.  **Displaying Results:** The worker sends the prediction results back to the main thread, which then updates the UI to display the output to the user.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+This separation of concerns ensures that the computationally intensive work of the AI model does not freeze the user's browser.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+-----
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 🚀 Getting Started
 
-### `npm run eject`
+To get a local copy up and running, follow these simple steps.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### Prerequisites
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+You'll need to have Node.js and npm (or pnpm) installed on your machine.
