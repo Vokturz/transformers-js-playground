@@ -21,6 +21,9 @@ const ModelLoader = () => {
     setHasBeenLoaded
   } = useModel()
 
+  useEffect(() => {
+    setHasBeenLoaded(false)
+  }, [selectedQuantization])
 
   useEffect(() => {
     if (!modelInfo) return
@@ -43,6 +46,8 @@ const ModelLoader = () => {
     setHasBeenLoaded(false)
   }, [modelInfo, setSelectedQuantization, setHasBeenLoaded])
 
+
+
   useEffect(() => {
     if (!modelInfo) return
 
@@ -61,6 +66,7 @@ const ModelLoader = () => {
       const { status, output } = e.data
       if (status === 'ready') {
         setStatus('ready')
+        if (e.data.output) console.log(e.data.output)
         setHasBeenLoaded(true)
       } else if (status === 'loading' && output && !hasBeenLoaded) {
         setStatus('loading')
@@ -156,7 +162,7 @@ const ModelLoader = () => {
           <div className="flex justify-center">
             <button
               className="w-32 py-2 px-4 bg-green-500 hover:bg-green-600 rounded text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm inline-flex items-center text-center justify-center space-x-2"
-              disabled={hasBeenLoaded}
+              disabled={hasBeenLoaded || status === 'loading'}
               onClick={loadModel}
             >
               {status === 'loading' && !hasBeenLoaded ? (

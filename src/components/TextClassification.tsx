@@ -24,8 +24,6 @@ function TextClassification() {
   const [text, setText] = useState<string>(PLACEHOLDER_TEXTS.join('\n'))
   const { activeWorker, status, setStatus, modelInfo, results, setResults, hasBeenLoaded} = useModel()
 
-
-
   const classify = useCallback(() => {
     if (!modelInfo || !activeWorker) {
       console.error('Model info or worker is not available')
@@ -48,46 +46,49 @@ function TextClassification() {
 
   return (
     <div className="flex flex-col h-[60vh] max-h-[100vh] w-full p-4">
-      <h1 className="text-2xl font-bold mb-4">Text Classification</h1>
+      <h1 className="text-2xl font-bold mb-4 flex-shrink-0">Text Classification</h1>
 
-      <div className="flex flex-col lg:flex-row gap-4 h-full">
+      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
         {/* Input Section */}
-        <div className="flex flex-col w-full lg:w-1/2">
-          <label className="text-lg font-medium mb-2">Input Text:</label>
-          <textarea
-            className="border border-gray-300 rounded p-3 flex-grow resize-none"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Enter text to classify (one per line)..."
-          />
+        <div className="flex flex-col w-full lg:w-1/2 min-h-0">
+          <label className="text-lg font-medium mb-2 flex-shrink-0">Input Text:</label>
+          
+          <div className="flex flex-col flex-1 min-h-0">
+            <textarea
+              className="border border-gray-300 rounded p-3 flex-1 resize-none min-h-[200px]"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Enter text to classify (one per line)..."
+            />
 
-          <div className="flex gap-2 mt-4">
-            <button
-              className="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              disabled={busy}
-              onClick={classify}
-            >
-              {hasBeenLoaded ? !busy
-                  ? 'Classify Text'
-                  : 'Processing...'
-                : 'Load model first'}
-            </button>
-            <button
-              className="py-2 px-4 bg-gray-500 hover:bg-gray-600 rounded text-white font-medium transition-colors"
-              onClick={handleClear}
-            >
-              Clear Results
-            </button>
+            <div className="flex gap-2 mt-4 flex-shrink-0">
+              <button
+                className="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                disabled={busy}
+                onClick={classify}
+              >
+                {hasBeenLoaded ? !busy
+                    ? 'Classify Text'
+                    : 'Processing...'
+                  : 'Load model first'}
+              </button>
+              <button
+                className="py-2 px-4 bg-gray-500 hover:bg-gray-600 rounded text-white font-medium transition-colors"
+                onClick={handleClear}
+              >
+                Clear Results
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Results Section */}
-        <div className="flex flex-col w-full lg:w-1/2">
-          <label className="text-lg font-medium mb-2">
+        <div className="flex flex-col w-full lg:w-1/2 min-h-0">
+          <label className="text-lg font-medium mb-2 flex-shrink-0">
             Classification Results ({results.length}):
           </label>
 
-          <div className="border border-gray-300 rounded p-3 flex-grow overflow-y-auto">
+          <div className="border border-gray-300 rounded p-3 flex-1 overflow-y-auto min-h-[200px]">
             {results.length === 0 ? (
               <div className="text-gray-500 text-center py-8">
                 No results yet. Click "Classify Text" to analyze your input.

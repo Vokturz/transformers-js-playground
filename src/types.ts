@@ -9,7 +9,13 @@ export interface ClassificationOutput {
   scores: number[]
 }
 
-export type WorkerStatus = 'initiate' | 'ready' | 'output' | 'loading' | 'error'
+export type WorkerStatus =
+  | 'initiate'
+  | 'ready'
+  | 'output'
+  | 'loading'
+  | 'error'
+  | 'disposed'
 
 export interface WorkerMessage {
   status: WorkerStatus

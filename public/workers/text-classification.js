@@ -9,7 +9,7 @@ class MyTextClassificationPipeline {
     this.instance = pipeline(
       this.task,
       model,
-      { dtype, progress_callback },
+      { dtype, device: "webgpu", progress_callback },
     )
     return this.instance
   }
@@ -17,49 +17,59 @@ class MyTextClassificationPipeline {
 
 // Listen for messages from the main thread
 self.addEventListener('message', async (event) => {
-  const { type, model, dtype, text } = event.data
+  try {
+    const { type, model, dtype, text } = event.data
 
-  if (!model) {
-    self.postMessage({
-      status: 'error',
-      output: 'No model provided'
-    })
-    return
-  }
-
-  // Retrieve the pipeline. This will download the model if not already cached.
-  const classifier = await MyTextClassificationPipeline.getInstance(
-    model,
-    dtype,
-    (x) => {
-      self.postMessage({ status: 'loading', output: x })
-    }
-  )
-
-  if (type === 'load') {
-    self.postMessage({ status: 'ready' })
-    return
-  }
-
-  if (type === 'classify') {
-    if (!text) {
-      self.postMessage({ status: 'ready' }) // Nothing to process
+    if (!model) {
+      self.postMessage({
+        status: 'error',
+        output: 'No model provided'
+      })
       return
     }
-    const split = text.split('\n')
-    for (const line of split) {
-      if (line.trim()) {
-        const output = await classifier(line)
-        self.postMessage({
-          status: 'output',
-          output: {
-            sequence: line,
-            labels: [output[0].label],
-            scores: [output[0].score]
-          }
-        })
+
+    // Retrieve the pipeline. This will download the model if not already cached.
+    const classifier = await MyTextClassificationPipeline.getInstance(
+      model,
+      dtype,
+      (x) => {
+        self.postMessage({ status: 'loading', output: x })
       }
+    )
+
+    if (type === 'load') {
+      self.postMessage({
+        status: 'ready',
+        output: `Model ${model}, dtype ${dtype} loaded`
+      })
+      return
     }
-    self.postMessage({ status: 'ready' })
+
+    if (type === 'classify') {
+      if (!text) {
+        self.postMessage({ status: 'ready' }) // Nothing to process
+        return
+      }
+      const split = text.split('\n')
+      for (const line of split) {
+        if (line.trim()) {
+          const output = await classifier(line)
+          self.postMessage({
+            status: 'output',
+            output: {
+              sequence: line,
+              labels: [output[0].label],
+              scores: [output[0].score]
+            }
+          })
+        }
+      }
+      self.postMessage({ status: 'ready' })
+    }
+  } catch (error) {
+    self.postMessage({
+      status: 'error',
+      output: error.message || 'An error occurred during processing'
+    })
   }
 })
