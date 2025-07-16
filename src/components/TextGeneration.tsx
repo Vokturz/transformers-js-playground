@@ -30,7 +30,7 @@ function TextGeneration() {
   // Generation state
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
 
-  const { activeWorker, status, modelInfo, hasBeenLoaded } = useModel()
+  const { activeWorker, status, modelInfo, hasBeenLoaded, selectedQuantization } = useModel()
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -73,10 +73,11 @@ function TextGeneration() {
       top_p: topP,
       top_k: topK,
       do_sample: doSample,
+      dtype: selectedQuantization ?? 'fp32'
     }
 
     activeWorker.postMessage(message)
-  }, [currentMessage, messages, modelInfo, activeWorker, temperature, maxTokens, topP, topK, doSample, isGenerating])
+  }, [currentMessage, messages, modelInfo, activeWorker, temperature, maxTokens, topP, topK, doSample, isGenerating, selectedQuantization])
 
   const handleGenerateText = useCallback(() => {
     if (!prompt.trim() || !modelInfo || !activeWorker || isGenerating) {
@@ -94,11 +95,12 @@ function TextGeneration() {
       max_new_tokens: maxTokens,
       top_p: topP,
       top_k: topK,
-      do_sample: doSample
+      do_sample: doSample,
+      dtype: selectedQuantization ?? 'fp32'
     }
 
     activeWorker.postMessage(message)
-  }, [prompt, modelInfo, activeWorker, temperature, maxTokens, topP, topK, doSample, isGenerating])
+  }, [prompt, modelInfo, activeWorker, temperature, maxTokens, topP, topK, doSample, isGenerating, selectedQuantization])
 
   useEffect(() => {
     if (!activeWorker) return

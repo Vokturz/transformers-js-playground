@@ -3,7 +3,7 @@ import {
   TextClassificationWorkerInput,
 } from '../types'
 import { useModel } from '../contexts/ModelContext'
-import { set } from 'lodash'
+
 const PLACEHOLDER_TEXTS: string[] = [
   'I absolutely love this product! It exceeded all my expectations.',
   "This is the worst purchase I've ever made. Complete waste of money.",
@@ -19,7 +19,7 @@ const PLACEHOLDER_TEXTS: string[] = [
 
 function TextClassification() {
   const [text, setText] = useState<string>(PLACEHOLDER_TEXTS.join('\n'))
-  const { activeWorker, status, modelInfo, results, setResults, hasBeenLoaded} = useModel()
+  const { activeWorker, status, modelInfo, results, setResults, hasBeenLoaded, selectedQuantization} = useModel()
 
   const classify = useCallback(() => {
     if (!modelInfo || !activeWorker) {
@@ -30,10 +30,11 @@ function TextClassification() {
     const message: TextClassificationWorkerInput = {
       type: 'classify',
       text,
-      model: modelInfo.id
+      model: modelInfo.id,
+      dtype: selectedQuantization ?? 'fp32'
     }
     activeWorker.postMessage(message)
-  }, [text, modelInfo, activeWorker, set])
+  }, [text, modelInfo, activeWorker, selectedQuantization, setResults])
 
   const busy: boolean = status !== 'ready'
 

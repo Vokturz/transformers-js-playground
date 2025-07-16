@@ -39,12 +39,14 @@ export interface ZeroShotWorkerInput {
   text: string
   labels: string[]
   model: string
+  dtype: QuantizationType
 }
 
 export interface TextClassificationWorkerInput {
   type: 'classify'
   text: string
   model: string
+  dtype: QuantizationType
 }
 
 export interface TextGenerationWorkerInput {
@@ -58,6 +60,7 @@ export interface TextGenerationWorkerInput {
   top_p?: number
   top_k?: number
   do_sample?: boolean
+  dtype: QuantizationType
 }
 
 const q8Types = ['q8', 'int8', 'bnb8', 'uint8'] as const

@@ -64,8 +64,6 @@ const ModelLoader = () => {
 
     const onMessageReceived = (e: MessageEvent<WorkerMessage>) => {
       const { status, output } = e.data
-      console.log('Received output from worker', e.data)
-
       if (status === 'ready') {
         setStatus('ready')
         if (e.data.output) console.log(e.data.output)

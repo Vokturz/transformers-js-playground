@@ -48,7 +48,7 @@ function ZeroShotClassification() {
     PLACEHOLDER_SECTIONS.map((title) => ({ title, items: [] }))
   )
 
-  const { activeWorker, status, modelInfo, hasBeenLoaded } = useModel()
+  const { activeWorker, status, modelInfo, hasBeenLoaded, selectedQuantization } = useModel()
 
   const classify = useCallback(() => {
     if (!modelInfo || !activeWorker) {
@@ -70,10 +70,11 @@ function ZeroShotClassification() {
       labels: sections
         .slice(0, sections.length - 1)
         .map((section) => section.title),
-      model: modelInfo.id
+      model: modelInfo.id,
+      dtype: selectedQuantization ?? 'fp32'
     }
     activeWorker.postMessage(message)
-  }, [text, sections, modelInfo, activeWorker])
+  }, [text, sections, modelInfo, activeWorker, selectedQuantization])
 
   // Handle worker messages
   useEffect(() => {
