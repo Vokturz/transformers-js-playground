@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import PipelineSelector from './components/PipelineSelector'
 import ZeroShotClassification from './components/ZeroShotClassification'
 import TextClassification from './components/TextClassification'
@@ -11,15 +11,18 @@ import ModelReadme from './components/ModelReadme'
 
 function App() {
   const { pipeline, setPipeline, setModels, setModelInfo, modelInfo } = useModel()
+  const [isFetching, setIsFetching] = useState(false)
 
   useEffect(() => {
     setModelInfo(null)
     const fetchModels = async () => {
+      setIsFetching(true)
       const fetchedModels = await getModelsByPipeline(pipeline)
       setModels(fetchedModels)
+      setIsFetching(false)
     }
     fetchModels()
-  }, [setModels, pipeline])
+  }, [setModels, setModelInfo, pipeline])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -44,12 +47,12 @@ function App() {
                   <span className="text-lg font-semibold text-gray-900 block">
                     Select Model
                   </span>
-                  <ModelSelector />
+                  <ModelSelector isFetching={isFetching} />
                 </div>
               </div>
 
               <div className="ml-6">
-                <ModelInfo />
+                <ModelInfo isFetching={isFetching} />
               </div>
             </div>
 

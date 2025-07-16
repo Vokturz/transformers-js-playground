@@ -1,6 +1,7 @@
+import { supportedPipelines } from "../components/PipelineSelector"
 import { ModelInfoResponse, QuantizationType } from "../types"
 
-const getModelInfo = async (modelName: string): Promise<ModelInfoResponse> => {
+const getModelInfo = async (modelName: string, pipeline: string): Promise<ModelInfoResponse> => {
   const token = process.env.REACT_APP_HUGGINGFACE_TOKEN
 
   if (!token) {
@@ -32,14 +33,21 @@ const getModelInfo = async (modelName: string): Promise<ModelInfoResponse> => {
   ]
   
   const siblingFiles = modelData.siblings?.map(s => s.rfilename) || []
-  const isCompatible =
-    requiredFiles.every((file) => siblingFiles.includes(file)) &&
-    siblingFiles.some((file) => file.endsWith('.onnx') && file.startsWith('onnx/'))
-  const incompatibilityReason = isCompatible
-    ? ''
-    : `Missing required files: ${requiredFiles
-        .filter(file => !siblingFiles.includes(file))
-        .join(', ')}`
+  const missingFiles = requiredFiles.filter(file => !siblingFiles.includes(file))
+  const hasOnnxFolder = siblingFiles.some((file) => file.endsWith('.onnx') && file.startsWith('onnx/'))
+
+  const isCompatible = missingFiles.length === 0 && hasOnnxFolder && modelData.tags.includes(pipeline)
+
+  
+  let incompatibilityReason = ''
+  if (!modelData.tags.includes(pipeline)) {
+    const expectedPipelines = modelData.tags.filter(tag => supportedPipelines.includes(tag)).join(', ')
+    incompatibilityReason = expectedPipelines ? `- Model can be used with ${expectedPipelines} pipelines only\n` : `- Pipeline ${pipeline} not supported by the model\n` 
+  } if (missingFiles.length > 0) {
+    incompatibilityReason += `- Missing required files: ${missingFiles.join(', ')}\n`
+  } else if (!hasOnnxFolder)  {
+    incompatibilityReason += '- Folder onnx/ is missing\n'
+  }
   const supportedQuantizations = siblingFiles
       .filter((file) => file.endsWith('.onnx') && file.includes('_'))
       .map((file) => file.split('/')[1].split('_')[1].split('.')[0])
@@ -106,7 +114,7 @@ const getModelInfo = async (modelName: string): Promise<ModelInfoResponse> => {
 }
 
 const getModelsByPipeline = async (
-  pipeline_tag: string
+  pipelineTag: string
 ): Promise<ModelInfoResponse[]> => {
   const token = process.env.REACT_APP_HUGGINGFACE_TOKEN
 
@@ -116,8 +124,71 @@ const getModelsByPipeline = async (
     )
   }
 
+  // First search with filter=onnx
+  const response1 = await fetch(
+    `https://huggingface.co/api/models?filter=${pipelineTag}&filter=onnx&sort=downloads&limit=50`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  )
+  if (!response1.ok) {
+    throw new Error(`Failed to fetch models for pipeline: ${response1.statusText}`)
+  }
+  const models1 = await response1.json()
+
+  // Second search with search=onnx
+  const response2 = await fetch(
+    `https://huggingface.co/api/models?filter=${pipelineTag}&search=onnx&sort=downloads&limit=50`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  )
+  if (!response2.ok) {
+    throw new Error(`Failed to fetch models for pipeline: ${response2.statusText}`)
+  }
+  const models2 = await response2.json()
+
+  // Combine and deduplicate models based on id
+  const combinedModels = [...models1, ...models2].filter((m: ModelInfoResponse) => m.createdAt > '2022/02/03')
+  const uniqueModels = combinedModels.filter((model, index, self) => 
+    index === self.findIndex(m => m.id === model.id)
+  )
+
+  if (pipelineTag === 'text-classification') {
+    return uniqueModels
+      .filter(
+        (model: ModelInfoResponse) =>
+          !model.tags.includes('reranker') &&
+          !model.id.includes('reranker') &&
+          !model.id.includes('ms-marco') &&
+          !model.id.includes('MiniLM')
+      )
+      .slice(0, 20)
+  }
+  
+  return uniqueModels.slice(0, 20)
+}
+
+
+const getModelsByPipelineCustom = async (
+  searchString: string,
+  pipelineTag: string
+): Promise<ModelInfoResponse[]> => {
+  const token = process.env.REACT_APP_HUGGINGFACE_TOKEN
+
+  if (!token) {
+    throw new Error(
+      'Hugging Face token not found. Please set REACT_APP_HUGGINGFACE_TOKEN in your .env file'
+    )
+  }
   const response = await fetch(
-    `https://huggingface.co/api/models?filter=${pipeline_tag}&filter=transformers.js&sort=downloads`,
+    `https://huggingface.co/api/models?filter=${pipelineTag}&search=${searchString}&sort=downloads&limit=50`,
     {
       method: 'GET',
       headers: {
@@ -126,12 +197,14 @@ const getModelsByPipeline = async (
     }
   )
 
-  if (!response.ok) {
+    if (!response.ok) {
     throw new Error(`Failed to fetch models for pipeline: ${response.statusText}`)
   }
   const models = await response.json()
-  if (pipeline_tag === 'text-classification') {
-    return models
+
+  const uniqueModels = models.filter((m: ModelInfoResponse) => m.createdAt > '2022/02/03')
+  if (pipelineTag === 'text-classification') {
+    return uniqueModels
       .filter(
         (model: ModelInfoResponse) =>
           !model.tags.includes('reranker') &&
@@ -139,10 +212,10 @@ const getModelsByPipeline = async (
           !model.id.includes('ms-marco') &&
           !model.id.includes('MiniLM')
       )
-      .slice(0, 10)
+      .slice(0, 20)
   }
   
-  return models.slice(0, 10)
+  return uniqueModels.slice(0, 20)
 }
 
 function getModelSize(
@@ -178,4 +251,4 @@ function getModelSize(
 }
 
 
-export { getModelInfo, getModelSize, getModelsByPipeline }
+export { getModelInfo, getModelSize, getModelsByPipeline, getModelsByPipelineCustom }

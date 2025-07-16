@@ -8,7 +8,7 @@ import {
 } from '@headlessui/react'
 import { ChevronDown, Check } from 'lucide-react';
 
-const pipelines = [
+export const supportedPipelines = [
   'text-classification',
   'zero-shot-classification',
   'text-generation',
@@ -63,7 +63,7 @@ const PipelineSelector: React.FC<PipelineSelectorProps> = ({
             leaveTo="transform scale-95 opacity-0"
           >
             <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {pipelines.map((p) => (
+              {supportedPipelines.map((p) => (
                 <ListboxOption
                   key={p}
                   className={({ active }) =>

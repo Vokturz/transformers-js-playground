@@ -12,7 +12,7 @@ import { getModelSize } from '../lib/huggingface'
 import { useModel } from '../contexts/ModelContext'
 import ModelLoader from './ModelLoader'
 
-const ModelInfo = () => {
+const ModelInfo = ({ isFetching }: { isFetching: boolean }) => {
   const formatNumber = (num: number) => {
     if (num >= 1000000000) {
       return (num / 1000000000).toFixed(1) + 'B'
@@ -64,9 +64,10 @@ const ModelInfo = () => {
     </div>
   )
 
-  if (!modelInfo) {
+  if (!modelInfo || isFetching) {
     return <ModelInfoSkeleton />
   }
+
 
   return (
     <div className="mt-5 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 rounded-lg border border-blue-200 space-y-3 h-full min-h-[150px]">
@@ -77,7 +78,7 @@ const ModelInfo = () => {
           href={`https://huggingface.co/${modelInfo.name}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm font-medium text-gray-700 truncate max-w-100 hover:underline"
+          className="text-sm font-medium text-gray-700 truncate max-w-80 hover:underline"
           title={modelInfo.name}
         >
           <ExternalLink className="w-3 h-3 inline-block mr-1" />
@@ -160,8 +161,7 @@ const ModelInfo = () => {
       {/* Incompatibility Message */}
       {modelInfo.isCompatible === false && modelInfo.incompatibilityReason && (
         <div className="bg-red-50 border border-red-200 rounded-md px-3 py-2">
-          <p className="text-sm text-red-700">
-            <span className="font-medium">Incompatible:</span>{' '}
+          <p className="text-sm text-red-700 whitespace-break-spaces">
             {modelInfo.incompatibilityReason}
           </p>
         </div>

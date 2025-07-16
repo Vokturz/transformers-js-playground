@@ -8,14 +8,29 @@ import {
 } from '@headlessui/react'
 import { useModel } from '../contexts/ModelContext'
 import { getModelInfo } from '../lib/huggingface'
-import { Heart, Download, ChevronDown, Check, ArrowDown, ArrowUp } from 'lucide-react'
+import {
+  Heart,
+  Download,
+  ChevronDown,
+  Check,
+  ArrowDown,
+  ArrowUp,
+  Plus,
+  Search,
+  X
+} from 'lucide-react'
 
 type SortOption = 'likes' | 'downloads' | 'createdAt' | 'name'
 
-const ModelSelector: React.FC = () => {
+function ModelSelector({ isFetching }: { isFetching: boolean }) {
   const { models, setModelInfo, modelInfo, pipeline } = useModel()
   const [sortBy, setSortBy] = useState<SortOption>('downloads')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [showCustomInput, setShowCustomInput] = useState(false)
+  const [customModelName, setCustomModelName] = useState('')
+  const [isLoadingCustomModel, setIsLoadingCustomModel] = useState(false)
+  const [customModelError, setCustomModelError] = useState('')
+  const [isCustomModel, setIsCustomModel] = useState(false)
 
   const formatNumber = (num: number) => {
     if (num >= 1000000000) {
@@ -57,9 +72,9 @@ const ModelSelector: React.FC = () => {
 
   // Function to fetch detailed model info and set as selected
   const fetchAndSetModelInfo = useCallback(
-    async (modelId: string) => {
+    async (modelId: string, isCustom: boolean = false) => {
       try {
-        const modelInfoResponse = await getModelInfo(modelId)
+        const modelInfoResponse = await getModelInfo(modelId, pipeline)
 
         let parameters = 0
         if (modelInfoResponse.safetensors) {
@@ -87,26 +102,28 @@ const ModelSelector: React.FC = () => {
           baseId: modelInfoResponse.baseId,
           readme: modelInfoResponse.readme
         }
-
-
         setModelInfo(modelInfo)
+        setIsCustomModel(isCustom)
       } catch (error) {
         console.error('Error fetching model info:', error)
+        throw error
       }
     },
-    [setModelInfo]
+    [setModelInfo, pipeline]
   )
 
   // Update modelInfo to first model when pipeline changes
   useEffect(() => {
-    if (models.length > 0) {
+    if (isFetching) return
+
+    if (models.length > 0 && !isCustomModel) {
       const firstModel = models[0]
-      fetchAndSetModelInfo(firstModel.id)
+      fetchAndSetModelInfo(firstModel.id, false)
     }
-  }, [pipeline, models, fetchAndSetModelInfo])
+  }, [pipeline, models, fetchAndSetModelInfo, isCustomModel, isFetching])
 
   const handleModelSelect = (modelId: string) => {
-    fetchAndSetModelInfo(modelId)
+    fetchAndSetModelInfo(modelId, false)
   }
 
   const handleSortChange = (newSortBy: SortOption) => {
@@ -118,6 +135,46 @@ const ModelSelector: React.FC = () => {
     }
   }
 
+  const handleCustomModelLoad = async () => {
+    if (!customModelName.trim()) {
+      setCustomModelError('Please enter a model name')
+      return
+    }
+
+    setIsLoadingCustomModel(true)
+    setCustomModelError('')
+
+    try {
+      await fetchAndSetModelInfo(customModelName.trim(), true)
+      setShowCustomInput(false)
+      setCustomModelName('')
+    } catch (error) {
+      setCustomModelError(
+        'Failed to load model. Please check the model name and try again.'
+      )
+    } finally {
+      setIsLoadingCustomModel(false)
+    }
+  }
+
+  const handleRemoveCustomModel = () => {
+    setIsCustomModel(false)
+    // Load the first model from the list
+    if (models.length > 0) {
+      fetchAndSetModelInfo(models[0].id, false)
+    }
+  }
+
+  const handleCustomInputKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleCustomModelLoad()
+    } else if (e.key === 'Escape') {
+      setShowCustomInput(false)
+      setCustomModelName('')
+      setCustomModelError('')
+    }
+  }
+
   const selectedModel =
     models.find((model) => model.id === modelInfo?.id) || models[0]
 
@@ -126,6 +183,72 @@ const ModelSelector: React.FC = () => {
       <ArrowUp className="w-3 h-3 ml-1" />
     ) : (
       <ArrowDown className="w-3 h-3 ml-1" />
+    )
+  }
+
+  if (isCustomModel) {
+    return (
+      <div className="relative">
+        <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white flex items-center justify-between">
+          <div className="flex flex-col flex-1 min-w-0">
+            <span className="truncate font-medium">
+              {modelInfo?.id || 'Custom model'}
+            </span>
+          </div>
+
+          <div className="flex items-center space-x-3">
+            {modelInfo && (modelInfo.likes > 0 || modelInfo.downloads > 0) && (
+              <div className="flex items-center space-x-3 text-xs text-gray-500">
+                {modelInfo.likes > 0 && (
+                  <div className="flex items-center space-x-1">
+                    <Heart className="w-3 h-3 text-red-500" />
+                    <span>{formatNumber(modelInfo.likes)}</span>
+                  </div>
+                )}
+                {modelInfo.downloads > 0 && (
+                  <div className="flex items-center space-x-1">
+                    <Download className="w-3 h-3 text-green-500" />
+                    <span>{formatNumber(modelInfo.downloads)}</span>
+                  </div>
+                )}
+              </div>
+            )}
+            <button
+              onClick={handleRemoveCustomModel}
+              className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+              title="Remove custom model"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (isFetching) {
+    return (
+      <div className="relative">
+        <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white flex items-center justify-between animate-pulse h-10">
+          <div className="flex flex-col flex-1 min-w-0 space-y-2">
+            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+          </div>
+
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-1">
+                <Heart className="w-3 h-3 text-red-500" />
+                <div className="h-3 bg-gray-200 rounded w-8"></div>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Download className="w-3 h-3 text-green-500" />
+                <div className="h-3 bg-gray-200 rounded w-8"></div>
+              </div>
+            </div>
+            <div className="w-4 h-4 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
     )
   }
 
@@ -176,119 +299,187 @@ const ModelSelector: React.FC = () => {
             leaveTo="transform scale-95 opacity-0"
           >
             <ListboxOptions className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-hidden focus:outline-none">
-              {/* Sort Controls - Always Visible */}
-              <div className="px-3 py-2 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
-                <div className="flex items-center space-x-2 text-xs">
-                  <span className="text-gray-600 font-medium">Sort by:</span>
-                  <button
-                    onClick={() => handleSortChange('name')}
-                    className={`px-2 py-1 rounded flex items-center space-x-1 ${
-                      sortBy === 'name'
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    <span>Name</span>
-                    {sortBy === 'name' && <SortIcon sortOrder={sortOrder} />}
-                  </button>
-                  <button
-                    onClick={() => handleSortChange('likes')}
-                    className={`px-2 py-1 rounded flex items-center space-x-1 ${
-                      sortBy === 'likes'
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    <Heart className="w-3 h-3" />
-                    <span>Likes</span>
-                    {sortBy === 'likes' && <SortIcon sortOrder={sortOrder} />}
-                  </button>
-                  <button
-                    onClick={() => handleSortChange('downloads')}
-                    className={`px-2 py-1 rounded flex items-center space-x-1 ${
-                      sortBy === 'downloads'
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    <Download className="w-3 h-3" />
-                    <span>Downloads</span>
-                    {sortBy === 'downloads' && (
-                      <SortIcon sortOrder={sortOrder} />
+              {/* Custom Model Input */}
+              {showCustomInput ? (
+                <div className="px-3 py-3 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="text"
+                        value={customModelName}
+                        onChange={(e) => setCustomModelName(e.target.value)}
+                        onKeyDown={handleCustomInputKeyPress}
+                        placeholder="Enter model name (e.g., Qwen/Qwen3-0.6B)"
+                        className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        autoFocus
+                      />
+                      <button
+                        onClick={handleCustomModelLoad}
+                        disabled={isLoadingCustomModel}
+                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                      >
+                        {isLoadingCustomModel ? (
+                          <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Search className="w-3 h-3" />
+                        )}
+                        <span>Load</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowCustomInput(false)
+                          setCustomModelName('')
+                          setCustomModelError('')
+                        }}
+                        className="px-2 py-1 text-sm text-gray-600 hover:text-gray-800"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                    {customModelError && (
+                      <p className="text-xs text-red-600">{customModelError}</p>
                     )}
-                  </button>
-                  <button
-                    onClick={() => handleSortChange('createdAt')}
-                    className={`px-2 py-1 rounded flex items-center space-x-1 ${
-                      sortBy === 'createdAt'
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    <span>Date</span>
-                    {sortBy === 'createdAt' && (
-                      <SortIcon sortOrder={sortOrder} />
-                    )}
-                  </button>
+                    <p className="text-xs text-gray-500">
+                      Press Enter to load or Escape to cancel
+                    </p>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <>
+                  {/* Load Custom Model Button */}
+                  <div className="px-3 py-2 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
+                    <button
+                      onClick={() => setShowCustomInput(true)}
+                      className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Load Custom Model</span>
+                    </button>
+                  </div>
+
+                  {/* Sort Controls */}
+                  <div className="px-3 py-2 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
+                    <div className="flex items-center space-x-2 text-xs">
+                      <span className="text-gray-600 font-medium">
+                        Sort by:
+                      </span>
+                      <button
+                        onClick={() => handleSortChange('name')}
+                        className={`px-2 py-1 rounded flex items-center space-x-1 ${
+                          sortBy === 'name'
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'text-gray-600 hover:bg-gray-100'
+                        }`}
+                      >
+                        <span>Name</span>
+                        {sortBy === 'name' && (
+                          <SortIcon sortOrder={sortOrder} />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => handleSortChange('likes')}
+                        className={`px-2 py-1 rounded flex items-center space-x-1 ${
+                          sortBy === 'likes'
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'text-gray-600 hover:bg-gray-100'
+                        }`}
+                      >
+                        <Heart className="w-3 h-3" />
+                        <span>Likes</span>
+                        {sortBy === 'likes' && (
+                          <SortIcon sortOrder={sortOrder} />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => handleSortChange('downloads')}
+                        className={`px-2 py-1 rounded flex items-center space-x-1 ${
+                          sortBy === 'downloads'
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'text-gray-600 hover:bg-gray-100'
+                        }`}
+                      >
+                        <Download className="w-3 h-3" />
+                        <span>Downloads</span>
+                        {sortBy === 'downloads' && (
+                          <SortIcon sortOrder={sortOrder} />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => handleSortChange('createdAt')}
+                        className={`px-2 py-1 rounded flex items-center space-x-1 ${
+                          sortBy === 'createdAt'
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'text-gray-600 hover:bg-gray-100'
+                        }`}
+                      >
+                        <span>Date</span>
+                        {sortBy === 'createdAt' && (
+                          <SortIcon sortOrder={sortOrder} />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Model Options - Scrollable */}
-              <div className="overflow-auto max-h-48">
-                {sortedModels.map((model) => {
-                  const hasStats = model.likes > 0 || model.downloads > 0
+              {!showCustomInput && (
+                <div className="overflow-auto max-h-48">
+                  {sortedModels.map((model) => {
+                    const hasStats = model.likes > 0 || model.downloads > 0
 
-                  return (
-                    <ListboxOption
-                      key={model.id}
-                      value={model}
-                      className={({ active, selected }) =>
-                        `px-3 py-2 cursor-pointer border-b border-gray-100 last:border-b-0 ${
-                          active ? 'bg-gray-50' : ''
-                        } ${selected ? 'bg-blue-50' : ''}`
-                      }
-                    >
-                      {({ selected }) => (
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center flex-1 mr-2">
-                            <span className="text-sm font-medium truncate">
-                              {model.id}
-                            </span>
-                            {selected && (
-                              <Check className="w-4 h-4 text-blue-600 ml-2 flex-shrink-0" />
-                            )}
-                          </div>
-
-                          {/* Stats Display */}
-                          {hasStats && (
-                            <div className="flex items-center space-x-3 text-xs text-gray-500 flex-shrink-0">
-                              {model.likes > 0 && (
-                                <div className="flex items-center space-x-1">
-                                  <Heart className="w-3 h-3 text-red-500" />
-                                  <span>{formatNumber(model.likes)}</span>
-                                </div>
-                              )}
-
-                              {model.downloads > 0 && (
-                                <div className="flex items-center space-x-1">
-                                  <Download className="w-3 h-3 text-green-500" />
-                                  <span>{formatNumber(model.downloads)}</span>
-                                </div>
-                              )}
-
-                              {model.createdAt && (
-                                <span className="text-xs text-gray-400">
-                                  {model.createdAt.split('T')[0]}
-                                </span>
+                    return (
+                      <ListboxOption
+                        key={model.id}
+                        value={model}
+                        className={({ active, selected }) =>
+                          `px-3 py-2 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+                            active ? 'bg-gray-50' : ''
+                          } ${selected ? 'bg-blue-50' : ''}`
+                        }
+                      >
+                        {({ selected }) => (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center flex-1 mr-2">
+                              <span className="text-sm font-medium truncate">
+                                {model.id}
+                              </span>
+                              {selected && (
+                                <Check className="w-4 h-4 text-blue-600 ml-2 flex-shrink-0" />
                               )}
                             </div>
-                          )}
-                        </div>
-                      )}
-                    </ListboxOption>
-                  )
-                })}
-              </div>
+
+                            {/* Stats Display */}
+                            {hasStats && (
+                              <div className="flex items-center space-x-3 text-xs text-gray-500 flex-shrink-0">
+                                {model.likes > 0 && (
+                                  <div className="flex items-center space-x-1">
+                                    <Heart className="w-3 h-3 text-red-500" />
+                                    <span>{formatNumber(model.likes)}</span>
+                                  </div>
+                                )}
+
+                                {model.downloads > 0 && (
+                                  <div className="flex items-center space-x-1">
+                                    <Download className="w-3 h-3 text-green-500" />
+                                    <span>{formatNumber(model.downloads)}</span>
+                                  </div>
+                                )}
+
+                                {model.createdAt && (
+                                  <span className="text-xs text-gray-400">
+                                    {model.createdAt.split('T')[0]}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </ListboxOption>
+                    )
+                  })}
+                </div>
+              )}
             </ListboxOptions>
           </Transition>
         </div>
