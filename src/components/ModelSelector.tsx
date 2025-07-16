@@ -107,11 +107,9 @@ function ModelSelector() {
           incompatibilityReason: modelInfoResponse.incompatibilityReason,
           supportedQuantizations: modelInfoResponse.supportedQuantizations,
           baseId: modelInfoResponse.baseId,
-          readme: modelInfoResponse.readme
+          readme: modelInfoResponse.readme,
+          hasChatTemplate: Boolean(modelInfoResponse.config?.tokenizer_config?.chat_template)
         }
-
-        console.log('Fetched model info:', modelInfoResponse)
-
         setModelInfo(modelInfo)
         setIsCustomModel(isCustom)
         setIsFetching(false)

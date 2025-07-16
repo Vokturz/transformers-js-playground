@@ -9,6 +9,16 @@ export interface ClassificationOutput {
   scores: number[]
 }
 
+export interface ChatMessage {
+  role: 'system' | 'user' | 'assistant'
+  content: string
+}
+
+export interface GenerationOutput {
+  role: 'assistant'
+  content: string
+}
+
 export type WorkerStatus =
   | 'initiate'
   | 'ready'
@@ -36,6 +46,18 @@ export interface TextClassificationWorkerInput {
   model: string
 }
 
+export interface TextGenerationWorkerInput {
+  type: 'generate'
+  prompt?: string
+  messages?: ChatMessage[]
+  hasChatTemplate: boolean
+  model: string
+  temperature?: number
+  max_new_tokens?: number
+  top_p?: number
+  top_k?: number
+  do_sample?: boolean
+}
 
 type q8 = 'q8' | 'int8' | 'bnb8' | 'uint8'
 type q4 = 'q4' | 'bnb4' | 'q4f16'
@@ -43,7 +65,6 @@ type fp16 = 'fp16'
 type fp32 = 'fp32'
 
 export type QuantizationType = q8 | q4 | fp16 | fp32
-
 
 export interface ModelInfo {
   id: string
@@ -58,8 +79,8 @@ export interface ModelInfo {
   supportedQuantizations: QuantizationType[]
   baseId?: string
   readme?: string
+  hasChatTemplate: boolean
 }
-
 
 export interface ModelInfoResponse {
   id: string
@@ -67,6 +88,9 @@ export interface ModelInfoResponse {
   config?: {
     architectures: string[]
     model_type: string
+    tokenizer_config?: {
+      chat_template?: string
+    }
   }
   lastModified: string
   pipeline_tag: string

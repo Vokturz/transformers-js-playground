@@ -23,7 +23,7 @@ const ModelLoader = () => {
 
   useEffect(() => {
     setHasBeenLoaded(false)
-  }, [selectedQuantization])
+  }, [selectedQuantization, setHasBeenLoaded])
 
   useEffect(() => {
     if (!modelInfo) return

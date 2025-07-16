@@ -8,6 +8,7 @@ import { getModelsByPipeline } from './lib/huggingface'
 import ModelSelector from './components/ModelSelector'
 import ModelInfo from './components/ModelInfo'
 import ModelReadme from './components/ModelReadme'
+import TextGeneration from './components/TextGeneration'
 
 function App() {
   const { pipeline, setPipeline, setModels, setModelInfo, modelInfo, setIsFetching} = useModel()
@@ -76,6 +77,7 @@ function App() {
             <ZeroShotClassification />
           )}
           {pipeline === 'text-classification' && <TextClassification />}
+          {pipeline === 'text-generation' && <TextGeneration />}
         </div>
       </main>
     </div>
