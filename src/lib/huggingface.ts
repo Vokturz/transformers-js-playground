@@ -5,21 +5,21 @@ const getModelInfo = async (
   modelName: string,
   pipeline: string
 ): Promise<ModelInfoResponse> => {
-  const token = process.env.REACT_APP_HUGGINGFACE_TOKEN
+  // const token = process.env.REACT_APP_HUGGINGFACE_TOKEN
 
-  if (!token) {
-    throw new Error(
-      'Hugging Face token not found. Please set REACT_APP_HUGGINGFACE_TOKEN in your .env file'
-    )
-  }
+  // if (!token) {
+  //   throw new Error(
+  //     'Hugging Face token not found. Please set REACT_APP_HUGGINGFACE_TOKEN in your .env file'
+  //   )
+  // }
 
   const response = await fetch(
     `https://huggingface.co/api/models/${modelName}`,
     {
       method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      // headers: {
+      //   Authorization: `Bearer ${token}`
+      // }
     }
   )
 
@@ -103,9 +103,9 @@ const getModelInfo = async (
       `https://huggingface.co/api/models/${baseModel}`,
       {
         method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        // headers: {
+        //   Authorization: `Bearer ${token}`
+        // }
       }
     )
 
@@ -140,22 +140,22 @@ const getModelInfo = async (
 const getModelsByPipeline = async (
   pipelineTag: string
 ): Promise<ModelInfoResponse[]> => {
-  const token = process.env.REACT_APP_HUGGINGFACE_TOKEN
+  // const token = process.env.REACT_APP_HUGGINGFACE_TOKEN
 
-  if (!token) {
-    throw new Error(
-      'Hugging Face token not found. Please set REACT_APP_HUGGINGFACE_TOKEN in your .env file'
-    )
-  }
+  // if (!token) {
+  //   throw new Error(
+  //     'Hugging Face token not found. Please set REACT_APP_HUGGINGFACE_TOKEN in your .env file'
+  //   )
+  // }
 
   // First search with filter=onnx
   const response1 = await fetch(
     `https://huggingface.co/api/models?filter=${pipelineTag}&filter=onnx&sort=downloads&limit=50`,
     {
       method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      // headers: {
+      //   Authorization: `Bearer ${token}`
+      // }
     }
   )
   if (!response1.ok) {
@@ -170,9 +170,9 @@ const getModelsByPipeline = async (
     `https://huggingface.co/api/models?filter=${pipelineTag}&search=onnx&sort=downloads&limit=50`,
     {
       method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      // headers: {
+      //   Authorization: `Bearer ${token}`
+      // }
     }
   )
   if (!response2.ok) {
@@ -209,20 +209,20 @@ const getModelsByPipelineCustom = async (
   searchString: string,
   pipelineTag: string
 ): Promise<ModelInfoResponse[]> => {
-  const token = process.env.REACT_APP_HUGGINGFACE_TOKEN
+  // const token = process.env.REACT_APP_HUGGINGFACE_TOKEN
 
-  if (!token) {
-    throw new Error(
-      'Hugging Face token not found. Please set REACT_APP_HUGGINGFACE_TOKEN in your .env file'
-    )
-  }
+  // if (!token) {
+  //   throw new Error(
+  //     'Hugging Face token not found. Please set REACT_APP_HUGGINGFACE_TOKEN in your .env file'
+  //   )
+  // }
   const response = await fetch(
     `https://huggingface.co/api/models?filter=${pipelineTag}&search=${searchString}&sort=downloads&limit=50`,
     {
       method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      // headers: {
+      //   Authorization: `Bearer ${token}`
+      // }
     }
   )
 
