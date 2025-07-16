@@ -1,5 +1,5 @@
 import { supportedPipelines } from '../components/PipelineSelector'
-import { ModelInfoResponse, QuantizationType } from '../types'
+import { allQuantizationTypes, ModelInfoResponse, QuantizationType } from '../types'
 
 const getModelInfo = async (
   modelName: string,
@@ -69,6 +69,7 @@ const getModelInfo = async (
         .filter((file) => file.endsWith('.onnx') && file.includes('_'))
         .map((file) => file.split('/')[1].split('_')[1].split('.')[0])
         .filter((q) => q !== 'quantized')
+        .filter((q) => allQuantizationTypes.includes(q as QuantizationType))
     : []
   const uniqueSupportedQuantizations = Array.from(
     new Set(supportedQuantizations)

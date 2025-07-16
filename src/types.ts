@@ -60,12 +60,23 @@ export interface TextGenerationWorkerInput {
   do_sample?: boolean
 }
 
-type q8 = 'q8' | 'int8' | 'bnb8' | 'uint8'
-type q4 = 'q4' | 'bnb4' | 'q4f16'
-type fp16 = 'fp16'
-type fp32 = 'fp32'
+const q8Types = ['q8', 'int8', 'bnb8', 'uint8'] as const
+const q4Types = ['q4', 'bnb4', 'q4f16'] as const
+const fp16Types = ['fp16'] as const
+const fp32Types = ['fp32'] as const
 
+type q8 = (typeof q8Types)[number]
+type q4 = (typeof q4Types)[number]
+type fp16 = (typeof fp16Types)[number]
+type fp32 = (typeof fp32Types)[number]
+ 
 export type QuantizationType = q8 | q4 | fp16 | fp32
+export const allQuantizationTypes = [
+  ...q8Types,
+  ...q4Types,
+  ...fp16Types,
+  ...fp32Types
+] as const
 
 export interface ModelInfo {
   id: string
