@@ -6,11 +6,11 @@ class MyTextClassificationPipeline {
   static instance = null
 
   static async getInstance(model, dtype = 'fp32', progress_callback = null) {
-    this.instance = pipeline(
-      this.task,
-      model,
-      { dtype, device: "webgpu", progress_callback },
-    )
+    this.instance = pipeline(this.task, model, {
+      dtype,
+      device: 'webgpu',
+      progress_callback
+    })
     return this.instance
   }
 }

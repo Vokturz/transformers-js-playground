@@ -1,12 +1,9 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import {
-  ClassificationOutput,
   TextClassificationWorkerInput,
-  WorkerMessage
 } from '../types'
 import { useModel } from '../contexts/ModelContext'
-import { getWorker } from '../lib/workerManager'
-
+import { set } from 'lodash'
 const PLACEHOLDER_TEXTS: string[] = [
   'I absolutely love this product! It exceeded all my expectations.',
   "This is the worst purchase I've ever made. Complete waste of money.",
@@ -22,7 +19,7 @@ const PLACEHOLDER_TEXTS: string[] = [
 
 function TextClassification() {
   const [text, setText] = useState<string>(PLACEHOLDER_TEXTS.join('\n'))
-  const { activeWorker, status, setStatus, modelInfo, results, setResults, hasBeenLoaded} = useModel()
+  const { activeWorker, status, modelInfo, results, setResults, hasBeenLoaded} = useModel()
 
   const classify = useCallback(() => {
     if (!modelInfo || !activeWorker) {
@@ -36,7 +33,7 @@ function TextClassification() {
       model: modelInfo.id
     }
     activeWorker.postMessage(message)
-  }, [text, modelInfo, setStatus, activeWorker])
+  }, [text, modelInfo, activeWorker, set])
 
   const busy: boolean = status !== 'ready'
 
