@@ -12,7 +12,7 @@ import { getModelSize } from '../lib/huggingface'
 import { useModel } from '../contexts/ModelContext'
 import ModelLoader from './ModelLoader'
 
-const ModelInfo = ({ isFetching }: { isFetching: boolean }) => {
+const ModelInfo = () => {
   const formatNumber = (num: number) => {
     if (num >= 1000000000) {
       return (num / 1000000000).toFixed(1) + 'B'
@@ -25,8 +25,10 @@ const ModelInfo = ({ isFetching }: { isFetching: boolean }) => {
   }
 
   const {
+    models,
     modelInfo,
-    selectedQuantization
+    selectedQuantization,
+    isFetching
   } = useModel()
 
   const ModelInfoSkeleton = () => (
@@ -64,7 +66,7 @@ const ModelInfo = ({ isFetching }: { isFetching: boolean }) => {
     </div>
   )
 
-  if (!modelInfo || isFetching) {
+  if (!modelInfo || isFetching || models.length === 0) {
     return <ModelInfoSkeleton />
   }
 

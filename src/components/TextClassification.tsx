@@ -22,52 +22,23 @@ const PLACEHOLDER_TEXTS: string[] = [
 
 function TextClassification() {
   const [text, setText] = useState<string>(PLACEHOLDER_TEXTS.join('\n'))
-  const [results, setResults] = useState<ClassificationOutput[]>([])
-  const { status, setStatus, modelInfo } = useModel()
-  const workerRef = useRef<Worker | null>(null)
+  const { activeWorker, status, setStatus, modelInfo, results, setResults, hasBeenLoaded} = useModel()
 
 
-  // We use the `useEffect` hook to setup the worker as soon as the component is mounted.
-  useEffect(() => {
-    if (!workerRef.current) {
-      workerRef.current = getWorker('text-classification')
-    }
-
-    // Create a callback function for messages from the worker thread.
-    const onMessageReceived = (e: MessageEvent<WorkerMessage>) => {
-      const status = e.data.status
-      if (status === 'ready') {
-        setStatus('ready')
-      } else if (status === 'output') {
-        setStatus('output')
-        const result = e.data.output!
-        setResults((prevResults) => [...prevResults, result])
-        console.log(result)
-      } else if (status === 'error') {
-        setStatus('error')
-        console.error(e.data.output)
-      }
-    }
-
-    // Attach the callback function as an event listener.
-    workerRef.current?.addEventListener('message', onMessageReceived)
-
-    // Define a cleanup function for when the component is unmounted.
-    return () =>
-      workerRef.current?.removeEventListener('message', onMessageReceived)
-  }, [setStatus])
 
   const classify = useCallback(() => {
-    if (!modelInfo) return
-    setStatus('loading')
+    if (!modelInfo || !activeWorker) {
+      console.error('Model info or worker is not available')
+      return
+    }
     setResults([]) // Clear previous results
     const message: TextClassificationWorkerInput = {
       type: 'classify',
       text,
       model: modelInfo.id
     }
-    workerRef.current?.postMessage(message)
-  }, [text, modelInfo, setStatus])
+    activeWorker.postMessage(message)
+  }, [text, modelInfo, setStatus, activeWorker])
 
   const busy: boolean = status !== 'ready'
 
@@ -96,8 +67,7 @@ function TextClassification() {
               disabled={busy}
               onClick={classify}
             >
-              {status === 'ready'
-                ? !busy
+              {hasBeenLoaded ? !busy
                   ? 'Classify Text'
                   : 'Processing...'
                 : 'Load model first'}

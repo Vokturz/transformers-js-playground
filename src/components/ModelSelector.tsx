@@ -22,8 +22,15 @@ import {
 
 type SortOption = 'likes' | 'downloads' | 'createdAt' | 'name'
 
-function ModelSelector({ isFetching }: { isFetching: boolean }) {
-  const { models, setModelInfo, modelInfo, pipeline } = useModel()
+function ModelSelector() {
+  const {
+    models,
+    setModelInfo,
+    modelInfo,
+    pipeline,
+    isFetching,
+    setIsFetching
+  } = useModel()
   const [sortBy, setSortBy] = useState<SortOption>('downloads')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [showCustomInput, setShowCustomInput] = useState(false)
@@ -102,25 +109,36 @@ function ModelSelector({ isFetching }: { isFetching: boolean }) {
           baseId: modelInfoResponse.baseId,
           readme: modelInfoResponse.readme
         }
+
+        console.log('Fetched model info:', modelInfoResponse)
+
         setModelInfo(modelInfo)
         setIsCustomModel(isCustom)
+        setIsFetching(false)
       } catch (error) {
         console.error('Error fetching model info:', error)
+        setIsFetching(false)
         throw error
       }
     },
-    [setModelInfo, pipeline]
+    [setModelInfo, pipeline, setIsFetching]
   )
 
-  // Update modelInfo to first model when pipeline changes
+  // Reset custom model state when pipeline changes
   useEffect(() => {
-    if (isFetching) return
+    setIsCustomModel(false)
+    setShowCustomInput(false)
+    setCustomModelName('')
+    setCustomModelError('')
+  }, [pipeline])
 
-    if (models.length > 0 && !isCustomModel) {
-      const firstModel = models[0]
+  // Update modelInfo to first model when models are loaded and no custom model is selected
+  useEffect(() => {
+    if (models.length > 0 && !isCustomModel && !modelInfo) {
+      const firstModel = sortedModels[0]
       fetchAndSetModelInfo(firstModel.id, false)
     }
-  }, [pipeline, models, fetchAndSetModelInfo, isCustomModel, isFetching])
+  }, [models, sortedModels, fetchAndSetModelInfo, isCustomModel, modelInfo])
 
   const handleModelSelect = (modelId: string) => {
     fetchAndSetModelInfo(modelId, false)
@@ -160,8 +178,8 @@ function ModelSelector({ isFetching }: { isFetching: boolean }) {
   const handleRemoveCustomModel = () => {
     setIsCustomModel(false)
     // Load the first model from the list
-    if (models.length > 0) {
-      fetchAndSetModelInfo(models[0].id, false)
+    if (sortedModels.length > 0) {
+      fetchAndSetModelInfo(sortedModels[0].id, false)
     }
   }
 
@@ -226,7 +244,7 @@ function ModelSelector({ isFetching }: { isFetching: boolean }) {
     )
   }
 
-  if (isFetching) {
+  if (isFetching || models.length === 0) {
     return (
       <div className="relative">
         <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white flex items-center justify-between animate-pulse h-10">

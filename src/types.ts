@@ -32,7 +32,7 @@ export interface TextClassificationWorkerInput {
 
 
 type q8 = 'q8' | 'int8' | 'bnb8' | 'uint8'
-type q4 = 'q4' | 'bnb4'
+type q4 = 'q4' | 'bnb4' | 'q4f16'
 type fp16 = 'fp16'
 type fp32 = 'fp32'
 

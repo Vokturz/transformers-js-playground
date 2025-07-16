@@ -1,7 +1,10 @@
-import { supportedPipelines } from "../components/PipelineSelector"
-import { ModelInfoResponse, QuantizationType } from "../types"
+import { supportedPipelines } from '../components/PipelineSelector'
+import { ModelInfoResponse, QuantizationType } from '../types'
 
-const getModelInfo = async (modelName: string, pipeline: string): Promise<ModelInfoResponse> => {
+const getModelInfo = async (
+  modelName: string,
+  pipeline: string
+): Promise<ModelInfoResponse> => {
   const token = process.env.REACT_APP_HUGGINGFACE_TOKEN
 
   if (!token) {
@@ -23,36 +26,53 @@ const getModelInfo = async (modelName: string, pipeline: string): Promise<ModelI
   if (!response.ok) {
     throw new Error(`Failed to fetch model info: ${response.statusText}`)
   }
-  
+
   const modelData: ModelInfoResponse = await response.json()
-  
+
   const requiredFiles = [
     'config.json',
     'tokenizer.json',
-    'tokenizer_config.json',
+    'tokenizer_config.json'
   ]
-  
-  const siblingFiles = modelData.siblings?.map(s => s.rfilename) || []
-  const missingFiles = requiredFiles.filter(file => !siblingFiles.includes(file))
-  const hasOnnxFolder = siblingFiles.some((file) => file.endsWith('.onnx') && file.startsWith('onnx/'))
 
-  const isCompatible = missingFiles.length === 0 && hasOnnxFolder && modelData.tags.includes(pipeline)
+  const siblingFiles = modelData.siblings?.map((s) => s.rfilename) || []
+  const missingFiles = requiredFiles.filter(
+    (file) => !siblingFiles.includes(file)
+  )
+  const hasOnnxFolder = siblingFiles.some(
+    (file) => file.endsWith('.onnx') && file.startsWith('onnx/')
+  )
 
-  
+  const isCompatible =
+    missingFiles.length === 0 &&
+    hasOnnxFolder &&
+    modelData.tags.includes(pipeline)
+
   let incompatibilityReason = ''
   if (!modelData.tags.includes(pipeline)) {
-    const expectedPipelines = modelData.tags.filter(tag => supportedPipelines.includes(tag)).join(', ')
-    incompatibilityReason = expectedPipelines ? `- Model can be used with ${expectedPipelines} pipelines only\n` : `- Pipeline ${pipeline} not supported by the model\n` 
-  } if (missingFiles.length > 0) {
-    incompatibilityReason += `- Missing required files: ${missingFiles.join(', ')}\n`
-  } else if (!hasOnnxFolder)  {
+    const expectedPipelines = modelData.tags
+      .filter((tag) => supportedPipelines.includes(tag))
+      .join(', ')
+    incompatibilityReason = expectedPipelines
+      ? `- Model can be used with ${expectedPipelines} pipelines only\n`
+      : `- Pipeline ${pipeline} not supported by the model\n`
+  }
+  if (missingFiles.length > 0) {
+    incompatibilityReason += `- Missing required files: ${missingFiles.join(
+      ', '
+    )}\n`
+  } else if (!hasOnnxFolder) {
     incompatibilityReason += '- Folder onnx/ is missing\n'
   }
-  const supportedQuantizations = siblingFiles
-      .filter((file) => file.endsWith('.onnx') && file.includes('_'))
-      .map((file) => file.split('/')[1].split('_')[1].split('.')[0])
-      .filter((q) => q !== 'quantized')
-  const uniqueSupportedQuantizations = Array.from(new Set(supportedQuantizations))
+  const supportedQuantizations = hasOnnxFolder
+    ? siblingFiles
+        .filter((file) => file.endsWith('.onnx') && file.includes('_'))
+        .map((file) => file.split('/')[1].split('_')[1].split('.')[0])
+        .filter((q) => q !== 'quantized')
+    : []
+  const uniqueSupportedQuantizations = Array.from(
+    new Set(supportedQuantizations)
+  )
   uniqueSupportedQuantizations.sort((a, b) => {
     const getNumericValue = (str: string) => {
       const match = str.match(/(\d+)/)
@@ -64,7 +84,9 @@ const getModelInfo = async (modelName: string, pipeline: string): Promise<ModelI
   // Fetch README content
   const fetchReadme = async (modelId: string): Promise<string> => {
     try {
-      const readmeResponse = await fetch(`https://huggingface.co/${modelId}/raw/main/README.md`)
+      const readmeResponse = await fetch(
+        `https://huggingface.co/${modelId}/raw/main/README.md`
+      )
       if (readmeResponse.ok) {
         return await readmeResponse.text()
       }
@@ -74,7 +96,7 @@ const getModelInfo = async (modelName: string, pipeline: string): Promise<ModelI
     return ''
   }
 
-  const baseModel = modelData.cardData?.base_model ?? modelData.modelId 
+  const baseModel = modelData.cardData?.base_model ?? modelData.modelId
   if (baseModel && !modelData.safetensors) {
     const baseModelResponse = await fetch(
       `https://huggingface.co/api/models/${baseModel}`,
@@ -89,21 +111,22 @@ const getModelInfo = async (modelName: string, pipeline: string): Promise<ModelI
     if (baseModelResponse.ok) {
       const baseModelData: ModelInfoResponse = await baseModelResponse.json()
       const readme = await fetchReadme(baseModel)
-      
+
       return {
         ...baseModelData,
         id: modelData.id,
         baseId: baseModel,
         isCompatible,
         incompatibilityReason,
-        supportedQuantizations: uniqueSupportedQuantizations as QuantizationType[],
+        supportedQuantizations:
+          uniqueSupportedQuantizations as QuantizationType[],
         readme
       }
     }
   }
-  
+
   const readme = await fetchReadme(modelData.id)
-  
+
   return {
     ...modelData,
     isCompatible,
@@ -135,7 +158,9 @@ const getModelsByPipeline = async (
     }
   )
   if (!response1.ok) {
-    throw new Error(`Failed to fetch models for pipeline: ${response1.statusText}`)
+    throw new Error(
+      `Failed to fetch models for pipeline: ${response1.statusText}`
+    )
   }
   const models1 = await response1.json()
 
@@ -150,14 +175,18 @@ const getModelsByPipeline = async (
     }
   )
   if (!response2.ok) {
-    throw new Error(`Failed to fetch models for pipeline: ${response2.statusText}`)
+    throw new Error(
+      `Failed to fetch models for pipeline: ${response2.statusText}`
+    )
   }
   const models2 = await response2.json()
 
   // Combine and deduplicate models based on id
-  const combinedModels = [...models1, ...models2].filter((m: ModelInfoResponse) => m.createdAt > '2022/02/03')
-  const uniqueModels = combinedModels.filter((model, index, self) => 
-    index === self.findIndex(m => m.id === model.id)
+  const combinedModels = [...models1, ...models2].filter(
+    (m: ModelInfoResponse) => m.createdAt > '2022/02/03'
+  )
+  const uniqueModels = combinedModels.filter(
+    (model, index, self) => index === self.findIndex((m) => m.id === model.id)
   )
 
   if (pipelineTag === 'text-classification') {
@@ -171,10 +200,9 @@ const getModelsByPipeline = async (
       )
       .slice(0, 20)
   }
-  
+
   return uniqueModels.slice(0, 20)
 }
-
 
 const getModelsByPipelineCustom = async (
   searchString: string,
@@ -197,12 +225,16 @@ const getModelsByPipelineCustom = async (
     }
   )
 
-    if (!response.ok) {
-    throw new Error(`Failed to fetch models for pipeline: ${response.statusText}`)
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch models for pipeline: ${response.statusText}`
+    )
   }
   const models = await response.json()
 
-  const uniqueModels = models.filter((m: ModelInfoResponse) => m.createdAt > '2022/02/03')
+  const uniqueModels = models.filter(
+    (m: ModelInfoResponse) => m.createdAt > '2022/02/03'
+  )
   if (pipelineTag === 'text-classification') {
     return uniqueModels
       .filter(
@@ -214,7 +246,7 @@ const getModelsByPipelineCustom = async (
       )
       .slice(0, 20)
   }
-  
+
   return uniqueModels.slice(0, 20)
 }
 
@@ -239,9 +271,10 @@ function getModelSize(
       bytesPerParameter = 1
       break
     case 'bnb4':
-    case 'q4': 
+    case 'q4':
+    case 'q4f16':
       bytesPerParameter = 0.5
-    break
+      break
   }
 
   const sizeInBytes = parameters * bytesPerParameter
@@ -250,5 +283,9 @@ function getModelSize(
   return sizeInMB
 }
 
-
-export { getModelInfo, getModelSize, getModelsByPipeline, getModelsByPipelineCustom }
+export {
+  getModelInfo,
+  getModelSize,
+  getModelsByPipeline,
+  getModelsByPipelineCustom
+}

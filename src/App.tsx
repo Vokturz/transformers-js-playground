@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import PipelineSelector from './components/PipelineSelector'
 import ZeroShotClassification from './components/ZeroShotClassification'
 import TextClassification from './components/TextClassification'
@@ -10,19 +10,24 @@ import ModelInfo from './components/ModelInfo'
 import ModelReadme from './components/ModelReadme'
 
 function App() {
-  const { pipeline, setPipeline, setModels, setModelInfo, modelInfo } = useModel()
-  const [isFetching, setIsFetching] = useState(false)
+  const { pipeline, setPipeline, setModels, setModelInfo, modelInfo, setIsFetching} = useModel()
 
   useEffect(() => {
     setModelInfo(null)
+    setModels([])
+    setIsFetching(true)
+    
     const fetchModels = async () => {
-      setIsFetching(true)
-      const fetchedModels = await getModelsByPipeline(pipeline)
-      setModels(fetchedModels)
-      setIsFetching(false)
+      try {
+        const fetchedModels = await getModelsByPipeline(pipeline)
+        setModels(fetchedModels)
+      } catch (error) {
+        console.error('Error fetching models:', error)
+        setIsFetching(false)
+      }
     }
     fetchModels()
-  }, [setModels, setModelInfo, pipeline])
+  }, [setModels, setModelInfo, setIsFetching, pipeline])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -47,12 +52,12 @@ function App() {
                   <span className="text-lg font-semibold text-gray-900 block">
                     Select Model
                   </span>
-                  <ModelSelector isFetching={isFetching} />
+                  <ModelSelector />
                 </div>
               </div>
 
               <div className="ml-6">
-                <ModelInfo isFetching={isFetching} />
+                <ModelInfo />
               </div>
             </div>
 
