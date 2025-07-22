@@ -7,12 +7,35 @@ class MyTextGenerationPipeline {
   static currentGeneration = null
 
   static async getInstance(model, dtype = 'fp32', progress_callback = null) {
-    this.instance = pipeline(this.task, model, {
-      dtype,
-      device: 'webgpu',
-      progress_callback
-    })
-    return this.instance
+    try {
+      // Try WebGPU first
+      this.instance = await pipeline(this.task, model, {
+        dtype,
+        device: 'webgpu',
+        progress_callback
+      })
+      return this.instance
+    } catch (webgpuError) {
+      // Fallback to WASM if WebGPU fails
+      if (progress_callback) {
+        progress_callback({
+          status: 'fallback',
+          message: 'WebGPU failed, falling back to WASM'
+        })
+      }
+      try {
+        this.instance = await pipeline(this.task, model, {
+          dtype,
+          device: 'wasm',
+          progress_callback
+        })
+        return this.instance
+      } catch (wasmError) {
+        throw new Error(
+          `Both WebGPU and WASM failed. WebGPU error: ${webgpuError.message}. WASM error: ${wasmError.message}`
+        )
+      }
+    }
   }
 
   static stopGeneration() {

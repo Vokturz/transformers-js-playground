@@ -6,12 +6,35 @@ class MyZeroShotClassificationPipeline {
   static instance = null
 
   static async getInstance(model, dtype = 'fp32', progress_callback = null) {
-    this.instance = pipeline(this.task, model, {
-      dtype,
-      device: 'webgpu',
-      progress_callback
-    })
-    return this.instance
+    try {
+      // Try WebGPU first
+      this.instance = await pipeline(this.task, model, {
+        dtype,
+        device: 'webgpu',
+        progress_callback
+      })
+      return this.instance
+    } catch (webgpuError) {
+      // Fallback to WASM if WebGPU fails
+      if (progress_callback) {
+        progress_callback({
+          status: 'fallback',
+          message: 'WebGPU failed, falling back to WASM'
+        })
+      }
+      try {
+        this.instance = await pipeline(this.task, model, {
+          dtype,
+          device: 'wasm',
+          progress_callback
+        })
+        return this.instance
+      } catch (wasmError) {
+        throw new Error(
+          `Both WebGPU and WASM failed. WebGPU error: ${webgpuError.message}. WASM error: ${wasmError.message}`
+        )
+      }
+    }
   }
 }
 
@@ -50,7 +73,7 @@ self.addEventListener('message', async (event) => {
         self.postMessage({ status: 'ready' }) // Nothing to process
         return
       }
-      
+
       const split = text.split('\n')
       for (const line of split) {
         if (line.trim()) {
@@ -58,7 +81,7 @@ self.addEventListener('message', async (event) => {
             hypothesis_template: 'This text is about {}.',
             multi_label: true
           })
-          
+
           self.postMessage({ status: 'output', output })
         }
       }
