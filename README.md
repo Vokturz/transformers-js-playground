@@ -1,5 +1,5 @@
 ---
-title: Transformers Js Playground
+title: Transformers.js Playground
 emoji: 🐠
 colorFrom: indigo
 colorTo: red

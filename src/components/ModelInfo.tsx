@@ -11,6 +11,7 @@ import {
 import { getModelSize } from '../lib/huggingface'
 import { useModel } from '../contexts/ModelContext'
 import ModelLoader from './ModelLoader'
+import Tooltip from './Tooltip'
 
 const ModelInfo = () => {
   const formatNumber = (num: number) => {
@@ -24,12 +25,7 @@ const ModelInfo = () => {
     return num.toString()
   }
 
-  const {
-    models,
-    modelInfo,
-    selectedQuantization,
-    isFetching
-  } = useModel()
+  const { models, modelInfo, selectedQuantization, isFetching } = useModel()
 
   const ModelInfoSkeleton = () => (
     <div className="mt-5 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 rounded-lg border border-blue-200 space-y-4 h-full min-h-[160px] animate-pulse w-[400px]">
@@ -70,7 +66,6 @@ const ModelInfo = () => {
     return <ModelInfoSkeleton />
   }
 
-
   return (
     <div className="mt-5 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 rounded-lg border border-blue-200 space-y-3 h-full min-h-[150px]">
       {/* Model Name Row */}
@@ -103,7 +98,7 @@ const ModelInfo = () => {
       </div>
 
       {/* Base Model Link */}
-      {modelInfo.baseId && (
+      {modelInfo.baseId && modelInfo.baseId !== modelInfo.id && (
         <div className="flex items-center space-x-2 ml-6 text-xs text-gray-600 truncate max-w-100">
           <a
             href={`https://huggingface.co/${modelInfo.baseId}`}
@@ -112,8 +107,8 @@ const ModelInfo = () => {
             className=" hover:underline"
             title={`Base model: ${modelInfo.baseId}`}
           >
-            <ExternalLink className="w-3 h-3 inline-block mr-1" />
-            ({modelInfo.baseId})
+            <ExternalLink className="w-3 h-3 inline-block mr-1" />(
+            {modelInfo.baseId})
           </a>
         </div>
       )}
@@ -121,41 +116,47 @@ const ModelInfo = () => {
       {/* Stats Row */}
       <div className="flex items-center justify-self-end space-x-4 text-xs text-gray-600">
         {modelInfo.likes > 0 && (
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1 cursor-default">
             <Heart className="w-3 h-3 text-red-500" />
             <span>{formatNumber(modelInfo.likes)}</span>
           </div>
         )}
 
         {modelInfo.downloads > 0 && (
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1 cursor-default">
             <Download className="w-3 h-3 text-green-500" />
             <span>{formatNumber(modelInfo.downloads)}</span>
           </div>
         )}
 
-        <div className="flex items-center space-x-1">
-          <Cpu className="w-3 h-3 text-purple-500" />
-          {modelInfo.parameters ? (
-            <span>{formatNumber(modelInfo.parameters)}</span>
-          ) : (
-            <span>?</span>
-          )}
-        </div>
+        <Tooltip content="Model parameters according to Hugging Face API">
+          <div className="flex items-center space-x-1 cursor-default">
+            <Cpu className="w-3 h-3 text-purple-500" />
+            {modelInfo.parameters ? (
+              <span>{formatNumber(modelInfo.parameters)}</span>
+            ) : (
+              <span>?</span>
+            )}
+          </div>
+        </Tooltip>
 
-        <div className="flex items-center space-x-1">
-          <DatabaseIcon className="w-3 h-3 text-purple-500" />
-          {modelInfo.parameters ? (
-            <span>
-              {`~${getModelSize(
-                modelInfo.parameters,
-                selectedQuantization
-              ).toFixed(1)}MB`}
-            </span>
-          ) : (
-            <span>?</span>
-          )}
-        </div>
+        <Tooltip
+          content={`Estimated size with ${selectedQuantization} quantization`}
+        >
+          <div className="flex items-center space-x-1 cursor-default">
+            <DatabaseIcon className="w-3 h-3 text-purple-500" />
+            {modelInfo.parameters ? (
+              <span>
+                {`~${getModelSize(
+                  modelInfo.parameters,
+                  selectedQuantization
+                ).toFixed(1)}MB`}
+              </span>
+            ) : (
+              <span>?</span>
+            )}
+          </div>
+        </Tooltip>
       </div>
 
       <ModelLoader />

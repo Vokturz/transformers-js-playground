@@ -1,5 +1,9 @@
 import { supportedPipelines } from '../components/PipelineSelector'
-import { allQuantizationTypes, ModelInfoResponse, QuantizationType } from '../types'
+import {
+  allQuantizationTypes,
+  ModelInfoResponse,
+  QuantizationType
+} from '../types'
 
 const getModelInfo = async (
   modelName: string,
@@ -16,7 +20,7 @@ const getModelInfo = async (
   const response = await fetch(
     `https://huggingface.co/api/models/${modelName}`,
     {
-      method: 'GET',
+      method: 'GET'
       // headers: {
       //   Authorization: `Bearer ${token}`
       // }
@@ -102,7 +106,7 @@ const getModelInfo = async (
     const baseModelResponse = await fetch(
       `https://huggingface.co/api/models/${baseModel}`,
       {
-        method: 'GET',
+        method: 'GET'
         // headers: {
         //   Authorization: `Bearer ${token}`
         // }
@@ -152,7 +156,7 @@ const getModelsByPipeline = async (
   const response1 = await fetch(
     `https://huggingface.co/api/models?filter=${pipelineTag}&filter=onnx&sort=downloads&limit=50`,
     {
-      method: 'GET',
+      method: 'GET'
       // headers: {
       //   Authorization: `Bearer ${token}`
       // }
@@ -169,7 +173,7 @@ const getModelsByPipeline = async (
   const response2 = await fetch(
     `https://huggingface.co/api/models?filter=${pipelineTag}&search=onnx&sort=downloads&limit=50`,
     {
-      method: 'GET',
+      method: 'GET'
       // headers: {
       //   Authorization: `Bearer ${token}`
       // }
@@ -219,7 +223,7 @@ const getModelsByPipelineCustom = async (
   const response = await fetch(
     `https://huggingface.co/api/models?filter=${pipelineTag}&search=${searchString}&sort=downloads&limit=50`,
     {
-      method: 'GET',
+      method: 'GET'
       // headers: {
       //   Authorization: `Bearer ${token}`
       // }

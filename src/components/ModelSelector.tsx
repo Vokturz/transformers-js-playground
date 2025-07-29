@@ -108,7 +108,9 @@ function ModelSelector() {
           supportedQuantizations: modelInfoResponse.supportedQuantizations,
           baseId: modelInfoResponse.baseId,
           readme: modelInfoResponse.readme,
-          hasChatTemplate: Boolean(modelInfoResponse.config?.tokenizer_config?.chat_template)
+          hasChatTemplate: Boolean(
+            modelInfoResponse.config?.tokenizer_config?.chat_template
+          )
         }
         setModelInfo(modelInfo)
         setIsCustomModel(isCustom)
@@ -314,7 +316,7 @@ function ModelSelector() {
             leaveFrom="transform scale-100 opacity-100"
             leaveTo="transform scale-95 opacity-0"
           >
-            <ListboxOptions className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-hidden focus:outline-none">
+            <ListboxOptions className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-hidden focus:outline-none">
               {/* Custom Model Input */}
               {showCustomInput ? (
                 <div className="px-3 py-3 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
@@ -362,8 +364,8 @@ function ModelSelector() {
                 </div>
               ) : (
                 <>
-                  {/* Load Custom Model Button */}
-                  <div className="px-3 py-2 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
+                  <div className="sticky top-0 z-10 bg-gray-50 border-b border-gray-200 p-3 space-y-3">
+                    {/* Load Custom Model Button */}
                     <button
                       onClick={() => setShowCustomInput(true)}
                       className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors"
@@ -371,10 +373,8 @@ function ModelSelector() {
                       <Plus className="w-4 h-4" />
                       <span>Load Custom Model</span>
                     </button>
-                  </div>
 
-                  {/* Sort Controls */}
-                  <div className="px-3 py-2 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
+                    {/* Sort Controls */}
                     <div className="flex items-center space-x-2 text-xs">
                       <span className="text-gray-600 font-medium">
                         Sort by:
@@ -455,16 +455,15 @@ function ModelSelector() {
                         }
                       >
                         {({ selected }) => (
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center flex-1 mr-2">
-                              <span className="text-sm font-medium truncate">
+                          <div className="relative flex items-center justify-between">
+                            <div className="flex items-center flex-1 w-5/12">
+                              <span className="text-sm font-medium truncate w-11/12 ">
                                 {model.id}
                               </span>
-                              {selected && (
-                                <Check className="w-4 h-4 text-blue-600 ml-2 flex-shrink-0" />
-                              )}
                             </div>
-
+                            {selected && (
+                              <Check className="mr-2 w-4 h-4 text-blue-600 ml-2 flex-shrink-0" />
+                            )}
                             {/* Stats Display */}
                             {hasStats && (
                               <div className="flex items-center space-x-3 text-xs text-gray-500 flex-shrink-0">

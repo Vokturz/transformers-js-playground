@@ -11,13 +11,20 @@ import ModelReadme from './components/ModelReadme'
 import TextGeneration from './components/TextGeneration'
 
 function App() {
-  const { pipeline, setPipeline, setModels, setModelInfo, modelInfo, setIsFetching} = useModel()
+  const {
+    pipeline,
+    setPipeline,
+    setModels,
+    setModelInfo,
+    modelInfo,
+    setIsFetching
+  } = useModel()
 
   useEffect(() => {
     setModelInfo(null)
     setModels([])
     setIsFetching(true)
-    
+
     const fetchModels = async () => {
       try {
         const fetchedModels = await getModelsByPipeline(pipeline)
@@ -37,8 +44,8 @@ function App() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <div className="bg-white rounded-lg border p-6">
-            <div className="flex items-start justify-between max-w-6xl mx-auto">
-              <div className="space-y-2 flex-1">
+            <div className="flex items-center lg:items-start justify-between mx-auto flex-col lg:flex-row">
+              <div className="space-y-2 w-10/12 lg:w-7/12">
                 <div className="space-y-2">
                   <span className="text-lg font-semibold text-gray-900 block">
                     Choose a Pipeline

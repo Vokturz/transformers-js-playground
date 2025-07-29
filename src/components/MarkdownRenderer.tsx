@@ -1,7 +1,7 @@
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 interface MarkdownRendererProps {
   content: string
@@ -15,13 +15,7 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
-      disallowedElements={[
-        'script',
-        'style',
-        'iframe',
-        'object',
-        'embed',
-      ]}
+      disallowedElements={['script', 'style', 'iframe', 'object', 'embed']}
       unwrapDisallowed={true}
       components={{
         code: ({ className, children, ...props }: any) => {
@@ -29,23 +23,26 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
           const isInline = !match
           return !isInline ? (
             <SyntaxHighlighter
-              style={tomorrow}
+              style={oneLight}
               language={match[1]}
               PreTag="div"
-              className="rounded-md my-4"
+              className="rounded-md my-4 border border-r-2"
               {...props}
             >
               {String(children).replace(/\n$/, '')}
             </SyntaxHighlighter>
           ) : (
-            <code className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono" {...props}>
+            <code
+              className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono"
+              {...props}
+            >
               {children}
             </code>
           )
         },
         a: ({ children, href }) => (
-          <a 
-            href={href} 
+          <a
+            href={href}
             className="text-blue-600 hover:text-blue-800 underline"
             target="_blank"
             rel="noopener noreferrer"

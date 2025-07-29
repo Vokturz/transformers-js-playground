@@ -1,9 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
-import {
-  Section,
-  WorkerMessage,
-  ZeroShotWorkerInput,
-} from '../types'
+import { useState, useEffect, useCallback } from 'react'
+import { Section, WorkerMessage, ZeroShotWorkerInput } from '../types'
 import { useModel } from '../contexts/ModelContext'
 
 const PLACEHOLDER_REVIEWS: string[] = [
@@ -48,7 +44,13 @@ function ZeroShotClassification() {
     PLACEHOLDER_SECTIONS.map((title) => ({ title, items: [] }))
   )
 
-  const { activeWorker, status, modelInfo, hasBeenLoaded, selectedQuantization } = useModel()
+  const {
+    activeWorker,
+    status,
+    modelInfo,
+    hasBeenLoaded,
+    selectedQuantization
+  } = useModel()
 
   const classify = useCallback(() => {
     if (!modelInfo || !activeWorker) {
@@ -157,7 +159,8 @@ function ZeroShotClassification() {
           disabled={busy}
           onClick={classify}
         >
-          {hasBeenLoaded ? !busy
+          {hasBeenLoaded
+            ? !busy
               ? 'Categorize'
               : 'Processing...'
             : 'Load model first'}
