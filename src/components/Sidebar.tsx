@@ -3,6 +3,7 @@ import PipelineSelector from './PipelineSelector'
 import ModelSelector from './ModelSelector'
 import ModelInfo from './ModelInfo'
 import { useModel } from '../contexts/ModelContext'
+import TextGenerationConfig from './TextGenerationConfig'
 
 interface SidebarProps {
   isOpen: boolean
@@ -73,6 +74,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             </div>
 
             <hr className="border-gray-200" />
+            {pipeline === 'text-generation' && <TextGenerationConfig />}
           </div>
         </div>
       </div>
