@@ -72,7 +72,7 @@ type q8 = (typeof q8Types)[number]
 type q4 = (typeof q4Types)[number]
 type fp16 = (typeof fp16Types)[number]
 type fp32 = (typeof fp32Types)[number]
- 
+
 export type QuantizationType = q8 | q4 | fp16 | fp32
 export const allQuantizationTypes = [
   ...q8Types,
@@ -95,6 +95,7 @@ export interface ModelInfo {
   baseId?: string
   readme?: string
   hasChatTemplate: boolean
+  widgetData?: any
 }
 
 export interface ModelInfoResponse {
@@ -130,6 +131,7 @@ export interface ModelInfoResponse {
   siblings?: {
     rfilename: string
   }[]
+  widgetData?: any
   modelId?: string
   isCompatible: boolean
   incompatibilityReason?: string

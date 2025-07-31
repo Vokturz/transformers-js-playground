@@ -1,7 +1,5 @@
-import { useState, useCallback } from 'react'
-import {
-  TextClassificationWorkerInput,
-} from '../types'
+import { useState, useCallback, useEffect } from 'react'
+import { TextClassificationWorkerInput } from '../types'
 import { useModel } from '../contexts/ModelContext'
 
 const PLACEHOLDER_TEXTS: string[] = [
@@ -19,7 +17,29 @@ const PLACEHOLDER_TEXTS: string[] = [
 
 function TextClassification() {
   const [text, setText] = useState<string>(PLACEHOLDER_TEXTS.join('\n'))
-  const { activeWorker, status, modelInfo, results, setResults, hasBeenLoaded, selectedQuantization} = useModel()
+  const [numberExamples, setNumberExamples] = useState(PLACEHOLDER_TEXTS.length)
+  const {
+    activeWorker,
+    status,
+    modelInfo,
+    results,
+    setResults,
+    hasBeenLoaded,
+    selectedQuantization
+  } = useModel()
+
+  useEffect(() => {
+    if (modelInfo?.widgetData) {
+      const examples = modelInfo.widgetData.map((e: any) => e.text)
+      if (examples.length > 0) {
+        setText(examples.join('\n'))
+      }
+    }
+  }, [modelInfo])
+
+  useEffect(() => {
+    setNumberExamples(text.split('\n').length)
+  }, [text])
 
   const classify = useCallback(() => {
     if (!modelInfo || !activeWorker) {
@@ -44,13 +64,17 @@ function TextClassification() {
 
   return (
     <div className="flex flex-col h-[60vh] max-h-[100vh] w-full p-4">
-      <h1 className="text-2xl font-bold mb-4 flex-shrink-0">Text Classification</h1>
+      <h1 className="text-2xl font-bold mb-4 flex-shrink-0">
+        Text Classification
+      </h1>
 
       <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
         {/* Input Section */}
         <div className="flex flex-col w-full lg:w-1/2 min-h-0">
-          <label className="text-lg font-medium mb-2 flex-shrink-0">Input Text:</label>
-          
+          <label className="text-lg font-medium mb-2 flex-shrink-0">
+            Input Text ({numberExamples} examples):
+          </label>
+
           <div className="flex flex-col flex-1 min-h-0">
             <textarea
               className="border border-gray-300 rounded p-3 flex-1 resize-none min-h-[200px]"
@@ -65,7 +89,8 @@ function TextClassification() {
                 disabled={busy}
                 onClick={classify}
               >
-                {hasBeenLoaded ? !busy
+                {hasBeenLoaded
+                  ? !busy
                     ? 'Classify Text'
                     : 'Processing...'
                   : 'Load model first'}

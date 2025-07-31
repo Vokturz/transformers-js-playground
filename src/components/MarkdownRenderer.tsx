@@ -26,7 +26,7 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
               style={oneLight}
               language={match[1]}
               PreTag="div"
-              className="rounded-md my-4 border border-r-2"
+              className="rounded-md my-4 border border-r-2 text-sm"
               {...props}
             >
               {String(children).replace(/\n$/, '')}

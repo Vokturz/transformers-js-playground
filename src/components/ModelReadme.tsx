@@ -1,5 +1,6 @@
-import { FileText, ChevronDown } from 'lucide-react'
-import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
+import { ExternalLink, FileText } from 'lucide-react'
+import { useState } from 'react'
+import Modal from './Modal'
 import MarkdownRenderer from './MarkdownRenderer'
 
 interface ModelReadmeProps {
@@ -8,30 +9,46 @@ interface ModelReadmeProps {
   modelName: string
 }
 
-const ModelReadme = ({ readme, pipeline, modelName}: ModelReadmeProps) => {
+const ModelReadme = ({ readme, pipeline, modelName }: ModelReadmeProps) => {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const title = (
+    <div className="flex items-center space-x-2">
+      <a
+        className="truncate hover:underline"
+        href={`https://huggingface.co/${modelName}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <ExternalLink className="w-3 h-3 inline-block mr-1" />
+
+        {modelName}
+      </a>
+      <span className=" text-gray-500">README.md</span>
+    </div>
+  )
 
   return (
-    <div className="mt-2">
-      <Disclosure>
-        <DisclosureButton className="flex justify-between items-center w-full px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
-          <div className="flex items-center text-sm text-gray-600">
-            <FileText className="w-4 h-4 mr-2" />
-            README.md
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="text-xs text-gray-400">
-              <i>{pipeline}</i> • {modelName}
-            </div>
-            <ChevronDown className="w-4 h-4 text-gray-400 transition-transform ui-open:rotate-180" />
-          </div>
-        </DisclosureButton>
-        <DisclosurePanel className="px-4 py-5 bg-gray-50 rounded-b-lg border-l border-r border-b border-gray-200 max-h-[600px] overflow-y-auto">
-          <div className="text-sm text-gray-800">
-            <MarkdownRenderer content={readme} />
-          </div>
-        </DisclosurePanel>
-      </Disclosure>
-    </div>
+    <>
+      <button
+        onClick={() => setIsModalOpen(true)}
+        className="flex items-center w-full px-3 py-2 text-sm text-gray-600 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+      >
+        <FileText className="w-4 h-4 mr-2 flex-shrink-0" />
+        <span className="truncate">View README.md</span>
+      </button>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={title}
+        maxWidth="5xl"
+      >
+        <div className="text-sm max-w-none px-4">
+          <MarkdownRenderer content={readme} />
+        </div>
+      </Modal>
+    </>
   )
 }
 

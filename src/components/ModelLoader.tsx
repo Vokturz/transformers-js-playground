@@ -46,8 +46,6 @@ const ModelLoader = () => {
     setHasBeenLoaded(false)
   }, [modelInfo, setSelectedQuantization, setHasBeenLoaded])
 
-
-
   useEffect(() => {
     if (!modelInfo) return
 
@@ -60,7 +58,6 @@ const ModelLoader = () => {
       setStatus('initiate')
       setActiveWorker(newWorker)
     }
-
 
     const onMessageReceived = (e: MessageEvent<WorkerMessage>) => {
       const { status, output } = e.data
@@ -81,7 +78,7 @@ const ModelLoader = () => {
         setStatus('output')
         const result = e.data.output!
         setResults((prev: any[]) => [...prev, result])
-        
+
         // console.log(result)
       } else if (status === 'error') {
         setStatus('error')
@@ -130,9 +127,7 @@ const ModelLoader = () => {
         <div className="flex items-center space-x-2">
           {modelInfo.supportedQuantizations.length > 1 ? (
             <>
-              <span className="text-xs text-gray-600 font-medium">
-                Quantization:
-              </span>
+              <span className="text-xs text-gray-600 font-medium">Quant:</span>
 
               <div className="relative">
                 <select

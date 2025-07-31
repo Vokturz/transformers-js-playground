@@ -19,6 +19,7 @@ import {
   Search,
   X
 } from 'lucide-react'
+import Tooltip from './Tooltip'
 
 type SortOption = 'likes' | 'downloads' | 'createdAt' | 'name'
 
@@ -110,7 +111,8 @@ function ModelSelector() {
           readme: modelInfoResponse.readme,
           hasChatTemplate: Boolean(
             modelInfoResponse.config?.tokenizer_config?.chat_template
-          )
+          ),
+          widgetData: modelInfoResponse.widgetData
         }
         setModelInfo(modelInfo)
         setIsCustomModel(isCustom)
@@ -280,9 +282,11 @@ function ModelSelector() {
           <ListboxButton className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-left flex items-center justify-between">
             <div className="flex items-center justify-between w-full">
               <div className="flex flex-col flex-1 min-w-0">
-                <span className="truncate font-medium">
-                  {modelInfo?.id || 'Select a model'}
-                </span>
+                <Tooltip content={modelInfo?.id || 'Select a model'}>
+                  <span className="truncate font-medium block">
+                    {modelInfo?.id || 'Select a model'}
+                  </span>
+                </Tooltip>
               </div>
 
               <div className="flex items-center space-x-3">
@@ -449,45 +453,49 @@ function ModelSelector() {
                         key={model.id}
                         value={model}
                         className={({ active, selected }) =>
-                          `px-3 py-2 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+                          `px-3 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${
                             active ? 'bg-gray-50' : ''
                           } ${selected ? 'bg-blue-50' : ''}`
                         }
                       >
                         {({ selected }) => (
-                          <div className="relative flex items-center justify-between">
-                            <div className="flex items-center flex-1 w-5/12">
-                              <span className="text-sm font-medium truncate w-11/12 ">
-                                {model.id}
-                              </span>
-                            </div>
-                            {selected && (
-                              <Check className="mr-2 w-4 h-4 text-blue-600 ml-2 flex-shrink-0" />
-                            )}
-                            {/* Stats Display */}
-                            {hasStats && (
-                              <div className="flex items-center space-x-3 text-xs text-gray-500 flex-shrink-0">
-                                {model.likes > 0 && (
-                                  <div className="flex items-center space-x-1">
-                                    <Heart className="w-3 h-3 text-red-500" />
-                                    <span>{formatNumber(model.likes)}</span>
-                                  </div>
-                                )}
-
-                                {model.downloads > 0 && (
-                                  <div className="flex items-center space-x-1">
-                                    <Download className="w-3 h-3 text-green-500" />
-                                    <span>{formatNumber(model.downloads)}</span>
-                                  </div>
-                                )}
-
-                                {model.createdAt && (
-                                  <span className="text-xs text-gray-400">
-                                    {model.createdAt.split('T')[0]}
+                          <div className="relative flex items-start py-1">
+                            <div className="flex-1 min-w-0 pr-3">
+                              <div className="flex items-center justify-between">
+                                <Tooltip content={model.id}>
+                                  <span className="text-sm font-medium truncate block max-w-full">
+                                    {model.id}
                                   </span>
+                                </Tooltip>
+                                {selected && (
+                                  <Check className="w-4 h-4 text-blue-600 ml-2 flex-shrink-0" />
                                 )}
                               </div>
-                            )}
+                              {/* Stats Display */}
+                              {hasStats && (
+                                <div className="flex items-center space-x-3 text-xs text-gray-500 mt-1">
+                                  {model.likes > 0 && (
+                                    <div className="flex items-center space-x-1">
+                                      <Heart className="w-3 h-3 text-red-500" />
+                                      <span>{formatNumber(model.likes)}</span>
+                                    </div>
+                                  )}
+                                  {model.downloads > 0 && (
+                                    <div className="flex items-center space-x-1">
+                                      <Download className="w-3 h-3 text-green-500" />
+                                      <span>
+                                        {formatNumber(model.downloads)}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {model.createdAt && (
+                                    <span className="text-xs text-gray-400">
+                                      {model.createdAt.split('T')[0]}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         )}
                       </ListboxOption>

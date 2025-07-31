@@ -5,6 +5,7 @@
   "dependencies": {
     "@headlessui/react": "^2.2.4",
     "@huggingface/transformers": "^3.6.1",
+    "@tailwindcss/typography": "^0.5.16",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
