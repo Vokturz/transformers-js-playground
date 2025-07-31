@@ -6,6 +6,7 @@ import Header from './Header'
 import { useModel } from './contexts/ModelContext'
 import { getModelsByPipeline } from './lib/huggingface'
 import TextGeneration from './components/TextGeneration'
+import FeatureExtraction from './components/FeatureExtraction'
 import Sidebar from './components/Sidebar'
 import ModelReadme from './components/ModelReadme'
 import { PipelineLayout } from './components/PipelineLayout'
@@ -70,6 +71,7 @@ function App() {
                 )}
                 {pipeline === 'text-classification' && <TextClassification />}
                 {pipeline === 'text-generation' && <TextGeneration />}
+                {pipeline === 'feature-extraction' && <FeatureExtraction />}
               </div>
             </div>
           </main>

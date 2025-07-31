@@ -14,6 +14,9 @@ export const getWorker = (pipeline: string) => {
       case 'text-generation':
         workerUrl = `${process.env.PUBLIC_URL}/workers/text-generation.js`
         break
+      case 'feature-extraction':
+        workerUrl = `${process.env.PUBLIC_URL}/workers/feature-extraction.js`
+        break
       default:
         return null
     }

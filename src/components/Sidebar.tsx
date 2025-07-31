@@ -4,6 +4,7 @@ import ModelSelector from './ModelSelector'
 import ModelInfo from './ModelInfo'
 import { useModel } from '../contexts/ModelContext'
 import TextGenerationConfig from './TextGenerationConfig'
+import FeatureExtractionConfig from './FeatureExtractionConfig'
 
 interface SidebarProps {
   isOpen: boolean
@@ -75,6 +76,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
             <hr className="border-gray-200" />
             {pipeline === 'text-generation' && <TextGenerationConfig />}
+            {pipeline === 'feature-extraction' && <FeatureExtractionConfig />}
           </div>
         </div>
       </div>

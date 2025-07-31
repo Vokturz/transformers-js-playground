@@ -24,6 +24,7 @@ export type WorkerStatus =
   | 'ready'
   | 'output'
   | 'loading'
+  | 'progress'
   | 'error'
   | 'disposed'
 
@@ -61,6 +62,29 @@ export interface TextGenerationWorkerInput {
   top_k?: number
   do_sample?: boolean
   dtype: QuantizationType
+}
+
+export interface FeatureExtractionWorkerInput {
+  type: 'extract' | 'load'
+  texts?: string[]
+  model: string
+  dtype: QuantizationType
+  config: {
+    pooling: 'mean' | 'cls' | 'max'
+    normalize: boolean
+  }
+}
+
+export interface EmbeddingExample {
+  id: string
+  text: string
+  embedding?: number[]
+  isLoading?: boolean
+}
+
+export interface SimilarityResult {
+  exampleId: string
+  similarity: number
 }
 
 const q8Types = ['q8', 'int8', 'bnb8', 'uint8'] as const
