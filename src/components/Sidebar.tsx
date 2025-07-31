@@ -5,6 +5,7 @@ import ModelInfo from './ModelInfo'
 import { useModel } from '../contexts/ModelContext'
 import TextGenerationConfig from './TextGenerationConfig'
 import FeatureExtractionConfig from './FeatureExtractionConfig'
+import ZeroShotClassificationConfig from './ZeroShotClassificationConfig'
 
 interface SidebarProps {
   isOpen: boolean
@@ -77,6 +78,9 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             <hr className="border-gray-200" />
             {pipeline === 'text-generation' && <TextGenerationConfig />}
             {pipeline === 'feature-extraction' && <FeatureExtractionConfig />}
+            {pipeline === 'zero-shot-classification' && (
+              <ZeroShotClassificationConfig />
+            )}
           </div>
         </div>
       </div>

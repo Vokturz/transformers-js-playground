@@ -1,6 +1,7 @@
 import { useModel } from '../contexts/ModelContext'
 import { TextGenerationProvider } from '../contexts/TextGenerationContext'
 import { FeatureExtractionProvider } from '../contexts/FeatureExtractionContext'
+import { ZeroShotClassificationProvider } from '../contexts/ZeroShotClassificationContext'
 
 export const PipelineLayout = ({ children }: { children: React.ReactNode }) => {
   const { pipeline } = useModel()
@@ -12,8 +13,12 @@ export const PipelineLayout = ({ children }: { children: React.ReactNode }) => {
     case 'feature-extraction':
       return <FeatureExtractionProvider>{children}</FeatureExtractionProvider>
 
-    // case 'zero-shot-classification':
-    //   return <ZeroShotProvider>{children}</ZeroShotProvider>;
+    case 'zero-shot-classification':
+      return (
+        <ZeroShotClassificationProvider>
+          {children}
+        </ZeroShotClassificationProvider>
+      )
 
     default:
       return <>{children}</>

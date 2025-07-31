@@ -1,48 +1,12 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Section, WorkerMessage, ZeroShotWorkerInput } from '../types'
+import { useEffect, useCallback } from 'react'
+import { WorkerMessage, ZeroShotWorkerInput } from '../types'
 import { useModel } from '../contexts/ModelContext'
-
-const PLACEHOLDER_REVIEWS: string[] = [
-  // battery/charging problems
-  'Disappointed with the battery life! The phone barely lasts half a day with regular use. Considering how much I paid for it, I expected better performance in this department.',
-  "I bought this phone a week ago, and I'm already frustrated with the battery life. It barely lasts half a day with normal usage. I expected more from a supposedly high-end device",
-  "The charging port is so finicky. Sometimes it takes forever to charge, and other times it doesn't even recognize the charger. Frustrating experience!",
-
-  // overheating
-  "This phone heats up way too quickly, especially when using demanding apps. It's uncomfortable to hold, and I'm concerned it might damage the internal components over time. Not what I expected",
-  "This phone is like holding a hot potato. Video calls turn it into a scalding nightmare. Seriously, can't it keep its cool?",
-  "Forget about a heatwave outside; my phone's got its own. It's like a little portable heater. Not what I signed up for.",
-
-  // poor build quality
-  'I dropped the phone from a short distance, and the screen cracked easily. Not as durable as I expected from a flagship device.',
-  'Took a slight bump in my bag, and the frame got dinged. Are we back in the flip phone era?',
-  "So, my phone's been in my pocket with just keys – no ninja moves or anything. Still, it managed to get some scratches. Disappointed with the build quality.",
-
-  // software
-  'The software updates are a nightmare. Each update seems to introduce new bugs, and it takes forever for them to be fixed.',
-  'Constant crashes and freezes make me want to throw it into a black hole.',
-  "Every time I open Instagram, my phone freezes and crashes. It's so frustrating!",
-
-  // other
-  "I'm not sure what to make of this phone. It's not bad, but it's not great either. I'm on the fence about it.",
-  "I hate the color of this phone. It's so ugly!",
-  "This phone sucks! I'm returning it."
-].sort(() => Math.random() - 0.5)
-
-const PLACEHOLDER_SECTIONS: string[] = [
-  'Battery and charging problems',
-  'Overheating',
-  'Poor build quality',
-  'Software issues',
-  'Other'
-]
+import { useZeroShotClassification } from '../contexts/ZeroShotClassificationContext'
+import { Send, Loader2 } from 'lucide-react'
 
 function ZeroShotClassification() {
-  const [text, setText] = useState<string>(PLACEHOLDER_REVIEWS.join('\n'))
-
-  const [sections, setSections] = useState<Section[]>(
-    PLACEHOLDER_SECTIONS.map((title) => ({ title, items: [] }))
-  )
+  const { text, setText, sections, setSections, config } =
+    useZeroShotClassification()
 
   const {
     activeWorker,
@@ -76,7 +40,14 @@ function ZeroShotClassification() {
       dtype: selectedQuantization ?? 'fp32'
     }
     activeWorker.postMessage(message)
-  }, [text, sections, modelInfo, activeWorker, selectedQuantization])
+  }, [
+    text,
+    sections,
+    modelInfo,
+    activeWorker,
+    selectedQuantization,
+    setSections
+  ])
 
   // Handle worker messages
   useEffect(() => {
@@ -88,7 +59,7 @@ function ZeroShotClassification() {
         const { sequence, labels, scores } = e.data.output!
 
         // Threshold for classification
-        const label = scores[0] > 0.5 ? labels[0] : 'Other'
+        const label = scores[0] > config.threshold ? labels[0] : 'Other'
 
         const sectionID =
           sections.map((x) => x.title).indexOf(label) ?? sections.length - 1
@@ -105,111 +76,98 @@ function ZeroShotClassification() {
 
     activeWorker.addEventListener('message', onMessageReceived)
     return () => activeWorker.removeEventListener('message', onMessageReceived)
-  }, [sections, activeWorker])
+  }, [sections, activeWorker, config.threshold, setSections])
 
   const busy: boolean = status !== 'ready'
 
-  const handleAddCategory = (): void => {
-    setSections((sections) => {
-      const newSections = [...sections]
-      // add at position 2 from the end
-      newSections.splice(newSections.length - 1, 0, {
-        title: 'New Category',
-        items: []
-      })
-      return newSections
-    })
-  }
-
-  const handleRemoveCategory = (): void => {
-    setSections((sections) => {
-      const newSections = [...sections]
-      newSections.splice(newSections.length - 2, 1) // Remove second last element
-      return newSections
-    })
-  }
-
-  const handleClear = (): void => {
-    setSections((sections) =>
-      sections.map((section) => ({
-        ...section,
-        items: []
-      }))
-    )
-  }
-
-  const handleSectionTitleChange = (index: number, newTitle: string): void => {
-    setSections((sections) => {
-      const newSections = [...sections]
-      newSections[index].title = newTitle
-      return newSections
-    })
-  }
-
   return (
-    <div className="flex flex-col h-screen w-full p-1">
-      <textarea
-        className="border w-full p-1 h-1/2"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-      ></textarea>
-      <div className="flex flex-col justify-center items-center m-2 gap-1">
-        <button
-          className="border py-1 px-2 bg-blue-400 rounded text-white text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          disabled={busy}
-          onClick={classify}
-        >
-          {hasBeenLoaded
-            ? !busy
-              ? 'Categorize'
-              : 'Processing...'
-            : 'Load model first'}
-        </button>
-        <div className="flex gap-1">
+    <div className="flex flex-col h-[70vh] max-h-[100vh] w-full p-4">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold">Zero-Shot Classification</h1>
+      </div>
+
+      {/* Input Text Area */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Text to classify (one item per line):
+        </label>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Enter text items to classify, one per line..."
+          className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+          rows={8}
+          disabled={!hasBeenLoaded || busy}
+        />
+      </div>
+
+      {/* Classify Button */}
+      <div className="mb-4">
+        {hasBeenLoaded && (
           <button
-            className="border py-1 px-2 bg-green-400 rounded text-white text-sm font-medium cursor-pointer"
-            onClick={handleAddCategory}
+            onClick={classify}
+            disabled={!text.trim() || busy || !hasBeenLoaded}
+            className="px-6 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center gap-2"
           >
-            Add category
+            {busy ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <Send className="w-4 h-4" />
+                Categorize
+              </>
+            )}
           </button>
-          <button
-            className="border py-1 px-2 bg-red-400 rounded text-white text-sm font-medium cursor-pointer"
-            disabled={sections.length <= 1}
-            onClick={handleRemoveCategory}
-          >
-            Remove category
-          </button>
-          <button
-            className="border py-1 px-2 bg-orange-400 rounded text-white text-sm font-medium cursor-pointer"
-            onClick={handleClear}
-          >
-            Clear
-          </button>
+        )}
+      </div>
+
+      {/* Results Grid */}
+      <div className="flex-1 overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 h-full">
+          {sections.map((section, index) => (
+            <div
+              key={index}
+              className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden"
+            >
+              <div className="px-3 py-2 bg-gray-50 border-b border-gray-200">
+                <h3
+                  className="font-medium text-gray-900 text-center truncate"
+                  title={section.title}
+                >
+                  {section.title}
+                </h3>
+                <div className="text-xs text-gray-500 text-center">
+                  {section.items.length} items
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                {section.items.map((item, itemIndex) => (
+                  <div
+                    key={itemIndex}
+                    className="p-2 bg-blue-50 border border-blue-200 rounded text-sm"
+                  >
+                    {item}
+                  </div>
+                ))}
+                {section.items.length === 0 && (
+                  <div className="text-gray-400 text-sm italic text-center py-4">
+                    No items classified here yet
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      <div className="flex justify-between flex-grow overflow-x-auto max-h-[40%]">
-        {sections.map((section, index) => (
-          <div key={index} className="flex flex-col w-full">
-            <input
-              disabled={section.title === 'Other'}
-              className="w-full border px-1 text-center"
-              value={section.title}
-              onChange={(e) => handleSectionTitleChange(index, e.target.value)}
-            ></input>
-            <div className="overflow-y-auto h-full border">
-              {section.items.map((item, itemIndex) => (
-                <div
-                  className="m-2 border bg-red-50 rounded p-1 text-sm"
-                  key={itemIndex}
-                >
-                  {item}
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+      {!hasBeenLoaded && (
+        <div className="text-center text-gray-500 text-sm mt-2">
+          Please load a model first to start classifying text
+        </div>
+      )}
     </div>
   )
 }

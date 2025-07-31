@@ -18,13 +18,12 @@ function TextGenerationConfig() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <h3 className="text-lg font-semibold text-gray-900">
         Text Generation Settings
       </h3>
 
-      {/* Generation Parameters */}
-      <div className="space-y-4 px-10">
+      <div className="space-y-3">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Temperature: {config.temperature}
@@ -40,6 +39,10 @@ function TextGenerationConfig() {
             }
             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
           />
+          <p className="text-xs text-gray-500 mt-1">
+            Controls randomness in generation (lower = more focused, higher =
+            more creative)
+          </p>
         </div>
 
         <div>
@@ -57,6 +60,9 @@ function TextGenerationConfig() {
             }
             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
           />
+          <p className="text-xs text-gray-500 mt-1">
+            Maximum number of tokens to generate in the response
+          </p>
         </div>
 
         <div>
@@ -74,6 +80,10 @@ function TextGenerationConfig() {
             }
             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
           />
+          <p className="text-xs text-gray-500 mt-1">
+            Nucleus sampling - considers tokens with cumulative probability up
+            to this value
+          </p>
         </div>
 
         <div>
@@ -91,9 +101,12 @@ function TextGenerationConfig() {
             }
             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
           />
+          <p className="text-xs text-gray-500 mt-1">
+            Only consider the top K most likely tokens at each step
+          </p>
         </div>
 
-        <div className="flex items-center pt-2">
+        <div className="flex items-center">
           <Switch
             checked={config.doSample}
             onChange={(checked) => handleConfigChange('doSample', checked)}
@@ -109,21 +122,47 @@ function TextGenerationConfig() {
             Do Sample
           </label>
         </div>
+        <p className="text-xs text-gray-500 mt-1">
+          Enable sampling-based generation (disable for deterministic output)
+        </p>
+
+        {/* System Message for Chat */}
+        {modelInfo?.hasChatTemplate && (
+          <div className="pt-2 border-t border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-800 mb-2">
+              System Message
+            </h4>
+            <textarea
+              value={messages.find((m) => m.role === 'system')?.content || ''}
+              onChange={(e) => updateSystemMessage(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              rows={4}
+              placeholder="e.g., You are a helpful assistant."
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Initial instructions that guide the model's behavior throughout
+              the conversation
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* System Message for Chat */}
-      {modelInfo?.hasChatTemplate && (
-        <div>
-          <h4 className="font-semibold text-gray-800 mb-2">System Message</h4>
-          <textarea
-            value={messages.find((m) => m.role === 'system')?.content || ''}
-            onChange={(e) => updateSystemMessage(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md text-sm"
-            rows={4}
-            placeholder="e.g., You are a helpful assistant."
-          />
+      <div className="pt-2 border-t border-gray-200">
+        <div className="text-xs text-gray-500">
+          <p className="mb-1">
+            <strong>Temperature:</strong> Higher values make output more random,
+            lower values more focused
+          </p>
+          <p className="mb-1">
+            <strong>Top-p & Top-k:</strong> Control which tokens are considered
+            during generation
+          </p>
+          <p>
+            <strong>Sampling:</strong> When disabled, always picks the most
+            likely next token (greedy decoding)
+          </p>
         </div>
-      )}
+      </div>
     </div>
   )
 }

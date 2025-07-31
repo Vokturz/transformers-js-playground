@@ -114,6 +114,7 @@ function ModelSelector() {
           ),
           widgetData: modelInfoResponse.widgetData
         }
+        console.log(modelInfo)
         setModelInfo(modelInfo)
         setIsCustomModel(isCustom)
         setIsFetching(false)
