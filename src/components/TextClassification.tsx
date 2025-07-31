@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { TextClassificationWorkerInput } from '../types'
+import { TextClassificationWorkerInput, WorkerMessage } from '../types'
 import { useModel } from '../contexts/ModelContext'
 
 const PLACEHOLDER_TEXTS: string[] = [
@@ -18,12 +18,12 @@ const PLACEHOLDER_TEXTS: string[] = [
 function TextClassification() {
   const [text, setText] = useState<string>(PLACEHOLDER_TEXTS.join('\n'))
   const [numberExamples, setNumberExamples] = useState(PLACEHOLDER_TEXTS.length)
+  const [results, setResults] = useState<any[]>([])
   const {
     activeWorker,
     status,
+    setStatus,
     modelInfo,
-    results,
-    setResults,
     hasBeenLoaded,
     selectedQuantization
   } = useModel()
@@ -55,6 +55,23 @@ function TextClassification() {
     }
     activeWorker.postMessage(message)
   }, [text, modelInfo, activeWorker, selectedQuantization, setResults])
+
+  // Handle worker messages
+  useEffect(() => {
+    if (!activeWorker) return
+
+    const onMessageReceived = (e: MessageEvent<WorkerMessage>) => {
+      const status = e.data.status
+      if (status === 'output') {
+        setStatus('output')
+        const result = e.data.output!
+        setResults((prev: any[]) => [...prev, result])
+      }
+    }
+
+    activeWorker.addEventListener('message', onMessageReceived)
+    return () => activeWorker.removeEventListener('message', onMessageReceived)
+  }, [activeWorker, setStatus])
 
   const busy: boolean = status !== 'ready'
 

@@ -16,7 +16,6 @@ const ModelLoader = () => {
     activeWorker,
     setActiveWorker,
     pipeline,
-    setResults,
     hasBeenLoaded,
     setHasBeenLoaded
   } = useModel()
@@ -74,12 +73,6 @@ const ModelLoader = () => {
         ) {
           setProgress(output.progress)
         }
-      } else if (status === 'output') {
-        setStatus('output')
-        const result = e.data.output!
-        setResults((prev: any[]) => [...prev, result])
-
-        // console.log(result)
       } else if (status === 'error') {
         setStatus('error')
         console.error(e.data.output)
@@ -99,7 +92,6 @@ const ModelLoader = () => {
     setActiveWorker,
     setStatus,
     setProgress,
-    setResults,
     hasBeenLoaded,
     setHasBeenLoaded
   ])

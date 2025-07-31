@@ -1,9 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState
-} from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 import {
   ModelInfo,
   ModelInfoResponse,
@@ -28,8 +23,6 @@ interface ModelContextType {
   setActiveWorker: (worker: Worker | null) => void
   isFetching: boolean
   setIsFetching: (isFetching: boolean) => void
-  results: any[]
-  setResults: React.Dispatch<React.SetStateAction<any[]>>
   hasBeenLoaded: boolean
   setHasBeenLoaded: (hasBeenLoaded: boolean) => void
 }
@@ -48,9 +41,7 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
     useState<QuantizationType>('int8')
   const [activeWorker, setActiveWorker] = useState<Worker | null>(null)
   const [isFetching, setIsFetching] = useState(false)
-  const [results, setResults] = useState<any[]>([])
   const [hasBeenLoaded, setHasBeenLoaded] = useState(false)
-
 
   // set progress to 0 when model is changed
   useEffect(() => {
@@ -76,8 +67,6 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
         setActiveWorker,
         isFetching,
         setIsFetching,
-        results,
-        setResults,
         hasBeenLoaded,
         setHasBeenLoaded
       }}
