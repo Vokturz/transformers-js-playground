@@ -22,7 +22,7 @@ const Sidebar = ({ isOpen, onClose, setIsModalOpen }: SidebarProps) => {
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black opacity-50 z-40 lg:hidden"
           onClick={onClose}
         />
       )}
@@ -79,7 +79,7 @@ const Sidebar = ({ isOpen, onClose, setIsModalOpen }: SidebarProps) => {
               <div className="mt-4 w-42">
                 <button
                   onClick={() => setIsModalOpen(true)}
-                  className="flex items-center w-full px-3 py-2 text-sm text-gray-600 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+                  className="flex items-center w-44 px-3 py-2 text-sm text-gray-600 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
                 >
                   <FileText className="w-4 h-4 mr-2 shrink-0" />
                   <span className="truncate">View README.md</span>

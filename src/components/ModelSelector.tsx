@@ -332,7 +332,7 @@ function ModelSelector() {
                         value={customModelName}
                         onChange={(e) => setCustomModelName(e.target.value)}
                         onKeyDown={handleCustomInputKeyPress}
-                        placeholder="Enter model name (e.g., Qwen/Qwen3-0.6B)"
+                        placeholder="onnx-community/Qwen3-0.6B-ONNX"
                         className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-sm focus:outline-hidden focus:ring-1 focus:ring-blue-500"
                         autoFocus
                       />
