@@ -75,6 +75,28 @@ export interface FeatureExtractionWorkerInput {
   }
 }
 
+export interface ImageClassificationWorkerInput {
+  type: 'classify'
+  image: string | ImageData | HTMLImageElement | HTMLCanvasElement
+  model: string
+  dtype: QuantizationType
+  topK?: number
+}
+
+export interface ImageClassificationResult {
+  label: string
+  score: number
+}
+
+export interface ImageExample {
+  id: string
+  name: string
+  url: string
+  file?: File
+  predictions?: ImageClassificationResult[]
+  isLoading?: boolean
+}
+
 export interface EmbeddingExample {
   id: string
   text: string

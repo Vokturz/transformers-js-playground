@@ -34,9 +34,9 @@ const getModelInfo = async (
   const modelData: ModelInfoResponse = await response.json()
 
   const requiredFiles = [
-    'config.json',
-    'tokenizer.json',
-    'tokenizer_config.json'
+    'config.json'
+    // 'tokenizer.json',
+    // 'tokenizer_config.json'
   ]
 
   const siblingFiles = modelData.siblings?.map((s) => s.rfilename) || []

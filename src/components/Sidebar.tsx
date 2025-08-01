@@ -6,6 +6,7 @@ import { useModel } from '../contexts/ModelContext'
 import TextGenerationConfig from './pipelines/TextGenerationConfig'
 import FeatureExtractionConfig from './pipelines/FeatureExtractionConfig'
 import ZeroShotClassificationConfig from './pipelines/ZeroShotClassificationConfig'
+import ImageClassificationConfig from './pipelines/ImageClassificationConfig'
 
 interface SidebarProps {
   isOpen: boolean
@@ -91,6 +92,9 @@ const Sidebar = ({ isOpen, onClose, setIsModalOpen }: SidebarProps) => {
             {pipeline === 'feature-extraction' && <FeatureExtractionConfig />}
             {pipeline === 'zero-shot-classification' && (
               <ZeroShotClassificationConfig />
+            )}
+            {pipeline === 'image-classification' && (
+              <ImageClassificationConfig />
             )}
           </div>
         </div>
