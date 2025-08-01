@@ -305,7 +305,7 @@ function ImageClassification() {
                     >
                       <div className="flex gap-3">
                         {showPreviews && (
-                          <div className="flex-shrink-0">
+                          <div className="shrink-0">
                             <img
                               src={example.url}
                               alt={example.name}

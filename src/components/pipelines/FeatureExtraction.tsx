@@ -273,7 +273,7 @@ function FeatureExtraction() {
                 onChange={(e) => setNewExampleText(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Enter text to get embeddings... (Press Enter to add)"
-                className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 rows={2}
                 disabled={!hasBeenLoaded || isExtracting}
               />

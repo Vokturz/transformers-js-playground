@@ -135,7 +135,7 @@ function TextGenerationConfig() {
             <textarea
               value={messages.find((m) => m.role === 'system')?.content || ''}
               onChange={(e) => updateSystemMessage(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 rounded-md text-sm focus:outline-hidden focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               rows={4}
               placeholder="e.g., You are a helpful assistant."
             />

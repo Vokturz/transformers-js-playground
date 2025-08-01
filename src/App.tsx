@@ -48,7 +48,7 @@ function App() {
               <div className="absolute right-0 top-16 lg:hidden mb-4">
                 <button
                   onClick={() => setIsSidebarOpen(true)}
-                  className="items-center px-2 py-2 bg-white border border-gray-300 rounded-l-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  className="flex items-center px-2 py-2 bg-white border border-gray-300 rounded-l-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >
                   <Settings className="w-5 h-5" />
                 </button>

@@ -227,7 +227,7 @@ function TextGeneration() {
               onChange={(e) => setCurrentMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
-              className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               rows={2}
               disabled={!hasBeenLoaded || isGenerating}
             />
@@ -255,7 +255,7 @@ function TextGeneration() {
               onChange={(e) => setPrompt(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Enter your text prompt here... (Press Enter to generate, Shift+Enter for new line)"
-              className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               rows={4}
               disabled={!hasBeenLoaded || isGenerating}
             />
@@ -286,7 +286,7 @@ function TextGeneration() {
               </label>
             </div>
             {generatedText ? (
-              <div className="whitespace-pre-wrap text-gray-800 bg-gray-50 p-3 rounded border">
+              <div className="whitespace-pre-wrap text-gray-800 bg-gray-50 p-3 rounded-sm border">
                 {generatedText}
               </div>
             ) : (

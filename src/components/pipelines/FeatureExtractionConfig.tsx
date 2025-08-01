@@ -23,7 +23,7 @@ const FeatureExtractionConfig = () => {
                 pooling: e.target.value as 'mean' | 'cls' | 'max'
               }))
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
           >
             <option value="mean">Mean Pooling</option>
             <option value="cls">CLS Token</option>
@@ -45,7 +45,7 @@ const FeatureExtractionConfig = () => {
                   normalize: e.target.checked
                 }))
               }
-              className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+              className="rounded border-gray-300 text-blue-600 shadow-xs focus:border-blue-300 focus:ring-3 focus:ring-blue-200 focus:ring-opacity-50"
             />
             <span className="text-sm font-medium text-gray-700">
               Normalize Embeddings

@@ -57,9 +57,9 @@ const ZeroShotClassificationConfig = () => {
                   value={section.title}
                   onChange={(e) => updateSectionTitle(index, e.target.value)}
                   disabled={section.title === 'Other'}
-                  className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded-sm focus:outline-hidden focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 />
-                <span className="text-xs text-gray-500 min-w-[2rem]">
+                <span className="text-xs text-gray-500 min-w-8">
                   ({section.items.length})
                 </span>
               </div>
@@ -69,7 +69,7 @@ const ZeroShotClassificationConfig = () => {
           <div className="flex gap-2 mt-3">
             <button
               onClick={addCategory}
-              className="flex items-center gap-1 px-3 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded transition-colors"
+              className="flex items-center gap-1 px-3 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded-sm transition-colors"
               title="Add Category"
             >
               <Plus className="w-3 h-3" />
@@ -78,7 +78,7 @@ const ZeroShotClassificationConfig = () => {
             <button
               onClick={removeCategory}
               disabled={sections.length <= 1}
-              className="flex items-center gap-1 px-3 py-1 text-xs bg-red-500 hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded transition-colors"
+              className="flex items-center gap-1 px-3 py-1 text-xs bg-red-500 hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-sm transition-colors"
               title="Remove Category"
             >
               <Minus className="w-3 h-3" />
@@ -86,7 +86,7 @@ const ZeroShotClassificationConfig = () => {
             </button>
             <button
               onClick={clearResults}
-              className="flex items-center gap-1 px-3 py-1 text-xs bg-orange-500 hover:bg-orange-600 text-white rounded transition-colors"
+              className="flex items-center gap-1 px-3 py-1 text-xs bg-orange-500 hover:bg-orange-600 text-white rounded-sm transition-colors"
               title="Clear Results"
             >
               <Trash2 className="w-3 h-3" />

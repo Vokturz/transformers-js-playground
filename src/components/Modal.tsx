@@ -78,7 +78,7 @@ const Modal: React.FC<ModalProps> = ({
             <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
             <button
               onClick={onClose}
-              className="rounded-md p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="rounded-md p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
               <span className="sr-only">Close</span>
               <X className="h-5 w-5" />

@@ -95,7 +95,7 @@ function ZeroShotClassification() {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Enter text items to classify, one per line..."
-          className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
           rows={12}
           disabled={!hasBeenLoaded || busy}
         />
@@ -147,7 +147,7 @@ function ZeroShotClassification() {
                 {section.items.map((item, itemIndex) => (
                   <div
                     key={itemIndex}
-                    className="p-2 bg-blue-50 border border-blue-200 rounded text-sm"
+                    className="p-2 bg-blue-50 border border-blue-200 rounded-sm text-sm"
                   >
                     {item}
                   </div>

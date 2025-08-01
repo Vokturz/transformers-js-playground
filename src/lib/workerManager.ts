@@ -6,19 +6,19 @@ export const getWorker = (pipeline: string) => {
 
     switch (pipeline) {
       case 'text-classification':
-        workerUrl = `${process.env.PUBLIC_URL}/workers/text-classification.js`
+        workerUrl = `/workers/text-classification.js`
         break
       case 'zero-shot-classification':
-        workerUrl = `${process.env.PUBLIC_URL}/workers/zero-shot-classification.js`
+        workerUrl = `/workers/zero-shot-classification.js`
         break
       case 'text-generation':
-        workerUrl = `${process.env.PUBLIC_URL}/workers/text-generation.js`
+        workerUrl = `/workers/text-generation.js`
         break
       case 'feature-extraction':
-        workerUrl = `${process.env.PUBLIC_URL}/workers/feature-extraction.js`
+        workerUrl = `/workers/feature-extraction.js`
         break
       case 'image-classification':
-        workerUrl = `${process.env.PUBLIC_URL}/workers/image-classification.js`
+        workerUrl = `/workers/image-classification.js`
         break
       default:
         return null

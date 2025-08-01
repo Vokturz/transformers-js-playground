@@ -252,21 +252,21 @@ function ModelSelector() {
       <div className="relative">
         <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white flex items-center justify-between animate-pulse h-10">
           <div className="flex flex-col flex-1 min-w-0 space-y-2">
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-200 rounded-sm w-3/4"></div>
           </div>
 
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-1">
                 <Heart className="w-3 h-3 text-red-500" />
-                <div className="h-3 bg-gray-200 rounded w-8"></div>
+                <div className="h-3 bg-gray-200 rounded-sm w-8"></div>
               </div>
               <div className="flex items-center space-x-1">
                 <Download className="w-3 h-3 text-green-500" />
-                <div className="h-3 bg-gray-200 rounded w-8"></div>
+                <div className="h-3 bg-gray-200 rounded-sm w-8"></div>
               </div>
             </div>
-            <div className="w-4 h-4 bg-gray-200 rounded"></div>
+            <div className="w-4 h-4 bg-gray-200 rounded-sm"></div>
           </div>
         </div>
       </div>
@@ -280,7 +280,7 @@ function ModelSelector() {
         onChange={(model) => handleModelSelect(model.id)}
       >
         <div className="relative">
-          <ListboxButton className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-left flex items-center justify-between">
+          <ListboxButton className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-left flex items-center justify-between">
             <div className="flex items-center justify-between w-full">
               <div className="flex flex-col flex-1 min-w-0">
                 <Tooltip content={modelInfo?.id || 'Select a model'}>
@@ -308,7 +308,7 @@ function ModelSelector() {
                       )}
                     </div>
                   )}
-                <ChevronDown className="w-4 h-4 ui-open:rotate-180 transition-transform flex-shrink-0" />
+                <ChevronDown className="w-4 h-4 ui-open:rotate-180 transition-transform shrink-0" />
               </div>
             </div>
           </ListboxButton>
@@ -321,7 +321,7 @@ function ModelSelector() {
             leaveFrom="transform scale-100 opacity-100"
             leaveTo="transform scale-95 opacity-0"
           >
-            <ListboxOptions className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-hidden focus:outline-none">
+            <ListboxOptions className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-hidden focus:outline-hidden">
               {/* Custom Model Input */}
               {showCustomInput ? (
                 <div className="px-3 py-3 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
@@ -333,13 +333,13 @@ function ModelSelector() {
                         onChange={(e) => setCustomModelName(e.target.value)}
                         onKeyDown={handleCustomInputKeyPress}
                         placeholder="Enter model name (e.g., Qwen/Qwen3-0.6B)"
-                        className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-sm focus:outline-hidden focus:ring-1 focus:ring-blue-500"
                         autoFocus
                       />
                       <button
                         onClick={handleCustomModelLoad}
                         disabled={isLoadingCustomModel}
-                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
                       >
                         {isLoadingCustomModel ? (
                           <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
@@ -373,7 +373,7 @@ function ModelSelector() {
                     {/* Load Custom Model Button */}
                     <button
                       onClick={() => setShowCustomInput(true)}
-                      className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                      className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-sm transition-colors"
                     >
                       <Plus className="w-4 h-4" />
                       <span>Load Custom Model</span>
@@ -469,7 +469,7 @@ function ModelSelector() {
                                   </span>
                                 </Tooltip>
                                 {selected && (
-                                  <Check className="w-4 h-4 text-blue-600 ml-2 flex-shrink-0" />
+                                  <Check className="w-4 h-4 text-blue-600 ml-2 shrink-0" />
                                 )}
                               </div>
                               {/* Stats Display */}

@@ -33,7 +33,7 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
             </SyntaxHighlighter>
           ) : (
             <code
-              className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono"
+              className="bg-gray-100 px-1 py-0.5 rounded-sm text-sm font-mono"
               {...props}
             >
               {children}

@@ -40,7 +40,7 @@ const PipelineSelector: React.FC<PipelineSelectorProps> = ({
     <div className="relative">
       <Listbox value={selectedPipeline} onChange={setPipeline}>
         <div className="relative">
-          <ListboxButton className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 text-sm xl:text-base border border-gray-300">
+          <ListboxButton className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left focus:outline-hidden focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 text-sm xl:text-base border border-gray-300">
             <span className="block truncate font-medium">
               {formatPipelineName(selectedPipeline)}
             </span>
@@ -60,7 +60,7 @@ const PipelineSelector: React.FC<PipelineSelectorProps> = ({
             leaveFrom="transform scale-100 opacity-100"
             leaveTo="transform scale-95 opacity-0"
           >
-            <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-sm xl:text-base ring-1 ring-black ring-opacity-5 focus:outline-none">
+            <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-sm xl:text-base ring-1 ring-black ring-opacity-5 focus:outline-hidden">
               {supportedPipelines.map((p) => (
                 <ListboxOption
                   key={p}

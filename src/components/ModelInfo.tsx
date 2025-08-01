@@ -28,37 +28,37 @@ const ModelInfo = () => {
   const { models, modelInfo, selectedQuantization, isFetching } = useModel()
 
   const ModelInfoSkeleton = () => (
-    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-3 py-3 rounded-lg border border-blue-200 space-y-3 animate-pulse w-4/5">
+    <div className="bg-linear-to-r from-blue-50 to-indigo-50 px-3 py-3 rounded-lg border border-blue-200 space-y-3 animate-pulse w-4/5">
       <div className="flex items-center space-x-2">
         <Bot className="w-4 h-4 text-blue-300" />
-        <div className="h-4 bg-gray-300 rounded flex-1"></div>
+        <div className="h-4 bg-gray-300 rounded-sm flex-1"></div>
         <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
       </div>
 
       <div className="flex items-center space-x-2 ml-6">
-        <div className="h-3 bg-gray-200 rounded w-32"></div>
+        <div className="h-3 bg-gray-200 rounded-sm w-32"></div>
       </div>
 
       <div className="grid grid-cols-2 gap-2 text-xs">
         <div className="flex items-center space-x-1">
           <Heart className="w-3 h-3 text-red-300" />
-          <div className="h-3 bg-gray-200 rounded w-8"></div>
+          <div className="h-3 bg-gray-200 rounded-sm w-8"></div>
         </div>
         <div className="flex items-center space-x-1">
           <Download className="w-3 h-3 text-green-300" />
-          <div className="h-3 bg-gray-200 rounded w-8"></div>
+          <div className="h-3 bg-gray-200 rounded-sm w-8"></div>
         </div>
         <div className="flex items-center space-x-1">
           <Cpu className="w-3 h-3 text-purple-300" />
-          <div className="h-3 bg-gray-200 rounded w-8"></div>
+          <div className="h-3 bg-gray-200 rounded-sm w-8"></div>
         </div>
         <div className="flex items-center space-x-1">
           <DatabaseIcon className="w-3 h-3 text-purple-300" />
-          <div className="h-3 bg-gray-200 rounded w-12"></div>
+          <div className="h-3 bg-gray-200 rounded-sm w-12"></div>
         </div>
       </div>
       <hr className="border-gray-200" />
-      <div className="h-8 bg-gray-200 rounded w-full"></div>
+      <div className="h-8 bg-gray-200 rounded-sm w-full"></div>
     </div>
   )
 
@@ -67,12 +67,12 @@ const ModelInfo = () => {
   }
 
   return (
-    <div className="relative bg-gradient-to-r from-blue-50 to-indigo-50 px-3 py-3 rounded-lg border border-blue-200 space-y-3  h-full w-4/5">
+    <div className="relative bg-linear-to-r from-blue-50 to-indigo-50 px-3 py-3 rounded-lg border border-blue-200 space-y-3  h-full w-4/5">
       {/* Model Name Row */}
       <div className="flex justify-center items-center space-x-2">
         {/* Compatibility Status */}
         {typeof modelInfo.isCompatible === 'boolean' && (
-          <div className="flex-shrink-0 ">
+          <div className="shrink-0 ">
             {modelInfo.isCompatible ? (
               <CheckCircle className="w-4 h-4 text-green-500" />
             ) : (
