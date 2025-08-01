@@ -1,17 +1,20 @@
-import { ExternalLink, FileText } from 'lucide-react'
-import { useState } from 'react'
+import { ExternalLink } from 'lucide-react'
 import Modal from './Modal'
 import MarkdownRenderer from './MarkdownRenderer'
 
 interface ModelReadmeProps {
   readme: string
-  pipeline: string
   modelName: string
+  isModalOpen: boolean
+  setIsModalOpen: (isOpen: boolean) => void
 }
 
-const ModelReadme = ({ readme, pipeline, modelName }: ModelReadmeProps) => {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-
+const ModelReadme = ({
+  readme,
+  modelName,
+  isModalOpen,
+  setIsModalOpen
+}: ModelReadmeProps) => {
   const title = (
     <div className="flex items-center space-x-2">
       <a
@@ -30,14 +33,6 @@ const ModelReadme = ({ readme, pipeline, modelName }: ModelReadmeProps) => {
 
   return (
     <>
-      <button
-        onClick={() => setIsModalOpen(true)}
-        className="flex items-center w-full px-3 py-2 text-sm text-gray-600 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
-      >
-        <FileText className="w-4 h-4 mr-2 flex-shrink-0" />
-        <span className="truncate">View README.md</span>
-      </button>
-
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

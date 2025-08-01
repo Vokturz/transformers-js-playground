@@ -224,7 +224,7 @@ function FeatureExtraction() {
   const busy = status !== 'ready' || isExtracting
 
   return (
-    <div className="flex flex-col h-[70vh] max-h-[100vh] w-full p-4">
+    <div className="flex flex-col h-full max-h-[92vh] w-full p-4">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Feature Extraction (Embeddings)</h1>
         <div className="flex gap-2">

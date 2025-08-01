@@ -36,7 +36,7 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
   const [models, setModels] = useState<ModelInfoResponse[]>(
     [] as ModelInfoResponse[]
   )
-  const [pipeline, setPipeline] = useState<string>('text-classification')
+  const [pipeline, setPipeline] = useState<string>('feature-extraction') //text-generation
   const [selectedQuantization, setSelectedQuantization] =
     useState<QuantizationType>('int8')
   const [activeWorker, setActiveWorker] = useState<Worker | null>(null)

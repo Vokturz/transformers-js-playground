@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 import {
   Listbox,
   ListboxOption,
@@ -6,43 +6,41 @@ import {
   ListboxOptions,
   Transition
 } from '@headlessui/react'
-import { ChevronDown, Check } from 'lucide-react';
+import { ChevronDown, Check } from 'lucide-react'
 
 export const supportedPipelines = [
-  'text-classification',
-  'zero-shot-classification',
   'text-generation',
-  'summarization',
   'feature-extraction',
-  'sentiment-analysis',
+  'zero-shot-classification',
   'image-classification',
-  'question-answering',
+  'text-classification',
+  'summarization',
   'translation'
-];
+]
 
 interface PipelineSelectorProps {
-  pipeline: string;
-  setPipeline: (pipeline: string) => void;
+  pipeline: string
+  setPipeline: (pipeline: string) => void
 }
 
 const PipelineSelector: React.FC<PipelineSelectorProps> = ({
   pipeline,
   setPipeline
 }) => {
-  const selectedPipeline = pipeline;
+  const selectedPipeline = pipeline
 
   const formatPipelineName = (pipelineId: string) => {
     return pipelineId
       .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  };
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+  }
 
   return (
     <div className="relative">
       <Listbox value={selectedPipeline} onChange={setPipeline}>
         <div className="relative">
-          <ListboxButton className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300">
+          <ListboxButton className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 text-sm xl:text-base border border-gray-300">
             <span className="block truncate font-medium">
               {formatPipelineName(selectedPipeline)}
             </span>
@@ -53,7 +51,7 @@ const PipelineSelector: React.FC<PipelineSelectorProps> = ({
               />
             </span>
           </ListboxButton>
-          
+
           <Transition
             enter="transition duration-100 ease-out"
             enterFrom="transform scale-95 opacity-0"
@@ -62,7 +60,7 @@ const PipelineSelector: React.FC<PipelineSelectorProps> = ({
             leaveFrom="transform scale-100 opacity-100"
             leaveTo="transform scale-95 opacity-0"
           >
-            <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+            <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-sm xl:text-base ring-1 ring-black ring-opacity-5 focus:outline-none">
               {supportedPipelines.map((p) => (
                 <ListboxOption
                   key={p}
@@ -96,7 +94,7 @@ const PipelineSelector: React.FC<PipelineSelectorProps> = ({
         </div>
       </Listbox>
     </div>
-  );
-};
+  )
+}
 
-export default PipelineSelector;
+export default PipelineSelector

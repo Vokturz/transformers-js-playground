@@ -1,4 +1,4 @@
-import { X } from 'lucide-react'
+import { FileText, X } from 'lucide-react'
 import PipelineSelector from './PipelineSelector'
 import ModelSelector from './ModelSelector'
 import ModelInfo from './ModelInfo'
@@ -10,9 +10,10 @@ import ZeroShotClassificationConfig from './pipelines/ZeroShotClassificationConf
 interface SidebarProps {
   isOpen: boolean
   onClose: () => void
+  setIsModalOpen: (isOpen: boolean) => void
 }
 
-const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
+const Sidebar = ({ isOpen, onClose, setIsModalOpen }: SidebarProps) => {
   const { pipeline, setPipeline } = useModel()
 
   return (
@@ -51,7 +52,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           <div className="flex-1 overflow-y-auto p-4 space-y-6">
             {/* Pipeline Selection */}
             <div className="space-y-3 flex flex-row items-center space-x-4 text-center">
-              <h3 className="text-lg font-semibold text-gray-900 w-2/5 mt-2">
+              <h3 className="text-md xl:text-lg font-semibold text-gray-900 w-2/5 mt-2">
                 Choose a Pipeline
               </h3>
               <div className="w-3/5">
@@ -71,8 +72,18 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             </div>
 
             {/* Model Info */}
-            <div className="flex items-center justify-center">
+            <div className="flex flex-col items-center justify-center">
               <ModelInfo />
+              {/* Model README Button */}
+              <div className="mt-4 w-42">
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="flex items-center w-full px-3 py-2 text-sm text-gray-600 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+                >
+                  <FileText className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">View README.md</span>
+                </button>
+              </div>
             </div>
 
             <hr className="border-gray-200" />

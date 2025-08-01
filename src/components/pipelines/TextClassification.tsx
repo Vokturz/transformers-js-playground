@@ -80,7 +80,7 @@ function TextClassification() {
   }
 
   return (
-    <div className="flex flex-col h-[60vh] max-h-[100vh] w-full p-4">
+    <div className="flex flex-col h-full max-h-[92vh] w-full p-4">
       <h1 className="text-2xl font-bold mb-4 flex-shrink-0">
         Text Classification
       </h1>
