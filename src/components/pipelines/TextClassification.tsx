@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
-import { TextClassificationWorkerInput, WorkerMessage } from '../types'
-import { useModel } from '../contexts/ModelContext'
+import { TextClassificationWorkerInput, WorkerMessage } from '../../types'
+import { useModel } from '../../contexts/ModelContext'
 
 const PLACEHOLDER_TEXTS: string[] = [
   'I absolutely love this product! It exceeded all my expectations.',

@@ -4,9 +4,9 @@ import {
   EmbeddingExample,
   FeatureExtractionWorkerInput,
   WorkerMessage
-} from '../types'
-import { useModel } from '../contexts/ModelContext'
-import { useFeatureExtraction } from '../contexts/FeatureExtractionContext'
+} from '../../types'
+import { useModel } from '../../contexts/ModelContext'
+import { useFeatureExtraction } from '../../contexts/FeatureExtractionContext'
 
 interface Point2D {
   x: number

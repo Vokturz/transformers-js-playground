@@ -1,5 +1,5 @@
 import React from 'react'
-import { useFeatureExtraction } from '../contexts/FeatureExtractionContext'
+import { useFeatureExtraction } from '../../contexts/FeatureExtractionContext'
 
 const FeatureExtractionConfig = () => {
   const { config, setConfig } = useFeatureExtraction()
@@ -17,10 +17,12 @@ const FeatureExtractionConfig = () => {
           </label>
           <select
             value={config.pooling}
-            onChange={(e) => setConfig(prev => ({
-              ...prev,
-              pooling: e.target.value as 'mean' | 'cls' | 'max'
-            }))}
+            onChange={(e) =>
+              setConfig((prev) => ({
+                ...prev,
+                pooling: e.target.value as 'mean' | 'cls' | 'max'
+              }))
+            }
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
           >
             <option value="mean">Mean Pooling</option>
@@ -37,10 +39,12 @@ const FeatureExtractionConfig = () => {
             <input
               type="checkbox"
               checked={config.normalize}
-              onChange={(e) => setConfig(prev => ({
-                ...prev,
-                normalize: e.target.checked
-              }))}
+              onChange={(e) =>
+                setConfig((prev) => ({
+                  ...prev,
+                  normalize: e.target.checked
+                }))
+              }
               className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
             />
             <span className="text-sm font-medium text-gray-700">
@@ -59,10 +63,12 @@ const FeatureExtractionConfig = () => {
             <strong>Mean Pooling:</strong> Average all token embeddings
           </p>
           <p className="mb-1">
-            <strong>CLS Token:</strong> Use the [CLS] token embedding (if available)
+            <strong>CLS Token:</strong> Use the [CLS] token embedding (if
+            available)
           </p>
           <p>
-            <strong>Max Pooling:</strong> Take element-wise maximum across tokens
+            <strong>Max Pooling:</strong> Take element-wise maximum across
+            tokens
           </p>
         </div>
       </div>

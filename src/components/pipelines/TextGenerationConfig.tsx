@@ -2,8 +2,8 @@ import { Switch } from '@headlessui/react'
 import {
   useTextGeneration,
   GenerationConfigState
-} from '../contexts/TextGenerationContext'
-import { useModel } from '../contexts/ModelContext'
+} from '../../contexts/TextGenerationContext'
+import { useModel } from '../../contexts/ModelContext'
 
 function TextGenerationConfig() {
   const { config, setConfig, messages, updateSystemMessage } =

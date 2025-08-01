@@ -3,9 +3,9 @@ import PipelineSelector from './PipelineSelector'
 import ModelSelector from './ModelSelector'
 import ModelInfo from './ModelInfo'
 import { useModel } from '../contexts/ModelContext'
-import TextGenerationConfig from './TextGenerationConfig'
-import FeatureExtractionConfig from './FeatureExtractionConfig'
-import ZeroShotClassificationConfig from './ZeroShotClassificationConfig'
+import TextGenerationConfig from './pipelines/TextGenerationConfig'
+import FeatureExtractionConfig from './pipelines/FeatureExtractionConfig'
+import ZeroShotClassificationConfig from './pipelines/ZeroShotClassificationConfig'
 
 interface SidebarProps {
   isOpen: boolean

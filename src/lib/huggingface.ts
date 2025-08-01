@@ -153,8 +153,13 @@ const getModelsByPipeline = async (
   // }
 
   // First search with filter=onnx
+  console.log(
+    pipelineTag === 'feature-extraction'
+      ? '&search=sentence-transformers'
+      : '&filter=onnx'
+  )
   const response1 = await fetch(
-    `https://huggingface.co/api/models?filter=${pipelineTag}&filter=onnx&sort=downloads&limit=50`,
+    `https://huggingface.co/api/models?filter=${pipelineTag}${pipelineTag === 'feature-extraction' ? '&library=sentence-transformers' : '&filter=onnx'}&sort=downloads&limit=50`,
     {
       method: 'GET'
       // headers: {

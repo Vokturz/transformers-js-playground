@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from 'react'
-import { WorkerMessage, ZeroShotWorkerInput } from '../types'
-import { useModel } from '../contexts/ModelContext'
-import { useZeroShotClassification } from '../contexts/ZeroShotClassificationContext'
+import { WorkerMessage, ZeroShotWorkerInput } from '../../types'
+import { useModel } from '../../contexts/ModelContext'
+import { useZeroShotClassification } from '../../contexts/ZeroShotClassificationContext'
 import { Send, Loader2 } from 'lucide-react'
 
 function ZeroShotClassification() {
@@ -81,7 +81,7 @@ function ZeroShotClassification() {
   const busy: boolean = status !== 'ready'
 
   return (
-    <div className="flex flex-col h-[70vh] max-h-[100vh] w-full p-4">
+    <div className="flex flex-col h-full max-h-[100vh] w-full p-4">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Zero-Shot Classification</h1>
       </div>
@@ -96,7 +96,7 @@ function ZeroShotClassification() {
           onChange={(e) => setText(e.target.value)}
           placeholder="Enter text items to classify, one per line..."
           className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-          rows={8}
+          rows={12}
           disabled={!hasBeenLoaded || busy}
         />
       </div>
@@ -126,11 +126,11 @@ function ZeroShotClassification() {
 
       {/* Results Grid */}
       <div className="flex-1 overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 h-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 h-full">
           {sections.map((section, index) => (
             <div
               key={index}
-              className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden"
+              className="flex flex-col bg-white border border-gray-200 rounded-lg max-h-96"
             >
               <div className="px-3 py-2 bg-gray-50 border-b border-gray-200">
                 <h3

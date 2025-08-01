@@ -1,8 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Send, Trash2, Loader2, X } from 'lucide-react'
-import { ChatMessage, TextGenerationWorkerInput, WorkerMessage } from '../types'
-import { useModel } from '../contexts/ModelContext'
-import { useTextGeneration } from '../contexts/TextGenerationContext'
+import {
+  ChatMessage,
+  TextGenerationWorkerInput,
+  WorkerMessage
+} from '../../types'
+import { useModel } from '../../contexts/ModelContext'
+import { useTextGeneration } from '../../contexts/TextGenerationContext'
 
 function TextGeneration() {
   const { config, messages, setMessages } = useTextGeneration()

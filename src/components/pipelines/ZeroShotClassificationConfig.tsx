@@ -1,6 +1,6 @@
 import React from 'react'
 import { Plus, Minus, Trash2 } from 'lucide-react'
-import { useZeroShotClassification } from '../contexts/ZeroShotClassificationContext'
+import { useZeroShotClassification } from '../../contexts/ZeroShotClassificationContext'
 
 const ZeroShotClassificationConfig = () => {
   const {
@@ -27,22 +27,27 @@ const ZeroShotClassificationConfig = () => {
           <input
             type="range"
             min="0.1"
-            max="0.9"
-            step="0.1"
+            max="0.95"
+            step="0.01"
             value={config.threshold}
-            onChange={(e) => setConfig(prev => ({
-              ...prev,
-              threshold: parseFloat(e.target.value)
-            }))}
+            onChange={(e) =>
+              setConfig((prev) => ({
+                ...prev,
+                threshold: parseFloat(e.target.value)
+              }))
+            }
             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
           />
           <p className="text-xs text-gray-500 mt-1">
-            Minimum confidence score required for classification (lower values classify more items)
+            Minimum confidence score required for classification (lower values
+            classify more items)
           </p>
         </div>
 
         <div className="pt-2 border-t border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-800 mb-3">Categories</h4>
+          <h4 className="text-sm font-semibold text-gray-800 mb-3">
+            Categories
+          </h4>
 
           <div className="space-y-2 max-h-40 overflow-y-auto">
             {sections.map((section, index) => (
@@ -94,13 +99,16 @@ const ZeroShotClassificationConfig = () => {
       <div className="pt-2 border-t border-gray-200">
         <div className="text-xs text-gray-500">
           <p className="mb-1">
-            <strong>Threshold:</strong> Items with confidence scores below this threshold will be classified as "Other"
+            <strong>Threshold:</strong> Items with confidence scores below this
+            threshold will be classified as "Other"
           </p>
           <p className="mb-1">
-            <strong>Categories:</strong> Edit category names to customize classification labels
+            <strong>Categories:</strong> Edit category names to customize
+            classification labels
           </p>
           <p>
-            <strong>Other:</strong> Fallback category for items that don't meet the threshold for any specific category
+            <strong>Other:</strong> Fallback category for items that don't meet
+            the threshold for any specific category
           </p>
         </div>
       </div>
