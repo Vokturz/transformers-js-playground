@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useState, useCallback } from 'react'
 import { ImageExample } from '../types'
 
+interface ImageClassificationConfig {
+  top_k: number
+}
+
 interface ImageClassificationContextType {
   examples: ImageExample[]
   selectedExample: ImageExample | null
@@ -9,8 +13,8 @@ interface ImageClassificationContextType {
   removeExample: (id: string) => void
   updateExample: (id: string, updates: Partial<ImageExample>) => void
   clearExamples: () => void
-  topK: number
-  setTopK: (k: number) => void
+  config: ImageClassificationConfig
+  setConfig: React.Dispatch<React.SetStateAction<ImageClassificationConfig>>
 }
 
 const ImageClassificationContext = createContext<
@@ -38,7 +42,9 @@ export function ImageClassificationProvider({
   const [selectedExample, setSelectedExample] = useState<ImageExample | null>(
     null
   )
-  const [topK, setTopK] = useState<number>(5)
+  const [config, setConfig] = useState<ImageClassificationConfig>({
+    top_k: 5
+  })
 
   const addExample = useCallback((file: File) => {
     const id = Math.random().toString(36).substr(2, 9)
@@ -105,8 +111,8 @@ export function ImageClassificationProvider({
     removeExample,
     updateExample,
     clearExamples,
-    topK,
-    setTopK
+    config,
+    setConfig
   }
 
   return (

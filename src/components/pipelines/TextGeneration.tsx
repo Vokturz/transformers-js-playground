@@ -58,12 +58,8 @@ function TextGeneration() {
       messages: updatedMessages,
       hasChatTemplate: modelInfo.hasChatTemplate,
       model: modelInfo.id,
-      temperature: config.temperature,
-      max_new_tokens: config.maxTokens,
-      top_p: config.topP,
-      top_k: config.topK,
-      do_sample: config.doSample,
-      dtype: selectedQuantization ?? 'fp32'
+      dtype: selectedQuantization ?? 'fp32',
+      config
     }
 
     activeWorker.postMessage(message)
@@ -87,11 +83,7 @@ function TextGeneration() {
       prompt: prompt.trim(),
       hasChatTemplate: modelInfo.hasChatTemplate,
       model: modelInfo.id,
-      temperature: config.temperature,
-      max_new_tokens: config.maxTokens,
-      top_p: config.topP,
-      top_k: config.topK,
-      do_sample: config.doSample,
+      config,
       dtype: selectedQuantization ?? 'fp32'
     }
 

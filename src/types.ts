@@ -56,11 +56,13 @@ export interface TextGenerationWorkerInput {
   messages?: ChatMessage[]
   hasChatTemplate: boolean
   model: string
-  temperature?: number
-  max_new_tokens?: number
-  top_p?: number
-  top_k?: number
-  do_sample?: boolean
+  config?: {
+    temperature?: number
+    max_new_tokens?: number
+    top_p?: number
+    top_k?: number
+    do_sample?: boolean
+  }
   dtype: QuantizationType
 }
 
@@ -80,7 +82,9 @@ export interface ImageClassificationWorkerInput {
   image: string | ImageData | HTMLImageElement | HTMLCanvasElement
   model: string
   dtype: QuantizationType
-  topK?: number
+  config: {
+    top_k?: number
+  }
 }
 
 export interface ImageClassificationResult {

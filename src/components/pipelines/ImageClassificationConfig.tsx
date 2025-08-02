@@ -3,7 +3,7 @@ import { useImageClassification } from '../../contexts/ImageClassificationContex
 import { Slider } from '../ui/slider'
 
 const ImageClassificationConfig = () => {
-  const { topK, setTopK } = useImageClassification()
+  const { config, setConfig } = useImageClassification()
 
   return (
     <div className="space-y-4">
@@ -14,14 +14,14 @@ const ImageClassificationConfig = () => {
       <div className="space-y-3">
         <div>
           <label className="block text-sm font-medium text-foreground/80 mb-1">
-            Top K Predictions: {topK}
+            Top K Predictions: {config.top_k}
           </label>
           <Slider
-            defaultValue={[topK]}
+            defaultValue={[config.top_k]}
             min={1}
             max={10}
             step={1}
-            onValueChange={(value) => setTopK(value[0])}
+            onValueChange={(value) => setConfig({ top_k: value[0] })}
             className="w-full rounded-lg"
           />
           <div className="flex justify-between text-xs text-muted-foreground/60 mt-1">

@@ -49,20 +49,8 @@ class MyTextGenerationPipeline {
 // Listen for messages from the main thread
 self.addEventListener('message', async (event) => {
   try {
-    const {
-      type,
-      model,
-      dtype,
-      messages,
-      prompt,
-      hasChatTemplate,
-      temperature,
-      max_new_tokens,
-      top_p,
-      top_k,
-      do_sample,
-      stop_words
-    } = event.data
+    const { type, model, dtype, messages, prompt, hasChatTemplate, config } =
+      event.data
 
     if (type === 'stop') {
       MyTextGenerationPipeline.stopGeneration()
@@ -108,12 +96,11 @@ self.addEventListener('message', async (event) => {
       }
 
       const options = {
-        max_new_tokens: max_new_tokens || 100,
-        temperature: temperature || 0.7,
-        do_sample: do_sample !== false,
-        ...(top_p && { top_p }),
-        ...(top_k && { top_k }),
-        ...(stop_words && stop_words.length > 0 && { stop_words })
+        max_new_tokens: config.max_new_tokens || 100,
+        temperature: config.temperature || 0.7,
+        do_sample: config.do_sample !== false,
+        ...(config.top_p && { top_p }),
+        ...(config.top_k && { top_k })
       }
 
       // Create an AbortController for this generation

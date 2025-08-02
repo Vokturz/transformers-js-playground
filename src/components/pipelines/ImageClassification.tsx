@@ -45,7 +45,7 @@ function ImageClassification() {
     removeExample,
     updateExample,
     clearExamples,
-    topK
+    config
   } = useImageClassification()
 
   const [isClassifying, setIsClassifying] = useState<boolean>(false)
@@ -75,12 +75,12 @@ function ImageClassification() {
         image: example.url,
         model: modelInfo.id,
         dtype: selectedQuantization ?? 'fp32',
-        topK
+        config
       }
 
       activeWorker.postMessage(message)
     },
-    [modelInfo, activeWorker, selectedQuantization, topK, updateExample]
+    [modelInfo, activeWorker, selectedQuantization, config, updateExample]
   )
 
   const handleFileSelect = useCallback(
