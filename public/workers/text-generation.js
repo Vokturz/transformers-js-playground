@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.6.3'
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.1'
 
 class MyTextGenerationPipeline {
   static task = 'text-generation'
