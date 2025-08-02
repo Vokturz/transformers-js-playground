@@ -1,8 +1,8 @@
 ---
 title: Transformers.js Playground
-emoji: 🐠
+emoji: 🤗
 colorFrom: indigo
-colorTo: red
+colorTo: blue
 sdk: static
 pinned: false
 app_build_command: npm run build
