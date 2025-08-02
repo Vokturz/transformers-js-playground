@@ -1,4 +1,4 @@
-import { FileText, X } from 'lucide-react'
+import { Code2, FileText, X } from 'lucide-react'
 import PipelineSelector from './PipelineSelector'
 import ModelSelector from './ModelSelector'
 import ModelInfo from './ModelInfo'
@@ -7,14 +7,21 @@ import TextGenerationConfig from './pipelines/TextGenerationConfig'
 import FeatureExtractionConfig from './pipelines/FeatureExtractionConfig'
 import ZeroShotClassificationConfig from './pipelines/ZeroShotClassificationConfig'
 import ImageClassificationConfig from './pipelines/ImageClassificationConfig'
+import { Button } from '@/components/ui/button'
 
 interface SidebarProps {
   isOpen: boolean
   onClose: () => void
   setIsModalOpen: (isOpen: boolean) => void
+  setIsCodeModalOpen: (isOpen: boolean) => void
 }
 
-const Sidebar = ({ isOpen, onClose, setIsModalOpen }: SidebarProps) => {
+const Sidebar = ({
+  isOpen,
+  onClose,
+  setIsModalOpen,
+  setIsCodeModalOpen
+}: SidebarProps) => {
   const { pipeline, setPipeline } = useModel()
 
   return (
@@ -71,14 +78,18 @@ const Sidebar = ({ isOpen, onClose, setIsModalOpen }: SidebarProps) => {
             <div className="flex flex-col items-center justify-center">
               <ModelInfo />
               {/* Model README Button */}
-              <div className="mt-4 w-full max-w-44 mx-auto">
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="flex items-center w-full px-3 py-2 text-sm text-gray-600 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+              <div className="flex flex-row mt-2 space-x-4 ">
+                <Button variant="outline" onClick={() => setIsModalOpen(true)}>
+                  <FileText className="w-4 h-4 flex-shrink-0" />
+                  <span>View README.md</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsCodeModalOpen(true)}
                 >
-                  <FileText className="w-4 h-4 mr-2 flex-shrink-0" />
-                  <span className="truncate">View README.md</span>
-                </button>
+                  <Code2 className="w-4 h-4 flex-shrink-0" />
+                  <span>See Code</span>
+                </Button>
               </div>
             </div>
 

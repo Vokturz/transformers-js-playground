@@ -12,10 +12,12 @@ import Sidebar from './components/Sidebar'
 import ModelReadme from './components/ModelReadme'
 import { PipelineLayout } from './components/PipelineLayout'
 import Footer from './Footer'
+import ModelCode from './components/ModelCode'
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isCodeModalOpen, setIsCodeModalOpen] = useState(false)
   const { pipeline, setModels, setModelInfo, modelInfo, setIsFetching } =
     useModel()
 
@@ -74,6 +76,11 @@ function App() {
             isOpen={isSidebarOpen}
             onClose={() => setIsSidebarOpen(false)}
             setIsModalOpen={setIsModalOpen}
+            setIsCodeModalOpen={setIsCodeModalOpen}
+          />
+          <ModelCode
+            isCodeModalOpen={isCodeModalOpen}
+            setIsCodeModalOpen={setIsCodeModalOpen}
           />
         </div>
       </PipelineLayout>
