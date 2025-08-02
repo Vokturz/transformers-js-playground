@@ -87,19 +87,19 @@ function TextClassification() {
   }
 
   return (
-    <div className="flex flex-col h-full max-h-[calc(100dvh-148px)]  w-full p-4">
+    <div className="flex flex-col h-full max-h-[calc(100dvh-148px)] w-full p-4">
       <h1 className="text-2xl font-bold mb-4 shrink-0">Text Classification</h1>
 
-      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
+      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0 overflow-hidden">
         {/* Input Section */}
-        <div className="flex flex-col w-full lg:w-1/2 min-h-0">
+        <div className="flex flex-col w-full lg:w-1/2 min-h-0 max-h-[50vh] lg:max-h-none">
           <label className="text-lg font-medium mb-2 shrink-0">
             Input Text ({numberExamples} examples):
           </label>
 
           <div className="flex flex-col flex-1 min-h-0">
             <textarea
-              className="border border-gray-300 rounded-sm p-3 flex-1 resize-none min-h-[200px]"
+              className="border border-gray-300 rounded-sm p-3 flex-1 resize-none min-h-[200px] lg:min-h-[250px]"
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Enter text to classify (one per line)..."
@@ -128,12 +128,12 @@ function TextClassification() {
         </div>
 
         {/* Results Section */}
-        <div className="flex flex-col w-full lg:w-1/2 min-h-0">
+        <div className="flex flex-col w-full lg:w-1/2 min-h-0 max-h-[50vh] lg:max-h-none">
           <label className="text-lg font-medium mb-2 shrink-0">
             Classification Results ({results.length}):
           </label>
 
-          <div className="border border-gray-300 rounded-sm p-3 flex-1 overflow-y-auto min-h-[200px]">
+          <div className="border border-gray-300 rounded-sm p-3 flex-1 overflow-y-auto min-h-[200px] lg:min-h-[250px]">
             {results.length === 0 ? (
               <div className="text-gray-500 text-center py-8">
                 No results yet. Click "Classify Text" to analyze your input.
