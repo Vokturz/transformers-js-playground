@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Send, Trash2, Loader2, X } from 'lucide-react'
+import { Send, Eraser, Loader2, X } from 'lucide-react'
 import {
   ChatMessage,
   TextGenerationWorkerInput,
@@ -153,7 +153,7 @@ function TextGeneration() {
   const hasChatTemplate = modelInfo?.hasChatTemplate
 
   return (
-    <div className="flex flex-col min-h-[70vh] h-full max-h-[88vh] w-full p-4">
+    <div className="flex flex-col min-h-[30dvh] max-h-[calc(100dvh-148px)] w-full p-4">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">
           Text Generation {hasChatTemplate ? '(Chat)' : ''}
@@ -164,7 +164,7 @@ function TextGeneration() {
             className="p-2 bg-red-100 hover:bg-red-200 rounded-lg transition-colors"
             title={hasChatTemplate ? 'Clear Chat' : 'Clear Text'}
           >
-            <Trash2 className="w-4 h-4" />
+            <Eraser className="w-4 h-4" />
           </button>
           {isGenerating && (
             <button

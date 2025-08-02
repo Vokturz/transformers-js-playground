@@ -6,13 +6,13 @@ const FeatureExtractionConfig = () => {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900">
+      <h3 className="text-lg font-semibold text-foreground">
         Feature Extraction Settings
       </h3>
 
       <div className="space-y-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-foreground/80 mb-1">
             Pooling Strategy
           </label>
           <select
@@ -23,13 +23,13 @@ const FeatureExtractionConfig = () => {
                 pooling: e.target.value as 'mean' | 'cls' | 'max'
               }))
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            className="w-full px-3 py-2 border border-input rounded-md shadow-xs focus:outline-hidden focus:ring-2 focus:ring-ring focus:border-ring text-sm"
           >
             <option value="mean">Mean Pooling</option>
             <option value="cls">CLS Token</option>
             <option value="max">Max Pooling</option>
           </select>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             How to aggregate token embeddings into sentence embeddings
           </p>
         </div>
@@ -45,20 +45,20 @@ const FeatureExtractionConfig = () => {
                   normalize: e.target.checked
                 }))
               }
-              className="rounded border-gray-300 text-blue-600 shadow-xs focus:border-blue-300 focus:ring-3 focus:ring-blue-200 focus:ring-opacity-50"
+              className="rounded border-input text-primary shadow-xs focus:border-ring focus:ring-3 focus:ring-ring/20"
             />
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-foreground/80">
               Normalize Embeddings
             </span>
           </label>
-          <p className="text-xs text-gray-500 mt-1 ml-6">
+          <p className="text-xs text-muted-foreground mt-1 ml-6">
             L2 normalize embeddings for better similarity calculations
           </p>
         </div>
       </div>
 
-      <div className="pt-2 border-t border-gray-200">
-        <div className="text-xs text-gray-500">
+      <div className="pt-2 border-t border-border">
+        <div className="text-xs text-muted-foreground">
           <p className="mb-1">
             <strong>Mean Pooling:</strong> Average all token embeddings
           </p>

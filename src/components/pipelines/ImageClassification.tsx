@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import {
   Upload,
-  Trash2,
+  Eraser,
   Loader2,
   X,
   Eye,
@@ -185,7 +185,7 @@ function ImageClassification() {
   const busy = status !== 'ready' || isClassifying
 
   return (
-    <div className="flex flex-col h-full max-h-[88vh] w-full p-4">
+    <div className="flex flex-col h-full max-h-[calc(100dvh-148px)]  w-full p-4">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Image Classification</h1>
         <div className="flex gap-2">
@@ -213,7 +213,7 @@ function ImageClassification() {
             className="p-2 bg-red-100 hover:bg-red-200 rounded-lg transition-colors"
             title="Clear All Images"
           >
-            <Trash2 className="w-4 h-4" />
+            <Eraser className="w-4 h-4" />
           </button>
         </div>
       </div>

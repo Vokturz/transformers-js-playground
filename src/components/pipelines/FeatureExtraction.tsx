@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Plus, Trash2, Loader2, X, Eye, EyeOff } from 'lucide-react'
+import { Plus, Eraser, Loader2, X, Eye, EyeOff } from 'lucide-react'
 import {
   EmbeddingExample,
   FeatureExtractionWorkerInput,
@@ -241,7 +241,7 @@ function FeatureExtraction() {
   const busy = status !== 'ready' || isExtracting
 
   return (
-    <div className="flex flex-col h-full max-h-[88vh] w-full p-4">
+    <div className="flex flex-col max-h-[calc(100dvh-148px)] w-full p-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
         <h1 className="text-xl sm:text-2xl font-bold">
           Feature Extraction (Embeddings)
@@ -273,7 +273,7 @@ function FeatureExtraction() {
             className="p-2 bg-red-100 hover:bg-red-200 rounded-lg transition-colors"
             title="Clear All Examples"
           >
-            <Trash2 className="w-4 h-4" />
+            <Eraser className="w-4 h-4" />
           </button>
         </div>
       </div>

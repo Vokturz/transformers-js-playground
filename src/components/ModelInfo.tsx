@@ -28,37 +28,37 @@ const ModelInfo = () => {
   const { models, modelInfo, selectedQuantization, isFetching } = useModel()
 
   const ModelInfoSkeleton = () => (
-    <div className="bg-linear-to-r from-blue-50 to-indigo-50 px-3 py-3 rounded-lg border border-blue-200 space-y-3 animate-pulse w-4/5">
+    <div className="bg-gradient-to-r from-secondary to-accent px-3 py-3 rounded-lg border border-border space-y-3 animate-pulse w-4/5">
       <div className="flex items-center space-x-2">
-        <Bot className="w-4 h-4 text-blue-300" />
-        <div className="h-4 bg-gray-300 rounded-sm flex-1"></div>
-        <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
+        <Bot className="w-4 h-4 text-primary/60" />
+        <div className="h-4 bg-muted rounded-sm flex-1"></div>
+        <div className="w-4 h-4 bg-muted rounded-full"></div>
       </div>
 
       <div className="flex items-center space-x-2 ml-6">
-        <div className="h-3 bg-gray-200 rounded-sm w-32"></div>
+        <div className="h-3 bg-muted/80 rounded-sm w-32"></div>
       </div>
 
       <div className="grid grid-cols-2 gap-2 text-xs">
         <div className="flex items-center space-x-1">
-          <Heart className="w-3 h-3 text-red-300" />
-          <div className="h-3 bg-gray-200 rounded-sm w-8"></div>
+          <Heart className="w-3 h-3 text-destructive/60" />
+          <div className="h-3 bg-muted/80 rounded-sm w-8"></div>
         </div>
         <div className="flex items-center space-x-1">
-          <Download className="w-3 h-3 text-green-300" />
-          <div className="h-3 bg-gray-200 rounded-sm w-8"></div>
+          <Download className="w-3 h-3 text-chart-2/60" />
+          <div className="h-3 bg-muted/80 rounded-sm w-8"></div>
         </div>
         <div className="flex items-center space-x-1">
-          <Cpu className="w-3 h-3 text-purple-300" />
-          <div className="h-3 bg-gray-200 rounded-sm w-8"></div>
+          <Cpu className="w-3 h-3 text-chart-4/60" />
+          <div className="h-3 bg-muted/80 rounded-sm w-8"></div>
         </div>
         <div className="flex items-center space-x-1">
-          <DatabaseIcon className="w-3 h-3 text-purple-300" />
-          <div className="h-3 bg-gray-200 rounded-sm w-12"></div>
+          <DatabaseIcon className="w-3 h-3 text-chart-4/60" />
+          <div className="h-3 bg-muted/80 rounded-sm w-12"></div>
         </div>
       </div>
-      <hr className="border-gray-200" />
-      <div className="h-8 bg-gray-200 rounded-sm w-full"></div>
+      <hr className="border-border" />
+      <div className="h-8 bg-muted/80 rounded-sm w-full"></div>
     </div>
   )
 
@@ -67,7 +67,7 @@ const ModelInfo = () => {
   }
 
   return (
-    <div className="relative bg-linear-to-r from-blue-50 to-indigo-50 px-3 py-3 rounded-lg border border-blue-200 space-y-3  h-full w-4/5">
+    <div className="relative bg-gradient-to-r from-secondary to-accent px-3 py-3 rounded-lg border border-border space-y-3  h-full w-4/5">
       {/* Model Name Row */}
       <div className="flex justify-center items-center space-x-2">
         {/* Compatibility Status */}
@@ -76,7 +76,7 @@ const ModelInfo = () => {
             {modelInfo.isCompatible ? (
               <CheckCircle className="w-4 h-4 text-green-500" />
             ) : (
-              <XCircle className="w-4 h-4 text-red-500" />
+              <XCircle className="w-4 h-4 text-destructive" />
             )}
           </div>
         )}
@@ -85,7 +85,7 @@ const ModelInfo = () => {
             href={`https://huggingface.co/${modelInfo.name}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-medium text-gray-700 hover:underline block truncate"
+            className="text-sm font-medium text-foreground/80 hover:underline block truncate"
             title={modelInfo.name}
           >
             <ExternalLink className="w-3 h-3 inline-block mr-1" />
@@ -97,7 +97,7 @@ const ModelInfo = () => {
               href={`https://huggingface.co/${modelInfo.baseId}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-gray-500 hover:underline block truncate mt-1"
+              className="text-xs text-muted-foreground hover:underline block truncate mt-1"
               title={`Base model: ${modelInfo.baseId}`}
             >
               <ExternalLink className="w-3 h-3 inline-block mr-1" />(
@@ -108,10 +108,10 @@ const ModelInfo = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+      <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
         {modelInfo.likes > 0 && (
           <div className="flex items-center space-x-1">
-            <Heart className="w-3 h-3 text-red-500" />
+            <Heart className="w-3 h-3 text-destructive" />
             <span>{formatNumber(modelInfo.likes)}</span>
           </div>
         )}
@@ -157,8 +157,8 @@ const ModelInfo = () => {
 
       {/* Incompatibility Message */}
       {modelInfo.isCompatible === false && modelInfo.incompatibilityReason && (
-        <div className="bg-red-50 border border-red-200 rounded-md px-2 py-2">
-          <p className="text-xs text-red-700 whitespace-break-spaces">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-md px-2 py-2">
+          <p className="text-xs text-destructive whitespace-break-spaces">
             {modelInfo.incompatibilityReason}
           </p>
         </div>
