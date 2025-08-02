@@ -132,7 +132,7 @@ const getModelsByPipeline = async (
 ): Promise<ModelInfoResponse[]> => {
   // Second search with search=onnx
   const response1 = await fetch(
-    `https://huggingface.co/api/models?filter=${pipelineTag}&search=onnx-community&sort=createdAt&limit=50`,
+    `https://huggingface.co/api/models?filter=${pipelineTag}&search=onnx-community&sort=createdAt&limit=5`,
     {
       method: 'GET'
     }

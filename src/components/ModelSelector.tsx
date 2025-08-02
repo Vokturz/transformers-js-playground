@@ -32,7 +32,7 @@ function ModelSelector() {
     isFetching,
     setIsFetching
   } = useModel()
-  const [sortBy, setSortBy] = useState<SortOption>('downloads')
+  const [sortBy, setSortBy] = useState<SortOption>('createdAt')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [showCustomInput, setShowCustomInput] = useState(false)
   const [customModelName, setCustomModelName] = useState('')
