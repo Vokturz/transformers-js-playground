@@ -1,6 +1,11 @@
 import { useState, useCallback, useEffect } from 'react'
-import { TextClassificationWorkerInput, WorkerMessage } from '../../types'
+import {
+  ClassificationOutput,
+  TextClassificationWorkerInput,
+  WorkerMessage
+} from '../../types'
 import { useModel } from '../../contexts/ModelContext'
+import { useTextClassification } from '../../contexts/TextClassificationContext'
 
 const PLACEHOLDER_TEXTS: string[] = [
   'I absolutely love this product! It exceeded all my expectations.',
@@ -18,7 +23,7 @@ const PLACEHOLDER_TEXTS: string[] = [
 function TextClassification() {
   const [text, setText] = useState<string>(PLACEHOLDER_TEXTS.join('\n'))
   const [numberExamples, setNumberExamples] = useState(PLACEHOLDER_TEXTS.length)
-  const [results, setResults] = useState<any[]>([])
+  const [results, setResults] = useState<ClassificationOutput[]>([])
   const {
     activeWorker,
     status,
@@ -27,6 +32,7 @@ function TextClassification() {
     hasBeenLoaded,
     selectedQuantization
   } = useModel()
+  const { config } = useTextClassification()
 
   useEffect(() => {
     if (modelInfo?.widgetData) {
@@ -51,10 +57,11 @@ function TextClassification() {
       type: 'classify',
       text,
       model: modelInfo.id,
-      dtype: selectedQuantization ?? 'fp32'
+      dtype: selectedQuantization ?? 'fp32',
+      config
     }
     activeWorker.postMessage(message)
-  }, [text, modelInfo, activeWorker, selectedQuantization, setResults])
+  }, [text, modelInfo, activeWorker, selectedQuantization, config, setResults])
 
   // Handle worker messages
   useEffect(() => {
@@ -65,7 +72,7 @@ function TextClassification() {
       if (status === 'output') {
         setStatus('output')
         const result = e.data.output!
-        setResults((prev: any[]) => [...prev, result])
+        setResults((prev: ClassificationOutput[]) => [...prev, result])
       }
     }
 
@@ -135,16 +142,46 @@ function TextClassification() {
               <div className="space-y-3">
                 {results.map((result, index) => (
                   <div key={index} className="p-3 rounded-sm border-2">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-semibold text-sm">
-                        {result.labels[0]}
-                      </span>
-                      <span className="text-sm font-mono">
-                        {(result.scores[0] * 100).toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-700">
+                    <div className="text-sm text-gray-700 mb-3">
                       {result.sequence}
+                    </div>
+                    <div className="space-y-2">
+                      {result.labels.map(
+                        (label: string, labelIndex: number) => {
+                          const score = result.scores[labelIndex]
+                          const isTopPrediction = labelIndex === 0
+
+                          return (
+                            <div
+                              key={labelIndex}
+                              className={`flex justify-between items-center p-2 rounded ${
+                                isTopPrediction
+                                  ? 'bg-blue-50 border-l-4 border-blue-500'
+                                  : 'bg-gray-50'
+                              }`}
+                            >
+                              <span
+                                className={`font-medium text-sm ${
+                                  isTopPrediction
+                                    ? 'text-blue-700'
+                                    : 'text-gray-700'
+                                }`}
+                              >
+                                {label}
+                              </span>
+                              <span
+                                className={`text-sm font-mono ${
+                                  isTopPrediction
+                                    ? 'text-blue-600'
+                                    : 'text-gray-600'
+                                }`}
+                              >
+                                {(score * 100).toFixed(1)}%
+                              </span>
+                            </div>
+                          )
+                        }
+                      )}
                     </div>
                   </div>
                 ))}

@@ -7,6 +7,7 @@ import TextGenerationConfig from './pipelines/TextGenerationConfig'
 import FeatureExtractionConfig from './pipelines/FeatureExtractionConfig'
 import ZeroShotClassificationConfig from './pipelines/ZeroShotClassificationConfig'
 import ImageClassificationConfig from './pipelines/ImageClassificationConfig'
+import TextClassificationConfig from './pipelines/TextClassificationConfig'
 import { Button } from '@/components/ui/button'
 
 interface SidebarProps {
@@ -102,6 +103,7 @@ const Sidebar = ({
             {pipeline === 'image-classification' && (
               <ImageClassificationConfig />
             )}
+            {pipeline === 'text-classification' && <TextClassificationConfig />}
           </div>
         </div>
       </div>

@@ -38,7 +38,9 @@ const ModelCode = ({ isCodeModalOpen, setIsCodeModalOpen }: ModelCodeProps) => {
     case 'text-classification':
       classType = 'classifier'
       exampleData = 'I love this product!'
-      config = {}
+      config = {
+        top_k: 1
+      }
       break
     case 'text-generation':
       classType = 'generator'

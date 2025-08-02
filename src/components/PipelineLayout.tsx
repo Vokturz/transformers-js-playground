@@ -3,6 +3,7 @@ import { TextGenerationProvider } from '../contexts/TextGenerationContext'
 import { FeatureExtractionProvider } from '../contexts/FeatureExtractionContext'
 import { ZeroShotClassificationProvider } from '../contexts/ZeroShotClassificationContext'
 import { ImageClassificationProvider } from '../contexts/ImageClassificationContext'
+import { TextClassificationProvider } from '../contexts/TextClassificationContext'
 
 export const PipelineLayout = ({ children }: { children: React.ReactNode }) => {
   const { pipeline } = useModel()
@@ -25,6 +26,9 @@ export const PipelineLayout = ({ children }: { children: React.ReactNode }) => {
       return (
         <ImageClassificationProvider>{children}</ImageClassificationProvider>
       )
+
+    case 'text-classification':
+      return <TextClassificationProvider>{children}</TextClassificationProvider>
 
     default:
       return <>{children}</>

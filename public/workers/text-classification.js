@@ -41,7 +41,7 @@ class MyTextClassificationPipeline {
 // Listen for messages from the main thread
 self.addEventListener('message', async (event) => {
   try {
-    const { type, model, dtype, text } = event.data
+    const { type, model, dtype, text, config } = event.data
 
     if (!model) {
       self.postMessage({
@@ -76,13 +76,13 @@ self.addEventListener('message', async (event) => {
       const split = text.split('\n')
       for (const line of split) {
         if (line.trim()) {
-          const output = await classifier(line)
+          const output = await classifier(line, config)
           self.postMessage({
             status: 'output',
             output: {
               sequence: line,
-              labels: [output[0].label],
-              scores: [output[0].score]
+              labels: output.map((item) => item.label),
+              scores: output.map((item) => item.score)
             }
           })
         }

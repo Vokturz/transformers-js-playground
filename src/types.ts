@@ -48,6 +48,9 @@ export interface TextClassificationWorkerInput {
   text: string
   model: string
   dtype: QuantizationType
+  config?: {
+    top_k?: number
+  }
 }
 
 export interface TextGenerationWorkerInput {

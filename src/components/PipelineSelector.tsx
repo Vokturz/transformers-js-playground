@@ -12,9 +12,9 @@ export const supportedPipelines = [
   'image-classification',
   'text-generation',
   'zero-shot-classification',
-  'text-classification',
-  'summarization',
-  'translation'
+  'text-classification'
+  // 'summarization',
+  // 'translation'
 ]
 
 interface PipelineSelectorProps {
