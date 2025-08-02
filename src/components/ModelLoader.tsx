@@ -75,13 +75,13 @@ const ModelLoader = () => {
           output.file.startsWith('onnx')
         ) {
           setProgress(output.progress)
-          setShowAlert(true)
-          setAlertMessage(
-            <div className="flex items-center">
-              <Loader2 className="animate-spin h-4 w-4 mr-2" />
-              Loading Model
-            </div>
-          )
+          // setShowAlert(true)
+          // setAlertMessage(
+          //   <div className="flex items-center">
+          //     <Loader2 className="animate-spin h-4 w-4 mr-2" />
+          //     Loading Model
+          //   </div>
+          // )
         }
       } else if (status === 'error') {
         setStatus('error')

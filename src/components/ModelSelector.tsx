@@ -114,7 +114,6 @@ function ModelSelector() {
           ),
           widgetData: modelInfoResponse.widgetData
         }
-        console.log(modelInfo)
         setModelInfo(modelInfo)
         setIsCustomModel(isCustom)
         setIsFetching(false)
@@ -127,12 +126,17 @@ function ModelSelector() {
     [setModelInfo, pipeline, setIsFetching]
   )
 
-  // Reset custom model state when pipeline changes
   useEffect(() => {
+    // Reset custom model state when pipeline changes
+
     setIsCustomModel(false)
     setShowCustomInput(false)
     setCustomModelName('')
     setCustomModelError('')
+
+    if (pipeline !== 'feature-extraction') {
+      setSortBy('downloads')
+    }
   }, [pipeline])
 
   // Update modelInfo to first model when models are loaded and no custom model is selected

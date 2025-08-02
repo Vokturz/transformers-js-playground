@@ -88,7 +88,7 @@ function App() {
       {modelInfo?.readme && (
         <ModelReadme
           readme={modelInfo.readme}
-          modelName={modelInfo.name}
+          modelName={modelInfo.baseId ? modelInfo.baseId : modelInfo.name}
           isModalOpen={isModalOpen}
           setIsModalOpen={setIsModalOpen}
         />

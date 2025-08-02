@@ -3,7 +3,7 @@ import Modal from './Modal'
 import MarkdownRenderer from './MarkdownRenderer'
 import { useModel } from '@/contexts/ModelContext'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface ModelCodeProps {
   isCodeModalOpen: boolean
@@ -12,7 +12,23 @@ interface ModelCodeProps {
 
 const ModelCode = ({ isCodeModalOpen, setIsCodeModalOpen }: ModelCodeProps) => {
   const [isCopied, setIsCopied] = useState(false)
+  const [showAlert, setShowAlert] = useState(false)
+  const [animateAlert, setAnimateAlert] = useState(false)
+
   const { modelInfo, pipeline, selectedQuantization } = useModel()
+
+  useEffect(() => {
+    if (isCopied) {
+      setShowAlert(true)
+      const enterTimeout = setTimeout(() => setAnimateAlert(true), 20)
+      return () => clearTimeout(enterTimeout)
+    } else {
+      setAnimateAlert(false)
+      const exitTimeout = setTimeout(() => setShowAlert(false), 300) // Match duration-300
+      return () => clearTimeout(exitTimeout)
+    }
+  }, [isCopied])
+
   if (!modelInfo) return null
 
   const title = (
@@ -24,7 +40,6 @@ const ModelCode = ({ isCodeModalOpen, setIsCodeModalOpen }: ModelCodeProps) => {
         rel="noopener noreferrer"
       >
         <ExternalLink className="w-3 h-3 inline-block mr-1" />
-
         {modelInfo.name}
       </a>
     </div>
@@ -107,7 +122,6 @@ print(result)
     setIsCopied(true)
     setTimeout(() => setIsCopied(false), 2000)
   }
-
   const pipelineName = pipeline
     .split('-')
     .map((word, index) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -121,6 +135,7 @@ print(result)
         title={title}
         maxWidth="5xl"
       >
+        {/* ... (all your modal content JSX is unchanged) */}
         <div className="text-sm max-w-none px-4">
           <div className="flex flex-row">
             <img src="/javascript-logo.svg" className="w-6 h-6 mr-1 rounded" />
@@ -133,7 +148,7 @@ print(result)
               target="_blank"
               rel="noopener noreferrer"
             >
-              Read about {pipeline} Pipeline Documentation for Javascript
+              Read about {pipeline} in Transformers.js documentation
             </a>
           </div>
           <div className="relative">
@@ -159,7 +174,7 @@ print(result)
               target="_blank"
               rel="noopener noreferrer"
             >
-              Read about {pipeline} Pipeline Documentation for Python
+              Read about {pipeline} in Transformers documentation
             </a>
             <div className="relative">
               <div className="absolute right-0 top-0 mt-2 mr-2">
@@ -176,8 +191,14 @@ print(result)
             </div>
           </div>
         </div>
-        {isCopied && (
-          <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
+        {showAlert && (
+          <div
+            className={`absolute top-4 left-1/2 -translate-x-1/2 transition-all duration-300 ease-in-out ${
+              animateAlert
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 -translate-y-4'
+            }`}
+          >
             <Alert>
               <CopyCheck className="w-4 h-4 opacity-60" />
               <AlertDescription>Copied!</AlertDescription>

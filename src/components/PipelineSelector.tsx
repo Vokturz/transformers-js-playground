@@ -11,8 +11,8 @@ export const supportedPipelines = [
   'feature-extraction',
   'image-classification',
   'text-generation',
-  'zero-shot-classification',
-  'text-classification'
+  'text-classification',
+  'zero-shot-classification'
   // 'summarization',
   // 'translation'
 ]

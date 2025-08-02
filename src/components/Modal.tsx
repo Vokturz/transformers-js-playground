@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 
 interface ModalProps {
@@ -26,6 +26,11 @@ const Modal: React.FC<ModalProps> = ({
   children,
   maxWidth = '4xl'
 }) => {
+  // State to control if the modal is in the DOM
+  const [isRendered, setIsRendered] = useState(isOpen)
+  // State to control the animation classes
+  const [isAnimating, setIsAnimating] = useState(false)
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -34,17 +39,24 @@ const Modal: React.FC<ModalProps> = ({
     }
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape)
+      setIsRendered(true)
       document.body.style.overflow = 'hidden'
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'unset'
+      document.addEventListener('keydown', handleEscape)
+      const animationTimeout = setTimeout(() => setIsAnimating(true), 20)
+      return () => clearTimeout(animationTimeout)
+    } else {
+      setIsAnimating(false)
+      const unmountTimeout = setTimeout(() => {
+        setIsRendered(false)
+        document.body.style.overflow = 'unset'
+        document.removeEventListener('keydown', handleEscape)
+      }, 300)
+      return () => clearTimeout(unmountTimeout)
     }
   }, [isOpen, onClose])
 
-  if (!isOpen) return null
+  // Unmount the component completely when not rendered
+  if (!isRendered) return null
 
   const maxWidthClasses = {
     sm: 'max-w-sm',
@@ -63,22 +75,30 @@ const Modal: React.FC<ModalProps> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black opacity-50 transition-opacity"
+        className={`fixed inset-0 bg-black transition-opacity duration-300 ease-in-out ${
+          isAnimating ? 'opacity-50' : 'opacity-0'
+        }`}
         onClick={onClose}
       />
 
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
         <div
-          className={`relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full ${maxWidthClasses[maxWidth]}`}
+          className={`relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all duration-300 ease-in-out sm:my-8 sm:w-full ${
+            maxWidthClasses[maxWidth]
+          } ${
+            isAnimating
+              ? 'opacity-100 translate-y-0 sm:scale-100'
+              : 'opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+          }`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
             <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
             <button
               onClick={onClose}
-              className="rounded-md p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
               <span className="sr-only">Close</span>
               <X className="h-5 w-5" />
@@ -86,7 +106,7 @@ const Modal: React.FC<ModalProps> = ({
           </div>
 
           {/* Content */}
-          <div className="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+          <div className="max-h-[calc(100vh-200px)] overflow-y-auto px-6 py-4">
             {children}
           </div>
         </div>

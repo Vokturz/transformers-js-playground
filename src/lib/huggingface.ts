@@ -132,7 +132,7 @@ const getModelsByPipeline = async (
 ): Promise<ModelInfoResponse[]> => {
   // Second search with search=onnx
   const response1 = await fetch(
-    `https://huggingface.co/api/models?filter=${pipelineTag}&search=onnx-community&sort=createdAt&limit=10`,
+    `https://huggingface.co/api/models?filter=${pipelineTag}&search=onnx-community&sort=createdAt&limit=15`,
     {
       method: 'GET'
     }
@@ -175,10 +175,10 @@ const getModelsByPipeline = async (
           !model.id.includes('ms-marco') &&
           !model.id.includes('MiniLM')
       )
-      .slice(0, 20)
+      .slice(0, 30)
   }
 
-  return uniqueModels.slice(0, 20)
+  return uniqueModels.slice(0, 30)
 }
 
 const getModelsByPipelineCustom = async (

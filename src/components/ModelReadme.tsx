@@ -27,7 +27,7 @@ const ModelReadme = ({
 
         {modelName}
       </a>
-      <span className=" text-gray-500">README.md</span>
+      <span className=" text-gray-300">README.md</span>
     </div>
   )
 
