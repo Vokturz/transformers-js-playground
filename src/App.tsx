@@ -11,6 +11,7 @@ import ImageClassification from './components/pipelines/ImageClassification'
 import Sidebar from './components/Sidebar'
 import ModelReadme from './components/ModelReadme'
 import { PipelineLayout } from './components/PipelineLayout'
+import Footer from './Footer'
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -39,7 +40,7 @@ function App() {
     <div className="relative min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Header />
       <PipelineLayout>
-        <div className=" flex h-[calc(100vh-4rem)]">
+        <div className=" flex h-[calc(100vh-8rem)]">
           {/* Header is h-16 = 4rem */}
           {/* Main Content */}
           <main className="flex-1 overflow-auto">
@@ -76,6 +77,7 @@ function App() {
           />
         </div>
       </PipelineLayout>
+      <Footer />
       {modelInfo?.readme && (
         <ModelReadme
           readme={modelInfo.readme}

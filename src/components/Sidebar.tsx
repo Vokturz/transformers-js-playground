@@ -50,13 +50,13 @@ const Sidebar = ({ isOpen, onClose, setIsModalOpen }: SidebarProps) => {
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-6">
             {/* Pipeline Selection */}
-            <div className="space-y-3 flex flex-row items-center space-x-4 text-center">
-              <h3 className="text-md xl:text-lg font-semibold text-gray-900 w-2/5 mt-2">
+            <div className="space-y-3">
+              <h3 className="text-md xl:text-lg font-semibold text-gray-900 mb-2">
                 Choose a Pipeline
               </h3>
-              <div className="w-3/5">
+              <div className="w-full">
                 <PipelineSelector
                   pipeline={pipeline}
                   setPipeline={setPipeline}
@@ -76,12 +76,12 @@ const Sidebar = ({ isOpen, onClose, setIsModalOpen }: SidebarProps) => {
             <div className="flex flex-col items-center justify-center">
               <ModelInfo />
               {/* Model README Button */}
-              <div className="mt-4 w-42">
+              <div className="mt-4 w-full max-w-44 mx-auto">
                 <button
                   onClick={() => setIsModalOpen(true)}
-                  className="flex items-center w-44 px-3 py-2 text-sm text-gray-600 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+                  className="flex items-center w-full px-3 py-2 text-sm text-gray-600 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
                 >
-                  <FileText className="w-4 h-4 mr-2 shrink-0" />
+                  <FileText className="w-4 h-4 mr-2 flex-shrink-0" />
                   <span className="truncate">View README.md</span>
                 </button>
               </div>
