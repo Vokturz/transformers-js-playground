@@ -1,13 +1,13 @@
 import { useEffect, useCallback, useState } from 'react'
-import { ChevronDown, Loader, X } from 'lucide-react'
+import { ChevronDown, Loader2, X } from 'lucide-react'
 import { QuantizationType, WorkerMessage } from '../types'
 import { useModel } from '../contexts/ModelContext'
 import { getWorker } from '../lib/workerManager'
 import { Alert, AlertDescription } from './ui/alert'
 
 const ModelLoader = () => {
-  const [isError, setIsError] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
+  const [showAlert, setShowAlert] = useState(false)
+  const [alertMessage, setAlertMessage] = useState<React.ReactNode>('')
   const {
     modelInfo,
     selectedQuantization,
@@ -75,16 +75,23 @@ const ModelLoader = () => {
           output.file.startsWith('onnx')
         ) {
           setProgress(output.progress)
+          setShowAlert(true)
+          setAlertMessage(
+            <div className="flex items-center">
+              <Loader2 className="animate-spin h-4 w-4 mr-2" />
+              Loading Model
+            </div>
+          )
         }
       } else if (status === 'error') {
         setStatus('error')
         const error = e.data.output
         console.error(error)
-        setErrorMessage(error.split('.')[0] + '. See console for details.')
-        setIsError(true)
+        setAlertMessage(error.split('.')[0] + '. See console for details.')
+        setShowAlert(true)
         setTimeout(() => {
-          setIsError(false)
-          setErrorMessage('')
+          setShowAlert(false)
+          setAlertMessage('')
         }, 3000)
       }
     }
@@ -105,6 +112,15 @@ const ModelLoader = () => {
     hasBeenLoaded,
     setHasBeenLoaded
   ])
+
+  useEffect(() => {
+    if (progress === 100) {
+      setTimeout(() => {
+        setShowAlert(false)
+        setAlertMessage('')
+      }, 2000)
+    }
+  }, [progress])
 
   const loadModel = useCallback(() => {
     if (!modelInfo || !selectedQuantization) return
@@ -164,7 +180,7 @@ const ModelLoader = () => {
             >
               {status === 'loading' && !hasBeenLoaded ? (
                 <>
-                  <Loader className="animate-spin h-4 w-4" />
+                  <Loader2 className="animate-spin h-4 w-4" />
                   <span>{progress.toFixed(0)}%</span>
                 </>
               ) : (
@@ -174,10 +190,12 @@ const ModelLoader = () => {
           </div>
         )}
       </div>
-      {isError && (
+      {showAlert && (
         <div className="fixed bottom-0 right-0 m-2">
-          <Alert variant="destructive">
-            <AlertDescription>{errorMessage}</AlertDescription>
+          <Alert
+            variant={`${typeof alertMessage === 'string' ? 'destructive' : 'default'}`}
+          >
+            <AlertDescription>{alertMessage}</AlertDescription>
           </Alert>
         </div>
       )}

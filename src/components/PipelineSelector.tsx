@@ -5,7 +5,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select' // Adjust the import path as needed
+} from '@/components/ui/select'
 
 export const supportedPipelines = [
   'feature-extraction',

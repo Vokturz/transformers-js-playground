@@ -46,7 +46,13 @@ function FeatureExtraction() {
 
   const [newExampleText, setNewExampleText] = useState<string>('')
   const [isExtracting, setIsExtracting] = useState<boolean>(false)
-  const [showVisualization, setShowVisualization] = useState<boolean>(true)
+  const [showVisualization, setShowVisualization] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 768
+    }
+    return true
+  })
+
   const [progress, setProgress] = useState<{
     completed: number
     total: number
@@ -59,6 +65,18 @@ function FeatureExtraction() {
     hasBeenLoaded,
     selectedQuantization
   } = useModel()
+
+  useEffect(() => {
+    const handleResize = () => {
+      setShowVisualization(window.innerWidth >= 768)
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
   const chartRef = useRef<SVGSVGElement>(null)
 
@@ -215,7 +233,6 @@ function FeatureExtraction() {
             })
           }
         })
-        console.log({ examples })
         setIsExtracting(false)
         setProgress(null)
       } else if (status === 'error') {

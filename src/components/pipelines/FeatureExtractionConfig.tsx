@@ -1,5 +1,12 @@
 import React from 'react'
 import { useFeatureExtraction } from '../../contexts/FeatureExtractionContext'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 
 const FeatureExtractionConfig = () => {
   const { config, setConfig } = useFeatureExtraction()
@@ -15,20 +22,36 @@ const FeatureExtractionConfig = () => {
           <label className="block text-sm font-medium text-foreground/80 mb-1">
             Pooling Strategy
           </label>
-          <select
+          <Select
             value={config.pooling}
-            onChange={(e) =>
+            onValueChange={(value) =>
               setConfig((prev) => ({
                 ...prev,
-                pooling: e.target.value as 'mean' | 'cls' | 'max'
+                pooling: value as 'mean' | 'cls'
               }))
             }
-            className="w-full px-3 py-2 border border-input rounded-md shadow-xs focus:outline-hidden focus:ring-2 focus:ring-ring focus:border-ring text-sm"
           >
-            <option value="mean">Mean Pooling</option>
-            <option value="cls">CLS Token</option>
-            <option value="max">Max Pooling</option>
-          </select>
+            <SelectTrigger className="w-full text-sm xl:text-base">
+              <SelectValue placeholder="Select a pooling strategy" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                key="mean"
+                value="mean"
+                className="text-sm data-[state=checked]:font-bold"
+              >
+                Mean Pooling
+              </SelectItem>
+              <SelectItem
+                key="cls"
+                value="cls"
+                className="text-sm data-[state=checked]:font-bold"
+              >
+                CLS Token
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
           <p className="text-xs text-muted-foreground mt-1">
             How to aggregate token embeddings into sentence embeddings
           </p>
@@ -65,10 +88,6 @@ const FeatureExtractionConfig = () => {
           <p className="mb-1">
             <strong>CLS Token:</strong> Use the [CLS] token embedding (if
             available)
-          </p>
-          <p>
-            <strong>Max Pooling:</strong> Take element-wise maximum across
-            tokens
           </p>
         </div>
       </div>

@@ -75,7 +75,7 @@ export interface FeatureExtractionWorkerInput {
   model: string
   dtype: QuantizationType
   config: {
-    pooling: 'mean' | 'cls' | 'max'
+    pooling: 'mean' | 'cls'
     normalize: boolean
   }
 }
