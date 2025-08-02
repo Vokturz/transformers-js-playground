@@ -1,9 +1,9 @@
 function Footer() {
   return (
     <footer className="bg-white w-full">
-      <div className="max-w-7xl flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 py-4 mx-auto">
+      <div className="max-w-7xl flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 py-4 mx-auto h-16">
         <div className="flex flex-row items-center space-x-2 text-sm text-gray-500">
-          <a
+          {/*<a
             href="https://vnavarro.dev"
             target="_blank"
             rel="noopener noreferrer"
@@ -11,8 +11,7 @@ function Footer() {
           >
             vnavarro.dev
           </a>
-          {/* vertical inline */}
-          <div className="w-[1px] h-4 bg-gray-500" />
+          <div className="w-[1px] h-4 bg-gray-500" />*/}
           <div className="flex flex-row space-x-2">
             <span>Powered by</span>
             <a
