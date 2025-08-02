@@ -59,7 +59,16 @@ const ModelCode = ({ isCodeModalOpen, setIsCodeModalOpen }: ModelCodeProps) => {
       break
     case 'text-generation':
       classType = 'generator'
-      exampleData = 'I love this product!'
+      if (modelInfo.hasChatTemplate) {
+        exampleData = JSON.stringify([
+          {
+            role: 'user',
+            content: 'Hello!'
+          }
+        ])
+      } else {
+        exampleData = 'Once upon a time, there was'
+      }
       config = {
         max_length: 50,
         do_sample: true,
@@ -99,7 +108,7 @@ const ${classType} = pipeline('${pipeline}', '${modelInfo.name}', {
   dtype: '${selectedQuantization}',
   device: 'webgpu' // 'wasm'
 });
-const result = await ${classType}('${exampleData}', ${JSON.stringify(config, null, 2)});
+const result = await ${classType}(${modelInfo.hasChatTemplate ? exampleData : "'" + exampleData + "'"}, ${JSON.stringify(config, null, 2)});
 console.log(result);
 `
 
@@ -113,7 +122,7 @@ console.log(result);
   const pythonCode = `from transformers import pipeline
 
 ${classType} = pipeline("${pipeline}", model="${modelInfo.name}")
-result = ${classType}("${exampleData}", ${configPython})
+result = ${classType}(${modelInfo.hasChatTemplate ? exampleData : '"' + exampleData + '"'}, ${configPython})
 print(result)
 `
 
