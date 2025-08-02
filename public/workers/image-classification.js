@@ -62,7 +62,7 @@ class MyImageClassificationPipeline {
 // Listen for messages from the main thread
 self.addEventListener('message', async (event) => {
   try {
-    const { type, image, model, dtype, topK = 5 } = event.data
+    const { type, image, model, dtype, topK = 1 } = event.data
 
     if (!model) {
       self.postMessage({
@@ -99,11 +99,9 @@ self.addEventListener('message', async (event) => {
       }
 
       try {
-        self.postMessage({ status: 'loading' })
-
         // Run classification
         const output = await classifier(image, {
-          topk: topK
+          top_k: topK
         })
 
         // Format predictions

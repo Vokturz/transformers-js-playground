@@ -464,7 +464,7 @@ function ModelSelector() {
                             <div className="flex-1 min-w-0 pr-3">
                               <div className="flex items-center justify-between">
                                 <Tooltip content={model.id}>
-                                  <span className="text-sm font-medium truncate block max-w-full">
+                                  <span className="text-sm font-medium truncate block max-w-[450px]">
                                     {model.id}
                                   </span>
                                 </Tooltip>

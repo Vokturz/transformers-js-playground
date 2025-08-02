@@ -1,5 +1,6 @@
 import React from 'react'
 import { useImageClassification } from '../../contexts/ImageClassificationContext'
+import { Slider } from '../ui/slider'
 
 const ImageClassificationConfig = () => {
   const { topK, setTopK } = useImageClassification()
@@ -15,18 +16,18 @@ const ImageClassificationConfig = () => {
           <label className="block text-sm font-medium text-foreground/80 mb-1">
             Top K Predictions: {topK}
           </label>
-          <input
-            type="range"
-            min="1"
-            max="10"
-            step="1"
-            value={topK}
-            onChange={(e) => setTopK(parseInt(e.target.value))}
-            className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+          <Slider
+            defaultValue={[topK]}
+            min={1}
+            max={10}
+            step={1}
+            onValueChange={(value) => setTopK(value[0])}
+            className="w-full rounded-lg"
           />
           <div className="flex justify-between text-xs text-muted-foreground/60 mt-1">
             <span>1</span>
-            <span>5</span>
+            <span>4</span>
+            <span>7</span>
             <span>10</span>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
@@ -36,7 +37,7 @@ const ImageClassificationConfig = () => {
 
         <div className="p-3 bg-chart-4/10 border border-chart-4/20 rounded-lg">
           <h4 className="text-sm font-medium text-chart-4 mb-2">💡 Tips</h4>
-          <div className="text-xs text-chart-4/80 space-y-1">
+          <div className="text-xs text-chart-4 space-y-1">
             <p>• Use Top K = 3-5 for most cases</p>
             <p>• Smaller images process faster</p>
             <p>• Try quantized models for speed</p>

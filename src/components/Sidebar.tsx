@@ -38,7 +38,7 @@ const Sidebar = ({ isOpen, onClose, setIsModalOpen }: SidebarProps) => {
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200 lg:hidden">
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-foreground">
               Configuration
             </h2>
             <button
@@ -52,21 +52,16 @@ const Sidebar = ({ isOpen, onClose, setIsModalOpen }: SidebarProps) => {
           {/* Content */}
           <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-6">
             {/* Pipeline Selection */}
-            <div className="space-y-3">
-              <h3 className="text-md xl:text-lg font-semibold text-gray-900 mb-2">
+            <div className="space-x-3 flex flex-row justify-center align-center">
+              <h3 className="text-md xl:text-lg font-semibold text-foreground text-nowrap mt-1">
                 Choose a Pipeline
               </h3>
-              <div className="w-full">
-                <PipelineSelector
-                  pipeline={pipeline}
-                  setPipeline={setPipeline}
-                />
-              </div>
+              <PipelineSelector pipeline={pipeline} setPipeline={setPipeline} />
             </div>
 
             {/* Model Selection */}
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-foreground">
                 Select Model
               </h3>
               <ModelSelector />

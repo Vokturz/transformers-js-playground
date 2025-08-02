@@ -30,7 +30,7 @@ const ModelInfo = () => {
   const ModelInfoSkeleton = () => (
     <div className="bg-gradient-to-r from-secondary to-accent px-3 py-3 rounded-lg border border-border space-y-3 animate-pulse w-4/5">
       <div className="flex items-center space-x-2">
-        <Bot className="w-4 h-4 text-primary/60" />
+        <Bot className="w-4 h-4 text-green-500" />
         <div className="h-4 bg-muted rounded-sm flex-1"></div>
         <div className="w-4 h-4 bg-muted rounded-full"></div>
       </div>
@@ -45,7 +45,7 @@ const ModelInfo = () => {
           <div className="h-3 bg-muted/80 rounded-sm w-8"></div>
         </div>
         <div className="flex items-center space-x-1">
-          <Download className="w-3 h-3 text-chart-2/60" />
+          <Download className="w-3 h-3 text-purple-500" />
           <div className="h-3 bg-muted/80 rounded-sm w-8"></div>
         </div>
         <div className="flex items-center space-x-1">
@@ -53,7 +53,7 @@ const ModelInfo = () => {
           <div className="h-3 bg-muted/80 rounded-sm w-8"></div>
         </div>
         <div className="flex items-center space-x-1">
-          <DatabaseIcon className="w-3 h-3 text-chart-4/60" />
+          <DatabaseIcon className="w-3 h-3 text-purple-500" />
           <div className="h-3 bg-muted/80 rounded-sm w-12"></div>
         </div>
       </div>

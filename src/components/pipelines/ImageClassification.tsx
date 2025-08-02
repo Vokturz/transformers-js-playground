@@ -49,7 +49,6 @@ function ImageClassification() {
   } = useImageClassification()
 
   const [isClassifying, setIsClassifying] = useState<boolean>(false)
-  const [showPreviews, setShowPreviews] = useState<boolean>(true)
   const [dragOver, setDragOver] = useState<boolean>(false)
   const [progress, setProgress] = useState<number | null>(null)
 
@@ -71,7 +70,6 @@ function ImageClassification() {
       updateExample(example.id, { isLoading: true })
       setIsClassifying(true)
       setProgress(0)
-
       const message: ImageClassificationWorkerInput = {
         type: 'classify',
         image: example.url,
@@ -135,7 +133,9 @@ function ImageClassification() {
   )
 
   const handleLoadSampleImages = useCallback(async () => {
+    const existstingImages = new Set(examples.map((ex) => ex.name))
     for (const sample of SAMPLE_IMAGES) {
+      if (existstingImages.has(sample.name)) continue
       try {
         const response = await fetch(sample.url)
         const blob = await response.blob()
@@ -145,14 +145,13 @@ function ImageClassification() {
         console.error(`Failed to load sample image ${sample.name}:`, error)
       }
     }
-  }, [addExample])
+  }, [addExample, examples])
 
   useEffect(() => {
     if (!activeWorker) return
 
     const onMessageReceived = (e: MessageEvent<WorkerMessage>) => {
       const { status, output, progress: workerProgress } = e.data
-
       if (status === 'progress' && workerProgress !== undefined) {
         setProgress(workerProgress)
       } else if (status === 'output' && output?.predictions) {
@@ -198,17 +197,6 @@ function ImageClassification() {
             Load Samples
           </button>
           <button
-            onClick={() => setShowPreviews(!showPreviews)}
-            className="p-2 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors"
-            title={showPreviews ? 'Hide Previews' : 'Show Previews'}
-          >
-            {showPreviews ? (
-              <EyeOff className="w-4 h-4" />
-            ) : (
-              <Eye className="w-4 h-4" />
-            )}
-          </button>
-          <button
             onClick={clearExamples}
             className="p-2 bg-red-100 hover:bg-red-200 rounded-lg transition-colors"
             title="Clear All Images"
@@ -218,7 +206,7 @@ function ImageClassification() {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 flex-1">
+      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
         {/* Left Panel - Image Upload and List */}
         <div className="lg:w-1/2 flex flex-col">
           {/* Upload Area */}
@@ -281,9 +269,9 @@ function ImageClassification() {
           )}
 
           {/* Images List */}
-          <div className="flex-1 overflow-y-auto border border-gray-300 rounded-lg bg-white">
+          <div className="flex-1 overflow-y-auto border border-gray-300 rounded-lg bg-white min-h-0 max-h-[30vh] sm:max-h-[20vh] lg:max-h-none">
             <div className="p-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">
+              <h3 className="text-sm font-medium text-gray-700 mb-3 sticky top-0 bg-white z-10">
                 Images ({examples.length})
               </h3>
               {examples.length === 0 ? (
@@ -292,7 +280,7 @@ function ImageClassification() {
                   started.
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="overflow-y-auto max-h-[calc(100%-10rem)] grid-cols-2 grid sm:grid-cols-3 lg:grid-cols-1 gap-2 ">
                   {examples.map((example) => (
                     <div
                       key={example.id}
@@ -304,15 +292,13 @@ function ImageClassification() {
                       onClick={() => handleSelectExample(example)}
                     >
                       <div className="flex gap-3">
-                        {showPreviews && (
-                          <div className="shrink-0">
-                            <img
-                              src={example.url}
-                              alt={example.name}
-                              className="w-16 h-16 object-cover rounded-lg"
-                            />
-                          </div>
-                        )}
+                        <div className="shrink-0">
+                          <img
+                            src={example.url}
+                            alt={example.name}
+                            className="w-16 h-16 object-cover rounded-lg"
+                          />
+                        </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-start">
                             <div className="flex-1 min-w-0">
@@ -332,11 +318,6 @@ function ImageClassification() {
                                 ) : (
                                   <div className="text-xs text-gray-500">
                                     Not classified
-                                  </div>
-                                )}
-                                {selectedExample?.id === example.id && (
-                                  <div className="text-xs text-blue-600">
-                                    Selected
                                   </div>
                                 )}
                               </div>
@@ -362,19 +343,19 @@ function ImageClassification() {
         </div>
 
         {/* Right Panel - Preview and Results */}
-        <div className="lg:w-1/2 flex flex-col">
+        <div className="lg:w-1/2 flex lg:flex-col flex-row space-x-4 sm:max-h-[34vh] lg:max-h-none">
           {/* Image Preview */}
           {selectedExample && (
             <div className="mb-4">
               <h3 className="text-sm font-medium text-gray-700 mb-2">
                 Selected Image
               </h3>
-              <div className="border border-gray-300 rounded-lg bg-white p-4">
+              <div className="sm:border-none border border-gray-300 rounded-lg bg-white p-4 sm:p-0">
                 <div className="flex flex-col items-center">
                   <img
                     src={selectedExample.url}
                     alt={selectedExample.name}
-                    className="max-w-full max-h-64 object-contain rounded-lg mb-2"
+                    className="max-w-64 lg:max-w-full max-h-60 lg:max-h-64 object-contain rounded-lg mb-2"
                   />
                   <div className="text-sm text-gray-600 text-center">
                     {selectedExample.name}
@@ -385,9 +366,9 @@ function ImageClassification() {
           )}
 
           {/* Classification Results */}
-          <div className="flex-1 overflow-y-auto border border-gray-300 rounded-lg bg-white">
+          <div className="flex-1 overflow-y-auto border border-gray-300 rounded-lg bg-white  ">
             <div className="p-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">
+              <h3 className="text-sm font-medium text-gray-700 mb-3 sticky top-0 bg-white">
                 Classification Results
                 {selectedExample && ` - ${selectedExample.name}`}
               </h3>
@@ -419,7 +400,7 @@ function ImageClassification() {
                   </button>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-3 overflow-y-auto max-h-[calc(100%-3rem)]">
                   {selectedExample.predictions.map((prediction, index) => {
                     const confidencePercent = (prediction.score * 100).toFixed(
                       1
