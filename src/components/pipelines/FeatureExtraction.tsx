@@ -142,9 +142,21 @@ function FeatureExtraction() {
   const handleAddExample = useCallback(() => {
     if (!newExampleText.trim()) return
 
-    addExample(newExampleText)
+    // Check for duplicates
+    const trimmedText = newExampleText.trim()
+    const isDuplicate = examples.some(
+      (example) => example.text.toLowerCase() === trimmedText.toLowerCase()
+    )
+
+    if (isDuplicate) {
+      // Optionally show a toast or alert here
+      setNewExampleText('')
+      return
+    }
+
+    addExample(trimmedText)
     setNewExampleText('')
-  }, [newExampleText, addExample])
+  }, [newExampleText, addExample, examples])
 
   const handleExtractAll = useCallback(() => {
     const textsToExtract = examples
@@ -167,8 +179,13 @@ function FeatureExtraction() {
   )
 
   const handleLoadSampleData = useCallback(() => {
-    SAMPLE_TEXTS.forEach((text) => addExample(text))
-  }, [addExample])
+    const existingTexts = new Set(examples.map((ex) => ex.text.toLowerCase()))
+    SAMPLE_TEXTS.forEach((text) => {
+      if (!existingTexts.has(text.toLowerCase())) {
+        addExample(text)
+      }
+    })
+  }, [addExample, examples])
 
   useEffect(() => {
     if (!activeWorker) return
@@ -224,14 +241,16 @@ function FeatureExtraction() {
   const busy = status !== 'ready' || isExtracting
 
   return (
-    <div className="flex flex-col h-full max-h-[92vh] w-full p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Feature Extraction (Embeddings)</h1>
-        <div className="flex gap-2">
+    <div className="flex flex-col h-full max-h-[88vh] w-full p-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+        <h1 className="text-xl sm:text-2xl font-bold">
+          Feature Extraction (Embeddings)
+        </h1>
+        <div className="flex flex-nowrap gap-2">
           <button
             onClick={handleLoadSampleData}
             disabled={!hasBeenLoaded || isExtracting}
-            className="px-3 py-2 bg-purple-100 hover:bg-purple-200 disabled:bg-gray-100 disabled:cursor-not-allowed rounded-lg transition-colors text-sm"
+            className="px-3 py-2 bg-purple-100 hover:bg-purple-200 disabled:bg-gray-100 disabled:cursor-not-allowed rounded-lg transition-colors text-xs sm:text-sm"
             title="Load Sample Data"
           >
             Load Samples
@@ -259,28 +278,28 @@ function FeatureExtraction() {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 flex-1">
+      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
         {/* Left Panel - Examples */}
-        <div className="lg:w-1/2 flex flex-col">
+        <div className="lg:w-1/2 flex flex-col min-h-0">
           {/* Add Example */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Add Text Examples:
             </label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <textarea
                 value={newExampleText}
                 onChange={(e) => setNewExampleText(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Enter text to get embeddings... (Press Enter to add)"
-                className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
                 rows={2}
                 disabled={!hasBeenLoaded || isExtracting}
               />
               <button
                 onClick={handleAddExample}
                 disabled={!newExampleText.trim() || !hasBeenLoaded}
-                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors self-start sm:self-stretch"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -309,9 +328,9 @@ function FeatureExtraction() {
           )}
 
           {/* Examples List */}
-          <div className="flex-1 overflow-y-auto border border-gray-300 rounded-lg bg-white">
-            <div className="p-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">
+          <div className="flex-1 overflow-y-auto border border-gray-300 rounded-lg bg-white min-h-0 max-h-[35vh] sm:max-h-[40vh] lg:max-h-none">
+            <div className="p-4 h-full">
+              <h3 className="text-sm font-medium text-gray-700 mb-3 sticky top-0 bg-white z-10">
                 Examples ({examples.length})
               </h3>
               {examples.length === 0 ? (
@@ -319,11 +338,11 @@ function FeatureExtraction() {
                   No examples added yet. Add some text above to get started.
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-2 overflow-y-auto max-h-[calc(100%-3rem)]">
                   {examples.map((example) => (
                     <div
                       key={example.id}
-                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                      className={`p-2 sm:p-3 border rounded-lg cursor-pointer transition-colors ${
                         selectedExample?.id === example.id
                           ? 'border-blue-500 bg-blue-50'
                           : 'border-gray-200 hover:border-gray-300'
@@ -377,19 +396,19 @@ function FeatureExtraction() {
         </div>
 
         {/* Right Panel - Visualization and Similarities */}
-        <div className="lg:w-1/2 flex flex-col">
+        <div className="lg:w-1/2 flex flex-col min-h-0">
           {showVisualization && (
             <div className="mb-4">
               <h3 className="text-sm font-medium text-gray-700 mb-2">
                 2D Visualization
               </h3>
-              <div className="border border-gray-300 rounded-lg bg-white p-4">
+              <div className="border border-gray-300 rounded-lg bg-white p-2 sm:p-4">
                 <svg
                   ref={chartRef}
                   width="100%"
-                  height="300"
+                  height="250"
                   viewBox="0 0 400 300"
-                  className="border border-gray-100"
+                  className="border border-gray-100 sm:h-[300px]"
                 >
                   {points2D.map((point) => {
                     const isSelected = selectedExample?.id === point.id
@@ -463,30 +482,30 @@ function FeatureExtraction() {
                   </div>
                 )}
                 {points2D.length > 0 && (
-                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="mt-3 p-2 sm:p-3 bg-gray-50 rounded-lg">
                     <h4 className="text-xs font-medium text-gray-700 mb-2">
                       Legend:
                     </h4>
-                    <div className="flex flex-wrap gap-3 text-xs">
+                    <div className="flex flex-wrap gap-2 sm:gap-3 text-xs">
                       <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                        <span>Selected</span>
+                        <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-blue-500"></div>
+                        <span className="text-xs">Selected</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                        <span>High similarity (&gt;80%)</span>
+                        <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-green-500"></div>
+                        <span className="text-xs">High (&gt;80%)</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                        <span>Medium similarity (50-80%)</span>
+                        <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-yellow-500"></div>
+                        <span className="text-xs">Med (50-80%)</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                        <span>Low similarity (&lt;50%)</span>
+                        <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-red-500"></div>
+                        <span className="text-xs">Low (&lt;50%)</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 rounded-full bg-gray-500"></div>
-                        <span>Not compared</span>
+                        <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-gray-500"></div>
+                        <span className="text-xs">Not compared</span>
                       </div>
                     </div>
                   </div>
@@ -496,9 +515,9 @@ function FeatureExtraction() {
           )}
 
           {/* Similarity Results */}
-          <div className="flex-1 overflow-y-auto border border-gray-300 rounded-lg bg-white">
-            <div className="p-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">
+          <div className="flex-1 overflow-y-auto border border-gray-300 rounded-lg bg-white min-h-0 max-h-[35vh] sm:max-h-[40vh] lg:max-h-none">
+            <div className="p-4 h-full">
+              <h3 className="text-sm font-medium text-gray-700 mb-3 sticky top-0 bg-white z-10">
                 Cosine Similarities
                 {selectedExample &&
                   ` (vs "${selectedExample.text.substring(0, 30)}...")`}
@@ -512,7 +531,7 @@ function FeatureExtraction() {
                   No other examples with embeddings to compare
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-2 overflow-y-auto max-h-[calc(100%-3rem)]">
                   {similarities.map((sim) => {
                     const example = examples.find(
                       (ex) => ex.id === sim.exampleId
@@ -530,7 +549,7 @@ function FeatureExtraction() {
                     return (
                       <div
                         key={sim.exampleId}
-                        className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                        className="p-2 sm:p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                       >
                         <div className="flex justify-between items-start">
                           <div className="flex-1 min-w-0">
