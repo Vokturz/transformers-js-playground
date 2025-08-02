@@ -1,10 +1,13 @@
-import { useEffect, useCallback } from 'react'
-import { ChevronDown, Loader } from 'lucide-react'
+import { useEffect, useCallback, useState } from 'react'
+import { ChevronDown, Loader, X } from 'lucide-react'
 import { QuantizationType, WorkerMessage } from '../types'
 import { useModel } from '../contexts/ModelContext'
 import { getWorker } from '../lib/workerManager'
+import { Alert, AlertDescription } from './ui/alert'
 
 const ModelLoader = () => {
+  const [isError, setIsError] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const {
     modelInfo,
     selectedQuantization,
@@ -75,7 +78,14 @@ const ModelLoader = () => {
         }
       } else if (status === 'error') {
         setStatus('error')
-        console.error(e.data.output)
+        const error = e.data.output
+        console.error(error)
+        setErrorMessage(error.split('.')[0] + '. See console for details.')
+        setIsError(true)
+        setTimeout(() => {
+          setIsError(false)
+          setErrorMessage('')
+        }, 3000)
       }
     }
 
@@ -164,6 +174,13 @@ const ModelLoader = () => {
           </div>
         )}
       </div>
+      {isError && (
+        <div className="fixed bottom-0 right-0 m-2">
+          <Alert variant="destructive">
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        </div>
+      )}
     </div>
   )
 }
