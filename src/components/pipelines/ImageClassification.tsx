@@ -184,7 +184,7 @@ function ImageClassification() {
   const busy = status !== 'ready' || isClassifying
 
   return (
-    <div className="flex flex-col h-full max-h-[calc(100dvh-148px)]  w-full p-4">
+    <div className="flex flex-col h-full max-h-[calc(100dvh-128px)]  w-full p-4">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Image Classification</h1>
         <div className="flex gap-2">

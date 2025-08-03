@@ -39,11 +39,10 @@ function App() {
   }, [setModels, setModelInfo, setIsFetching, pipeline])
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="relative min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
       <Header />
       <PipelineLayout>
-        <div className=" flex h-[calc(100vh-8rem)]">
-          {/* Header is h-16 = 4rem */}
+        <div className=" flex h-[calc(100vh-6.6rem)]">
           {/* Main Content */}
           <main className="flex-1 overflow-auto">
             <div className="h-full px-4 sm:px-6 lg:px-8 py-2 lg:pr-4 max-w-none">

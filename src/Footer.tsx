@@ -1,7 +1,7 @@
 function Footer() {
   return (
-    <footer className="bg-white w-full">
-      <div className="max-w-7xl flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 py-4 mx-auto h-16">
+    <footer className="bg-white w-full mt-auto">
+      <div className="max-w-7xl flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 py-4 mx-auto h-10">
         <div className="flex flex-row items-center space-x-2 text-sm text-gray-500">
           {/*<a
             href="https://vnavarro.dev"

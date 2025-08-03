@@ -81,7 +81,7 @@ function ZeroShotClassification() {
   const busy: boolean = status !== 'ready'
 
   return (
-    <div className="flex flex-col h-full max-h-[calc(100dvh-148px)]  w-full p-4">
+    <div className="flex flex-col h-full max-h-[calc(100dvh-128px)]  w-full p-4">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Zero-Shot Classification</h1>
       </div>
