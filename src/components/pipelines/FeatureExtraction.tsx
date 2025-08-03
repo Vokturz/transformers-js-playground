@@ -295,7 +295,8 @@ function FeatureExtraction() {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
+
+      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0 overflow-y-auto">
         {/* Left Panel - Examples */}
         <div className="lg:w-1/2 flex flex-col min-h-0">
           {/* Add Example */}
@@ -303,25 +304,26 @@ function FeatureExtraction() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Add Text Examples:
             </label>
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-row gap-2">
               <textarea
                 value={newExampleText}
                 onChange={(e) => setNewExampleText(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Enter text to get embeddings... (Press Enter to add)"
-                className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
+                className="w-5/6 lg:w-full flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
                 rows={2}
                 disabled={!hasBeenLoaded || isExtracting}
               />
               <button
                 onClick={handleAddExample}
                 disabled={!newExampleText.trim() || !hasBeenLoaded}
-                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors self-start sm:self-stretch"
+                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors self-stretch"
               >
                 <Plus className="w-4 h-4" />
               </button>
             </div>
           </div>
+
 
           {/* Extract Button */}
           {examples.some((ex) => !ex.embedding) && (
@@ -344,8 +346,8 @@ function FeatureExtraction() {
             </div>
           )}
 
-          {/* Examples List */}
-          <div className="flex-1 overflow-y-auto border border-gray-300 rounded-lg bg-white min-h-0 max-h-[35vh] sm:max-h-[40vh] lg:max-h-none">
+           {/* Examples List */}
+          <div className="flex-1 overflow-y-auto border border-gray-300 rounded-lg bg-white min-h-12 max-h-[35vh] sm:max-h-[40vh] lg:max-h-none">
             <div className="p-4 h-full">
               <h3 className="text-sm font-medium text-gray-700 mb-3 sticky top-0 bg-white z-10">
                 Examples ({examples.length})
@@ -415,11 +417,11 @@ function FeatureExtraction() {
         {/* Right Panel - Visualization and Similarities */}
         <div className="lg:w-1/2 flex flex-col min-h-0">
           {showVisualization && (
-            <div className="mb-4">
+            <div className="mb-2">
               <h3 className="text-sm font-medium text-gray-700 mb-2">
                 2D Visualization
               </h3>
-              <div className="border border-gray-300 rounded-lg bg-white p-2 sm:p-4">
+              <div className="border border-gray-300 rounded-lg bg-white p-2 sm:p-4 ">
                 <svg
                   ref={chartRef}
                   width="100%"
@@ -532,7 +534,7 @@ function FeatureExtraction() {
           )}
 
           {/* Similarity Results */}
-          <div className="flex-1 overflow-y-auto border border-gray-300 rounded-lg bg-white min-h-0 max-h-[35vh] sm:max-h-[40vh] lg:max-h-none">
+          <div className="flex-1 overflow-y-auto border border-gray-300 rounded-lg bg-white min-h-32 max-h-[35vh] sm:max-h-[40vh] lg:max-h-none">
             <div className="p-4 h-full">
               <h3 className="text-sm font-medium text-gray-700 mb-3 sticky top-0 bg-white z-10">
                 Cosine Similarities
@@ -560,8 +562,8 @@ function FeatureExtraction() {
                       sim.similarity > 0.8
                         ? 'text-green-600'
                         : sim.similarity > 0.5
-                          ? 'text-yellow-600'
-                          : 'text-red-500'
+                        ? 'text-yellow-600'
+                        : 'text-red-500'
 
                     return (
                       <div
@@ -585,8 +587,8 @@ function FeatureExtraction() {
                                 sim.similarity > 0.8
                                   ? 'bg-green-500'
                                   : sim.similarity > 0.5
-                                    ? 'bg-yellow-500'
-                                    : 'bg-red-500'
+                                  ? 'bg-yellow-500'
+                                  : 'bg-red-500'
                               }`}
                               style={{
                                 width: `${Math.max(sim.similarity * 100, 5)}%`

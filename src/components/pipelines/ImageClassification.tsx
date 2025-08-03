@@ -206,7 +206,7 @@ function ImageClassification() {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
+      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0  overflow-y-auto">
         {/* Left Panel - Image Upload and List */}
         <div className="lg:w-1/2 flex flex-col">
           {/* Upload Area */}
@@ -219,22 +219,27 @@ function ImageClassification() {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
+              className={`border-2 border-dashed rounded-lg p-3 lg:p-6 text-center transition-colors cursor-pointer ${
                 dragOver
                   ? 'border-blue-500 bg-blue-50'
                   : 'border-gray-300 hover:border-gray-400'
               } ${!hasBeenLoaded ? 'opacity-50 cursor-not-allowed' : ''}`}
               onClick={() => hasBeenLoaded && fileInputRef.current?.click()}
             >
-              <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-              <p className="text-sm text-gray-600">
-                {dragOver
-                  ? 'Drop images here'
-                  : 'Click to upload or drag and drop images'}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <div className="flex flex-row lg:flex-col">
+                <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                <div className='flex flex-col'>
+                <p className="text-sm text-gray-600">
+                  {dragOver
+                    ? 'Drop images here'
+                    : 'Click to upload or drag and drop images'}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
                 Supports JPG, PNG, GIF, WebP
               </p>
+              </div>
+              </div>
+              
               <input
                 ref={fileInputRef}
                 type="file"
@@ -350,12 +355,12 @@ function ImageClassification() {
               <h3 className="text-sm font-medium text-gray-700 mb-2">
                 Selected Image
               </h3>
-              <div className="sm:border-none border border-gray-300 rounded-lg bg-white p-4 sm:p-0">
+              <div className="border-none sm:border border-gray-300 rounded-lg bg-white p-4 sm:p-0">
                 <div className="flex flex-col items-center">
                   <img
                     src={selectedExample.url}
                     alt={selectedExample.name}
-                    className="max-w-64 lg:max-w-full max-h-60 lg:max-h-64 object-contain rounded-lg mb-2"
+                    className="max-w-24 lg:max-w-full max-h-60 lg:max-h-64 object-contain rounded-lg mb-2"
                   />
                   <div className="text-sm text-gray-600 text-center">
                     {selectedExample.name}
@@ -432,8 +437,8 @@ function ImageClassification() {
                               isTopPrediction
                                 ? 'bg-green-500'
                                 : prediction.score > 0.5
-                                  ? 'bg-blue-500'
-                                  : 'bg-gray-400'
+                                ? 'bg-blue-500'
+                                : 'bg-gray-400'
                             }`}
                             style={{
                               width: `${Math.max(prediction.score * 100, 2)}%`
