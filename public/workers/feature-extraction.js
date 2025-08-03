@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.1'
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@latest'
 
 class MyFeatureExtractionPipeline {
   static task = 'feature-extraction'
@@ -8,12 +8,14 @@ class MyFeatureExtractionPipeline {
   static async getInstance(model, dtype = 'fp32', progress_callback = null) {
     try {
       // Try WebGPU first
-      this.instance = await pipeline(this.task, model, {
-        dtype,
-        device: 'webgpu',
-        progress_callback
-      })
-      return this.instance
+      throw Error('onnxruntime-web failed for feature-extraction with transformers 3.7.1')
+
+      // this.instance = await pipeline(this.task, model, {
+      //   dtype,
+      //   device: 'webgpu',
+      //   progress_callback,
+      // })
+      // return this.instance
     } catch (webgpuError) {
       // Fallback to WASM if WebGPU fails
       if (progress_callback) {

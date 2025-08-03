@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.1'
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@latest'
 
 class MyImageClassificationPipeline {
   static task = 'image-classification'
@@ -19,11 +19,13 @@ class MyImageClassificationPipeline {
     if (!this.instance) {
       try {
         // Try WebGPU first
-        this.instance = await pipeline(this.task, model, {
-          dtype,
-          device: 'webgpu',
-          progress_callback
-        })
+        throw Error('onnxruntime-web failed for image-classification with transformers 3.7.1')
+
+        // this.instance = await pipeline(this.task, model, {
+        //   dtype,
+        //   device: 'webgpu',
+        //   progress_callback
+        // })
       } catch (webgpuError) {
         // Fallback to WASM if WebGPU fails
         if (progress_callback) {
