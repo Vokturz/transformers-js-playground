@@ -1,4 +1,4 @@
-import { Code2, FileText, X } from 'lucide-react'
+import { CircleQuestionMark, Code2, FileText, X } from 'lucide-react'
 import PipelineSelector from './PipelineSelector'
 import ModelSelector from './ModelSelector'
 import ModelInfo from './ModelInfo'
@@ -9,6 +9,7 @@ import ZeroShotClassificationConfig from './pipelines/ZeroShotClassificationConf
 import ImageClassificationConfig from './pipelines/ImageClassificationConfig'
 import TextClassificationConfig from './pipelines/TextClassificationConfig'
 import { Button } from '@/components/ui/button'
+import Tooltip from './Tooltip'
 
 interface SidebarProps {
   isOpen: boolean
@@ -61,9 +62,23 @@ const Sidebar = ({
           <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-6">
             {/* Pipeline Selection */}
             <div className="space-x-3 flex flex-row justify-center align-center">
-              <h3 className="text-md xl:text-lg font-semibold text-foreground text-nowrap mt-1">
-                Choose a Pipeline
-              </h3>
+              <div>
+                <h3 className="text-md xl:text-lg font-semibold text-foreground text-nowrap mt-1">
+                  Choose a Pipeline
+                </h3>
+                {(pipeline === 'feature-extraction' ||
+                  pipeline === 'image-classification') && (
+                  <span className="flex text-xs text-red-500 justify-center text-center">
+                    WebGPU disabled{' '}
+                    <Tooltip
+                      content="onnxruntime-web seems not to support this pipeline"
+                      className="transform -translate-x-1/3 break-keep max-w-12"
+                    >
+                      <CircleQuestionMark className="inline w-4 h-4 ml-1" />
+                    </Tooltip>
+                  </span>
+                )}
+              </div>
               <PipelineSelector pipeline={pipeline} setPipeline={setPipeline} />
             </div>
 
