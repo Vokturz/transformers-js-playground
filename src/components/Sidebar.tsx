@@ -8,6 +8,7 @@ import FeatureExtractionConfig from './pipelines/FeatureExtractionConfig'
 import ZeroShotClassificationConfig from './pipelines/ZeroShotClassificationConfig'
 import ImageClassificationConfig from './pipelines/ImageClassificationConfig'
 import TextClassificationConfig from './pipelines/TextClassificationConfig'
+import TextToSpeechConfig from './pipelines/TextToSpeechConfig'
 import { Button } from '@/components/ui/button'
 import Tooltip from './Tooltip'
 
@@ -24,7 +25,7 @@ const Sidebar = ({
   setIsModalOpen,
   setIsCodeModalOpen
 }: SidebarProps) => {
-  const { pipeline, setPipeline } = useModel()
+  const { pipeline, setPipeline, modelInfo } = useModel()
 
   return (
     <>
@@ -95,13 +96,18 @@ const Sidebar = ({
               <ModelInfo />
               {/* Model README Button */}
               <div className="flex flex-row mt-2 space-x-4 ">
-                <Button variant="outline" onClick={() => setIsModalOpen(true)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsModalOpen(true)}
+                  disabled={!modelInfo}
+                >
                   <FileText className="w-4 h-4 flex-shrink-0" />
                   <span>View README.md</span>
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => setIsCodeModalOpen(true)}
+                  disabled={!modelInfo}
                 >
                   <Code2 className="w-4 h-4 flex-shrink-0" />
                   <span>See Code</span>
@@ -119,6 +125,7 @@ const Sidebar = ({
               <ImageClassificationConfig />
             )}
             {pipeline === 'text-classification' && <TextClassificationConfig />}
+            {pipeline === 'text-to-speech' && <TextToSpeechConfig />}
           </div>
         </div>
       </div>

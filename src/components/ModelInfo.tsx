@@ -25,7 +25,14 @@ const ModelInfo = () => {
     return num.toString()
   }
 
-  const { models, modelInfo, selectedQuantization, isFetching } = useModel()
+  const {
+    models,
+    status,
+    modelInfo,
+    selectedQuantization,
+    isFetching,
+    errorText
+  } = useModel()
 
   const ModelInfoSkeleton = () => (
     <div className="bg-gradient-to-r from-secondary to-accent px-3 py-3 rounded-lg border border-border space-y-3 animate-pulse w-4/5">
@@ -73,7 +80,7 @@ const ModelInfo = () => {
         {/* Compatibility Status */}
         {typeof modelInfo.isCompatible === 'boolean' && (
           <div className="shrink-0 ">
-            {modelInfo.isCompatible ? (
+            {modelInfo.isCompatible && status !== 'error' ? (
               <CheckCircle className="w-4 h-4 text-green-500" />
             ) : (
               <XCircle className="w-4 h-4 text-destructive" />
@@ -156,10 +163,11 @@ const ModelInfo = () => {
       <ModelLoader />
 
       {/* Incompatibility Message */}
-      {modelInfo.isCompatible === false && modelInfo.incompatibilityReason && (
+      {((modelInfo.isCompatible === false && modelInfo.incompatibilityReason) ||
+        errorText) && (
         <div className="bg-destructive/10 border border-destructive/20 rounded-md px-2 py-2">
           <p className="text-xs text-destructive whitespace-break-spaces">
-            {modelInfo.incompatibilityReason}
+            {errorText ? errorText : modelInfo.incompatibilityReason}
           </p>
         </div>
       )}

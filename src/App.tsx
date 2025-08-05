@@ -8,6 +8,7 @@ import { getModelsByPipeline } from './lib/huggingface'
 import TextGeneration from './components/pipelines/TextGeneration'
 import FeatureExtraction from './components/pipelines/FeatureExtraction'
 import ImageClassification from './components/pipelines/ImageClassification'
+import TextToSpeech from './components/pipelines/TextToSpeech'
 import Sidebar from './components/Sidebar'
 import ModelReadme from './components/ModelReadme'
 import { PipelineLayout } from './components/PipelineLayout'
@@ -18,13 +19,22 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isCodeModalOpen, setIsCodeModalOpen] = useState(false)
-  const { pipeline, setModels, setModelInfo, modelInfo, setIsFetching } =
-    useModel()
+  const {
+    pipeline,
+    setModels,
+    setModelInfo,
+    modelInfo,
+    setIsFetching,
+    setErrorText,
+    setStatus
+  } = useModel()
 
   useEffect(() => {
     setModelInfo(null)
     setModels([])
     setIsFetching(true)
+    setStatus('initiate')
+    setErrorText('')
 
     const fetchModels = async () => {
       try {
@@ -36,7 +46,14 @@ function App() {
       }
     }
     fetchModels()
-  }, [setModels, setModelInfo, setIsFetching, pipeline])
+  }, [
+    setModels,
+    setModelInfo,
+    setIsFetching,
+    setStatus,
+    setErrorText,
+    pipeline
+  ])
 
   return (
     <div className="relative min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -67,6 +84,7 @@ function App() {
                 {pipeline === 'text-generation' && <TextGeneration />}
                 {pipeline === 'feature-extraction' && <FeatureExtraction />}
                 {pipeline === 'image-classification' && <ImageClassification />}
+                {pipeline === 'text-to-speech' && <TextToSpeech />}
               </div>
             </div>
           </main>

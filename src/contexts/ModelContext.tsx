@@ -25,6 +25,8 @@ interface ModelContextType {
   setIsFetching: (isFetching: boolean) => void
   hasBeenLoaded: boolean
   setHasBeenLoaded: (hasBeenLoaded: boolean) => void
+  errorText: string
+  setErrorText: (errorText: string) => void
 }
 
 const ModelContext = createContext<ModelContextType | undefined>(undefined)
@@ -42,6 +44,7 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
   const [activeWorker, setActiveWorker] = useState<Worker | null>(null)
   const [isFetching, setIsFetching] = useState(false)
   const [hasBeenLoaded, setHasBeenLoaded] = useState(false)
+  const [errorText, setErrorText] = useState('')
 
   // set progress to 0 when model is changed
   useEffect(() => {
@@ -68,7 +71,9 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
         isFetching,
         setIsFetching,
         hasBeenLoaded,
-        setHasBeenLoaded
+        setHasBeenLoaded,
+        errorText,
+        setErrorText
       }}
     >
       {children}

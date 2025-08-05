@@ -2,12 +2,13 @@ import { useEffect, useCallback, useState } from 'react'
 import { ChevronDown, Loader2, X } from 'lucide-react'
 import { QuantizationType, WorkerMessage } from '../types'
 import { useModel } from '../contexts/ModelContext'
-import { getWorker } from '../lib/workerManager'
+import { getWorker, terminateWorker } from '../lib/workerManager'
 import { Alert, AlertDescription } from './ui/alert'
 
 const ModelLoader = () => {
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState<React.ReactNode>('')
+  const [lastModel, setLastModel] = useState<string | null>(null)
   const {
     modelInfo,
     selectedQuantization,
@@ -20,7 +21,8 @@ const ModelLoader = () => {
     setActiveWorker,
     pipeline,
     hasBeenLoaded,
-    setHasBeenLoaded
+    setHasBeenLoaded,
+    setErrorText
   } = useModel()
 
   useEffect(() => {
@@ -57,8 +59,10 @@ const ModelLoader = () => {
     }
 
     if (!hasBeenLoaded) {
+      setErrorText('')
       setStatus('initiate')
       setActiveWorker(newWorker)
+      setProgress(0)
     }
 
     const onMessageReceived = (e: MessageEvent<WorkerMessage>) => {
@@ -75,24 +79,25 @@ const ModelLoader = () => {
           output.file.startsWith('onnx')
         ) {
           setProgress(output.progress)
-          // setShowAlert(true)
-          // setAlertMessage(
-          //   <div className="flex items-center">
-          //     <Loader2 className="animate-spin h-4 w-4 mr-2" />
-          //     Loading Model
-          //   </div>
-          // )
         }
       } else if (status === 'error') {
         setStatus('error')
         const error = e.data.output
         console.error(error)
-        setAlertMessage(error.split('.')[0] + '. See console for details.')
+        const errText = error.split(' WASM error: ')[1]
+        setErrorText(errText)
         setShowAlert(true)
+        let time = 3000
+        if (!hasBeenLoaded)
+          setAlertMessage(error.split('.')[0] + '. See console for details.')
+        else {
+          setAlertMessage(`${errText}. Refresh the page and try again.`)
+          time = 5000
+        }
         setTimeout(() => {
           setShowAlert(false)
           setAlertMessage('')
-        }, 3000)
+        }, time)
       }
     }
 
@@ -100,7 +105,7 @@ const ModelLoader = () => {
 
     return () => {
       newWorker.removeEventListener('message', onMessageReceived)
-      // terminateWorker(pipeline);
+      terminateWorker(pipeline)
     }
   }, [
     pipeline,
@@ -110,7 +115,8 @@ const ModelLoader = () => {
     setStatus,
     setProgress,
     hasBeenLoaded,
-    setHasBeenLoaded
+    setHasBeenLoaded,
+    setErrorText
   ])
 
   useEffect(() => {
@@ -174,8 +180,10 @@ const ModelLoader = () => {
         {selectedQuantization && (
           <div className="flex justify-center">
             <button
-              className="w-32 py-2 px-4 bg-green-500 hover:bg-green-600 rounded-sm text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm inline-flex items-center text-center justify-center space-x-2"
-              disabled={hasBeenLoaded || status === 'loading'}
+              className={`w-32 py-2 px-4 ${status !== 'error' ? 'bg-green-500 hover:bg-green-600 cursor-pointer' : 'bg-red-500 hover:bg-red-600'} rounded-sm text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm inline-flex items-center text-center justify-center space-x-2`}
+              disabled={
+                hasBeenLoaded || status === 'loading' || status === 'error'
+              }
               onClick={loadModel}
             >
               {status === 'loading' && !hasBeenLoaded ? (
@@ -183,8 +191,10 @@ const ModelLoader = () => {
                   <Loader2 className="animate-spin h-4 w-4" />
                   <span>{progress.toFixed(0)}%</span>
                 </>
-              ) : (
+              ) : status !== 'error' ? (
                 <span>{!hasBeenLoaded ? 'Load Model' : 'Model Ready'}</span>
+              ) : (
+                <span>Error</span>
               )}
             </button>
           </div>
