@@ -176,6 +176,14 @@ const getModelsByPipeline = async (
           !model.id.includes('MiniLM')
       )
       .slice(0, 30)
+  } else if (pipelineTag === 'text-to-speech') {
+    return uniqueModels
+      .filter(
+        (model: ModelInfoResponse) =>
+          !model.tags.includes('style_text_to_speech_2') &&
+          !model.id.includes('qwen2')
+      )
+      .slice(0, 30)
   }
 
   return uniqueModels.slice(0, 30)

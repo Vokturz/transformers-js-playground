@@ -12,6 +12,7 @@ export const supportedPipelines = [
   'image-classification',
   'text-generation',
   'text-classification',
+  'text-to-speech',
   'zero-shot-classification'
   // 'summarization',
   // 'translation'

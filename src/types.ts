@@ -80,6 +80,16 @@ export interface FeatureExtractionWorkerInput {
   }
 }
 
+export interface TextToSpeechWorkerInput {
+  type: 'synthesize'
+  text: string
+  model: string
+  dtype: QuantizationType
+  config?: {
+    speakerEmbeddings?: string
+  }
+}
+
 export interface ImageClassificationWorkerInput {
   type: 'classify'
   image: string | ImageData | HTMLImageElement | HTMLCanvasElement

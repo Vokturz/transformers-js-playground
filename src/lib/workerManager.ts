@@ -20,6 +20,9 @@ export const getWorker = (pipeline: string) => {
       case 'image-classification':
         workerUrl = `/workers/image-classification.js`
         break
+      case 'text-to-speech':
+        workerUrl = `/workers/text-to-speech.js`
+        break
       default:
         return null
     }

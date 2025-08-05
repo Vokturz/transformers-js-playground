@@ -105,7 +105,7 @@ const ModelLoader = () => {
 
     return () => {
       newWorker.removeEventListener('message', onMessageReceived)
-      terminateWorker(pipeline)
+      // terminateWorker(pipeline)
     }
   }, [
     pipeline,

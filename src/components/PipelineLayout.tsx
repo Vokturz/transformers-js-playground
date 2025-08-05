@@ -4,6 +4,7 @@ import { FeatureExtractionProvider } from '../contexts/FeatureExtractionContext'
 import { ZeroShotClassificationProvider } from '../contexts/ZeroShotClassificationContext'
 import { ImageClassificationProvider } from '../contexts/ImageClassificationContext'
 import { TextClassificationProvider } from '../contexts/TextClassificationContext'
+import { TextToSpeechProvider } from '../contexts/TextToSpeechContext'
 
 export const PipelineLayout = ({ children }: { children: React.ReactNode }) => {
   const { pipeline } = useModel()
@@ -29,6 +30,9 @@ export const PipelineLayout = ({ children }: { children: React.ReactNode }) => {
 
     case 'text-classification':
       return <TextClassificationProvider>{children}</TextClassificationProvider>
+
+    case 'text-to-speech':
+      return <TextToSpeechProvider>{children}</TextToSpeechProvider>
 
     default:
       return <>{children}</>
