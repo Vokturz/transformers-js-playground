@@ -19,7 +19,11 @@ interface TextToSpeechContextType {
   setAudioResults: React.Dispatch<React.SetStateAction<AudioResult[]>>
   currentText: string
   setCurrentText: React.Dispatch<React.SetStateAction<string>>
-  addAudioResult: (text: string, audio: Omit<AudioResult, 'text'>) => void
+  addAudioResult: (
+    text: string,
+    audio: Omit<AudioResult, 'text'>,
+    voice?: string
+  ) => void
   clearAudioResults: () => void
 }
 
