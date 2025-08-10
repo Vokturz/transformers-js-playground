@@ -100,16 +100,31 @@ const ModelCode = ({ isCodeModalOpen, setIsCodeModalOpen }: ModelCodeProps) => {
         top_k: 5
       }
       break
+    case 'text-to-speech':
+      classType = 'synthesizer'
+      exampleData =
+        "Life is like a box of chocolates. You never know what you're gonna get."
+      if (modelInfo.isStyleTTS2) {
+        config = {
+          voice: 'af_heart'
+        }
+      } else {
+        config = {
+          speaker_embeddings:
+            'https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/speaker_embeddings.bin'
+        }
+      }
+      break
   }
 
-  const jsCode = `import { pipeline } from '@huggingface/transformers';
+  let jsCode = `import { pipeline } from '@huggingface/transformers';
 
 const ${classType} = pipeline('${pipeline}', '${modelInfo.name}', {
   dtype: '${selectedQuantization}',
   device: 'webgpu' // 'wasm'
 });
 const result = await ${classType}(${modelInfo.hasChatTemplate ? exampleData : "'" + exampleData + "'"}, ${JSON.stringify(config, null, 2)});
-console.log(result);
+${pipeline === 'text-to-speech' ? "result.save('audio.wav')" : 'console.log(result);'}
 `
 
   const configPython = Object.entries(config)
@@ -119,12 +134,34 @@ console.log(result);
     )
     .join(', ')
 
-  const pythonCode = `from transformers import pipeline
+  let pythonCode = `from transformers import pipeline
 
 ${classType} = pipeline("${pipeline}", model="${modelInfo.name}")
 result = ${classType}(${modelInfo.hasChatTemplate ? exampleData : '"' + exampleData + '"'}, ${configPython})
-print(result)
+${pipeline === 'text-to-speech' ? 'audio = result["audio"]' : 'print(result)'}
 `
+
+  if (modelInfo.isStyleTTS2) {
+    jsCode = `
+import { KokoroTTS } from "kokoro-js";
+const tts = await KokoroTTS.from_pretrained('${modelInfo.name}', {
+  dtype: '${selectedQuantization}',
+  device: 'webgpu' // 'wasm'
+});
+
+const audio = await tts.generate("${exampleData}", ${JSON.stringify(config, null, 2)});
+audio.save("audio.wav");
+`
+
+    pythonCode = `!pip install -q kokoro>=0.9.4 soundfile
+from kokoro import KPipeline
+
+pipeline = KPipeline(lang_code='a')
+generator = pipeline("${exampleData}", voice='af_heart')
+for i, (gs, ps, audio) in enumerate(generator):
+    print(i, gs, ps)
+`
+  }
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
@@ -132,6 +169,7 @@ print(result)
     setTimeout(() => setIsCopied(false), 2000)
   }
   const pipelineName = pipeline
+    .replace('speech', 'audio')
     .split('-')
     .map((word, index) => word.charAt(0).toUpperCase() + word.slice(1))
     .join('')
@@ -144,8 +182,19 @@ print(result)
         title={title}
         maxWidth="5xl"
       >
-        {/* ... (all your modal content JSX is unchanged) */}
         <div className="text-sm max-w-none px-4">
+          {modelInfo.isStyleTTS2 && (
+            <div className="flex flex-row items-center text-sm hover:underline text-foreground/60 mb-4">
+              <a
+                href={`https://github.com/hexgrad/kokoro`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Check Kokoro github for more info about Style TTS2 models
+              </a>
+            </div>
+          )}
+
           <div className="flex flex-row">
             <img src="/javascript-logo.svg" className="w-6 h-6 mr-1 rounded" />
             <h2 className="text-lg font-medium mb-2">Javascript</h2>
@@ -153,7 +202,7 @@ print(result)
           <div className="flex flex-row items-center text-sm hover:underline text-foreground/60">
             <Link className="h-3 w-3 mr-2" />
             <a
-              href={`https://huggingface.co/docs/transformers.js/api/pipelines#pipelines${pipeline.replace(/-/g, '')}pipeline`}
+              href={`https://huggingface.co/docs/transformers.js/api/pipelines#pipelines${pipeline.replace(/-/g, '').replace('speech', 'audio')}pipeline`}
               target="_blank"
               rel="noopener noreferrer"
             >

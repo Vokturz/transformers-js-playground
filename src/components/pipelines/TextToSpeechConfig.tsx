@@ -30,7 +30,7 @@ const TextToSpeechConfig: React.FC<TextToSpeechConfigProps> = ({
             Select Voice
           </Label>
           <Select
-            value={config.voice}
+            value={config.voice || ''}
             onValueChange={(value) =>
               setConfig((prev) => ({
                 ...prev,
