@@ -8,7 +8,6 @@ import { Alert, AlertDescription } from './ui/alert'
 const ModelLoader = () => {
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState<React.ReactNode>('')
-  const [lastModel, setLastModel] = useState<string | null>(null)
   const {
     modelInfo,
     selectedQuantization,
@@ -134,7 +133,9 @@ const ModelLoader = () => {
     const message = {
       type: 'load',
       model: modelInfo.name,
-      dtype: selectedQuantization ?? 'fp32'
+      dtype: selectedQuantization ?? 'fp32',
+      isStyleTTS2:
+        modelInfo.isStyleTTS2 || modelInfo.name.includes('kitten-tts') || false // text-to-speech only
     }
     activeWorker?.postMessage(message)
   }, [modelInfo, selectedQuantization, activeWorker])
@@ -149,7 +150,7 @@ const ModelLoader = () => {
 
       <div className="flex items-center justify-between space-x-4">
         <div className="flex items-center space-x-2">
-          {modelInfo.supportedQuantizations.length > 1 ? (
+          {modelInfo.supportedQuantizations.length >= 1 ? (
             <>
               <span className="text-xs text-gray-600 font-medium">Quant:</span>
 

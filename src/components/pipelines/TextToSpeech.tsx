@@ -7,6 +7,7 @@ import {
   AudioResult
 } from '../../contexts/TextToSpeechContext'
 import AudioPlayer from '../AudioPlayer'
+import { preview } from 'vite'
 
 const SAMPLE_TEXTS = [
   'Hello, this is a sample text for text-to-speech synthesis.',
@@ -18,6 +19,7 @@ const SAMPLE_TEXTS = [
 function TextToSpeech() {
   const {
     config,
+    setConfig,
     audioResults,
     currentText,
     setCurrentText,
@@ -46,8 +48,10 @@ function TextToSpeech() {
       text: currentText.trim(),
       model: modelInfo.id,
       dtype: selectedQuantization ?? 'fp32',
+      isStyleTTS2: modelInfo.isStyleTTS2 ?? false,
       config: {
-        speakerEmbeddings: config.speakerEmbeddings
+        speakerEmbeddings: config.speakerEmbeddings,
+        voice: config.voice
       }
     }
 
@@ -72,7 +76,7 @@ function TextToSpeech() {
           audio: new Float32Array(output.audio),
           sampling_rate: output.sampling_rate
         }
-        addAudioResult(currentText, audioResult)
+        addAudioResult(currentText, audioResult, config.voice)
       } else if (status === 'ready' || status === 'error') {
         setIsSynthesizing(false)
       }
@@ -81,6 +85,15 @@ function TextToSpeech() {
     activeWorker.addEventListener('message', onMessageReceived)
     return () => activeWorker.removeEventListener('message', onMessageReceived)
   }, [activeWorker, currentText, addAudioResult])
+
+  useEffect(() => {
+    if (!modelInfo) return
+    if (modelInfo && modelInfo?.voices.length > 0)
+      setConfig((prev) => ({
+        ...prev,
+        voice: modelInfo.voices[0]
+      }))
+  }, [modelInfo])
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -172,6 +185,7 @@ function TextToSpeech() {
                 samplingRate={result.sampling_rate}
                 text={result.text}
                 index={index}
+                voice={result.voice}
               />
             ))}
           </div>

@@ -79,17 +79,6 @@ const Sidebar = ({
                     </Tooltip>
                   </span>
                 )}
-                {pipeline === 'text-to-speech' && (
-                  <span className="flex text-xs text-yellow-500 justify-center text-center">
-                    Not fully supported{' '}
-                    <Tooltip
-                      content="Transformers.js has limited support for text-to-speech"
-                      className="transform -translate-x-1/3 break-keep max-w-12"
-                    >
-                      <CircleQuestionMark className="inline w-4 h-4 ml-1" />
-                    </Tooltip>
-                  </span>
-                )}
               </div>
               <PipelineSelector pipeline={pipeline} setPipeline={setPipeline} />
             </div>

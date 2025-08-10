@@ -85,8 +85,10 @@ export interface TextToSpeechWorkerInput {
   text: string
   model: string
   dtype: QuantizationType
+  isStyleTTS2: boolean
   config?: {
     speakerEmbeddings?: string
+    voice?: string
   }
 }
 
@@ -157,8 +159,10 @@ export interface ModelInfo {
   supportedQuantizations: QuantizationType[]
   baseId?: string
   readme?: string
-  hasChatTemplate: boolean
+  hasChatTemplate: boolean // text-generation only
+  isStyleTTS2: boolean // text-to-speech only
   widgetData?: any
+  voices: string[] // text-to-speech only
 }
 
 export interface ModelInfoResponse {
@@ -202,4 +206,5 @@ export interface ModelInfoResponse {
   likes: number
   downloads: number
   readme?: string
+  voices: string[] // text-to-speech only
 }

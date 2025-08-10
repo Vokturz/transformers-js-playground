@@ -6,6 +6,7 @@ interface AudioPlayerProps {
   samplingRate: number
   text: string
   index: number
+  voice?: string
 }
 
 function createWavBuffer(
@@ -235,7 +236,13 @@ function CustomAudioVisualizer({
   )
 }
 
-function AudioPlayer({ audio, samplingRate, text, index }: AudioPlayerProps) {
+function AudioPlayer({
+  audio,
+  samplingRate,
+  text,
+  index,
+  voice
+}: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -373,7 +380,9 @@ function AudioPlayer({ audio, samplingRate, text, index }: AudioPlayerProps) {
   return (
     <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
       <div className="mb-3">
-        <p className="text-sm text-gray-700 font-medium mb-2">Prompt:</p>
+        <p className="text-sm text-gray-700 font-medium mb-2">
+          Prompt{voice ? ` (${voice})` : ''}:
+        </p>
         <p className="text-sm text-gray-600 italic bg-white p-2 rounded border">
           "{text}"
         </p>

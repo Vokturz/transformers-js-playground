@@ -1,13 +1,15 @@
 import { createContext, useContext, useState, ReactNode } from 'react'
 
 export interface TextToSpeechConfigState {
-  speakerEmbeddings: string
+  speakerEmbeddings?: string
+  voice?: string
 }
 
 export interface AudioResult {
   audio: Float32Array
   sampling_rate: number
   text: string
+  voice?: string
 }
 
 interface TextToSpeechContextType {
@@ -28,14 +30,19 @@ const TextToSpeechContext = createContext<TextToSpeechContextType | undefined>(
 export function TextToSpeechProvider({ children }: { children: ReactNode }) {
   const [config, setConfig] = useState<TextToSpeechConfigState>({
     speakerEmbeddings:
-      'https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/speaker_embeddings.bin'
+      'https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/speaker_embeddings.bin',
+    voice: undefined
   })
 
   const [audioResults, setAudioResults] = useState<AudioResult[]>([])
   const [currentText, setCurrentText] = useState<string>('')
 
-  const addAudioResult = (text: string, audio: Omit<AudioResult, 'text'>) => {
-    const fullAudioResult: AudioResult = { ...audio, text }
+  const addAudioResult = (
+    text: string,
+    audio: Omit<AudioResult, 'text'>,
+    voice?: string
+  ) => {
+    const fullAudioResult: AudioResult = { ...audio, text, voice }
     setAudioResults((prev) => [...prev, fullAudioResult])
   }
 

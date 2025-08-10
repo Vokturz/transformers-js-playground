@@ -20,6 +20,7 @@ import {
   X
 } from 'lucide-react'
 import Tooltip from './Tooltip'
+import { ModelInfoResponse } from '@/types'
 
 type SortOption = 'likes' | 'downloads' | 'createdAt' | 'name'
 
@@ -80,9 +81,9 @@ function ModelSelector() {
 
   // Function to fetch detailed model info and set as selected
   const fetchAndSetModelInfo = useCallback(
-    async (modelId: string, isCustom: boolean = false) => {
+    async (model: ModelInfoResponse, isCustom: boolean = false) => {
       try {
-        const modelInfoResponse = await getModelInfo(modelId, pipeline)
+        const modelInfoResponse = await getModelInfo(model.id, pipeline)
 
         let parameters = 0
         if (modelInfoResponse.safetensors) {
@@ -95,9 +96,11 @@ function ModelSelector() {
             0
         }
 
+        const allTags = [...model.tags, ...modelInfoResponse.tags]
+
         const modelInfo = {
-          id: modelId,
-          name: modelInfoResponse.id || modelId,
+          id: model.id,
+          name: modelInfoResponse.id || model.id,
           architecture:
             modelInfoResponse.config?.architectures?.[0] || 'Unknown',
           parameters,
@@ -112,7 +115,9 @@ function ModelSelector() {
           hasChatTemplate: Boolean(
             modelInfoResponse.config?.tokenizer_config?.chat_template
           ),
-          widgetData: modelInfoResponse.widgetData
+          isStyleTTS2: Boolean(allTags.includes('style_text_to_speech_2')),
+          widgetData: modelInfoResponse.widgetData,
+          voices: modelInfoResponse.voices
         }
         setModelInfo(modelInfo)
         setIsCustomModel(isCustom)
@@ -143,12 +148,12 @@ function ModelSelector() {
   useEffect(() => {
     if (models.length > 0 && !isCustomModel && !modelInfo) {
       const firstModel = sortedModels[0]
-      fetchAndSetModelInfo(firstModel.id, false)
+      fetchAndSetModelInfo(firstModel, false)
     }
   }, [models, sortedModels, fetchAndSetModelInfo, isCustomModel, modelInfo])
 
-  const handleModelSelect = (modelId: string) => {
-    fetchAndSetModelInfo(modelId, false)
+  const handleModelSelect = (model: ModelInfoResponse) => {
+    fetchAndSetModelInfo(model, false)
   }
 
   const handleSortChange = (newSortBy: SortOption) => {
@@ -170,7 +175,13 @@ function ModelSelector() {
     setCustomModelError('')
 
     try {
-      await fetchAndSetModelInfo(customModelName.trim(), true)
+      await fetchAndSetModelInfo(
+        {
+          id: customModelName.trim(),
+          tags: []
+        } as unknown as ModelInfoResponse,
+        true
+      )
       setShowCustomInput(false)
       setCustomModelName('')
     } catch (error) {
@@ -186,7 +197,7 @@ function ModelSelector() {
     setIsCustomModel(false)
     // Load the first model from the list
     if (sortedModels.length > 0) {
-      fetchAndSetModelInfo(sortedModels[0].id, false)
+      fetchAndSetModelInfo(sortedModels[0], false)
     }
   }
 
@@ -281,7 +292,7 @@ function ModelSelector() {
     <div className="relative">
       <Listbox
         value={selectedModel}
-        onChange={(model) => handleModelSelect(model.id)}
+        onChange={(model) => handleModelSelect(model)}
       >
         <div className="relative">
           <ListboxButton className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-left flex items-center justify-between">

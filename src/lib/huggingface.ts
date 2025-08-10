@@ -75,6 +75,20 @@ const getModelInfo = async (
     return getNumericValue(a) - getNumericValue(b)
   })
 
+  if (
+    uniqueSupportedQuantizations.length === 0 &&
+    siblingFiles.some((file) => file.endsWith('_quantized.onnx'))
+  ) {
+    uniqueSupportedQuantizations.push('q8')
+  }
+
+  const voices: string[] = []
+  siblingFiles
+    .filter((file) => file.startsWith('voices/') && !file.endsWith('af.bin'))
+    .forEach((file) => {
+      voices.push(file.split('/')[1].split('.')[0])
+    })
+
   // Fetch README content
   const fetchReadme = async (modelId: string): Promise<string> => {
     try {
@@ -111,7 +125,8 @@ const getModelInfo = async (
         incompatibilityReason,
         supportedQuantizations:
           uniqueSupportedQuantizations as QuantizationType[],
-        readme
+        readme,
+        voices
       }
     }
   }
@@ -123,7 +138,8 @@ const getModelInfo = async (
     isCompatible,
     incompatibilityReason,
     supportedQuantizations: uniqueSupportedQuantizations as QuantizationType[],
-    readme
+    readme,
+    voices
   }
 }
 
@@ -180,7 +196,7 @@ const getModelsByPipeline = async (
     return uniqueModels
       .filter(
         (model: ModelInfoResponse) =>
-          !model.tags.includes('style_text_to_speech_2') &&
+          // !model.tags.includes('style_text_to_speech_2') &&
           !model.id.includes('qwen2')
       )
       .slice(0, 30)
