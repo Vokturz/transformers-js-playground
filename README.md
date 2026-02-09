@@ -1,6 +1,6 @@
 ---
 title: Transformers.js Playground
-emoji: 🤗
+emoji: 🌍
 colorFrom: indigo
 colorTo: blue
 sdk: static
