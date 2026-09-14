@@ -2,12 +2,17 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { useTheme } from '@/contexts/ThemeContext'
 
 interface MarkdownRendererProps {
   content: string
 }
 
 const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
+  const { theme } = useTheme()
+  const codeTheme = theme === 'dark' ? oneDark : oneLight
+
   const cleanContent = content
     .replace(/^---\s*\n.*?\n---\s*\n/s, '')
     .replace(/<[^>]*>/g, '')
@@ -23,17 +28,17 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
           const isInline = !match
           return !isInline ? (
             <SyntaxHighlighter
-              style={oneLight}
+              style={codeTheme}
               language={match[1]}
               PreTag="div"
-              className="rounded-md my-4 border  text-sm"
+              className="my-4 overflow-hidden rounded-lg border border-border text-sm [&>div]:!m-0"
               {...props}
             >
               {String(children).replace(/\n$/, '')}
             </SyntaxHighlighter>
           ) : (
             <code
-              className="bg-gray-100 px-1 py-0.5 rounded-sm text-sm font-mono"
+              className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-[0.85em] text-foreground"
               {...props}
             >
               {children}
@@ -43,66 +48,73 @@ const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
         a: ({ children, href }) => (
           <a
             href={href}
-            className="text-blue-600 hover:text-blue-800 underline"
+            className="text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
             target="_blank"
             rel="noopener noreferrer"
           >
             {children}
           </a>
         ),
+        p: ({ children }) => (
+          <p className="mb-3 leading-relaxed text-foreground/90">
+            {children}
+          </p>
+        ),
         table: ({ children }) => (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+          <div className="my-4 overflow-x-auto rounded-lg border border-border">
+            <table className="min-w-full divide-y divide-border text-sm">
               {children}
             </table>
           </div>
         ),
         thead: ({ children }) => (
-          <thead className="bg-gray-50">{children}</thead>
+          <thead className="bg-muted/50">{children}</thead>
         ),
         tbody: ({ children }) => (
-          <tbody className="bg-white divide-y divide-gray-200">
-            {children}
-          </tbody>
+          <tbody className="divide-y divide-border">{children}</tbody>
         ),
         th: ({ children }) => (
-          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-300">
+          <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {children}
           </th>
         ),
         td: ({ children }) => (
-          <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 border border-gray-300">
+          <td className="whitespace-nowrap px-3 py-2 text-sm text-foreground">
             {children}
           </td>
         ),
-        ul: ({ children }) => (
-          <ul className="list-disc list-inside space-y-1 ml-4 mb-4">
+        blockquote: ({ children }) => (
+          <blockquote className="my-4 border-l-2 border-primary/50 pl-4 italic text-muted-foreground">
             {children}
-          </ul>
+          </blockquote>
+        ),
+        ul: ({ children }) => (
+          <ul className="mb-4 ml-4 list-disc space-y-1">{children}</ul>
         ),
         ol: ({ children }) => (
-          <ol className="list-decimal list-inside space-y-1 ml-4 mb-4">
-            {children}
-          </ol>
+          <ol className="mb-4 ml-4 list-decimal space-y-1">{children}</ol>
         ),
         li: ({ children }) => (
-          <li className="text-sm text-gray-900">{children}</li>
+          <li className="text-sm leading-relaxed text-foreground/90">
+            {children}
+          </li>
         ),
         h1: ({ children }) => (
-          <h1 className="text-xl font-semibold text-gray-900 mb-3 mt-4">
+          <h1 className="mb-3 mt-4 text-2xl font-semibold tracking-tight text-foreground">
             {children}
           </h1>
         ),
         h2: ({ children }) => (
-          <h2 className="text-lg font-semibold text-gray-900 mb-2 mt-3">
+          <h2 className="mb-2 mt-4 text-lg font-semibold tracking-tight text-foreground">
             {children}
           </h2>
         ),
         h3: ({ children }) => (
-          <h3 className="text-base font-semibold text-gray-900 mb-2 mt-3">
+          <h3 className="mb-2 mt-3 text-base font-semibold text-foreground">
             {children}
           </h3>
-        )
+        ),
+        hr: () => <hr className="my-4 border-border" />
       }}
     >
       {cleanContent}

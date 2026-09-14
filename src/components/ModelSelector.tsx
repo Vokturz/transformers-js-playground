@@ -20,6 +20,7 @@ import {
   X
 } from 'lucide-react'
 import Tooltip from './Tooltip'
+import { cn } from '@/lib/utils'
 import { ModelInfoResponse } from '@/types'
 
 type SortOption = 'likes' | 'downloads' | 'createdAt' | 'name'
@@ -216,34 +217,34 @@ function ModelSelector() {
 
   const SortIcon = ({ sortOrder }: { sortOrder: 'asc' | 'desc' }) => {
     return sortOrder === 'asc' ? (
-      <ArrowUp className="w-3 h-3 ml-1" />
+      <ArrowUp className="ml-1 h-3 w-3" />
     ) : (
-      <ArrowDown className="w-3 h-3 ml-1" />
+      <ArrowDown className="ml-1 h-3 w-3" />
     )
   }
 
   if (isCustomModel) {
     return (
       <div className="relative">
-        <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white flex items-center justify-between">
-          <div className="flex flex-col flex-1 min-w-0">
-            <span className="truncate font-medium">
+        <div className="flex w-full items-center justify-between gap-2 rounded-md border border-input bg-card px-3 py-2">
+          <div className="flex min-w-0 flex-1 flex-col">
+            <span className="truncate text-sm font-medium">
               {modelInfo?.id || 'Custom model'}
             </span>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex shrink-0 items-center gap-3">
             {modelInfo && (modelInfo.likes > 0 || modelInfo.downloads > 0) && (
-              <div className="flex items-center space-x-3 text-xs text-gray-500">
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 {modelInfo.likes > 0 && (
-                  <div className="flex items-center space-x-1">
-                    <Heart className="w-3 h-3 text-red-500" />
+                  <div className="flex items-center gap-1">
+                    <Heart className="h-3 w-3 text-destructive" />
                     <span>{formatNumber(modelInfo.likes)}</span>
                   </div>
                 )}
                 {modelInfo.downloads > 0 && (
-                  <div className="flex items-center space-x-1">
-                    <Download className="w-3 h-3 text-green-500" />
+                  <div className="flex items-center gap-1">
+                    <Download className="h-3 w-3 text-emerald-500" />
                     <span>{formatNumber(modelInfo.downloads)}</span>
                   </div>
                 )}
@@ -251,10 +252,10 @@ function ModelSelector() {
             )}
             <button
               onClick={handleRemoveCustomModel}
-              className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+              className="text-muted-foreground transition-colors hover:text-destructive"
               title="Remove custom model"
             >
-              <X className="w-4 h-4" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -265,28 +266,43 @@ function ModelSelector() {
   if (isFetching || models.length === 0) {
     return (
       <div className="relative">
-        <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white flex items-center justify-between animate-pulse h-10">
-          <div className="flex flex-col flex-1 min-w-0 space-y-2">
-            <div className="h-4 bg-gray-200 rounded-sm w-3/4"></div>
+        <div className="flex h-10 w-full animate-pulse items-center justify-between gap-3 rounded-md border border-input bg-card px-3 py-2">
+          <div className="min-w-0 flex-1 space-y-2">
+            <div className="h-4 w-3/4 rounded-sm bg-muted"></div>
           </div>
-
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-1">
-                <Heart className="w-3 h-3 text-red-500" />
-                <div className="h-3 bg-gray-200 rounded-sm w-8"></div>
+          <div className="flex shrink-0 items-center gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1">
+                <Heart className="h-3 w-3 text-destructive/60" />
+                <div className="h-3 w-8 rounded-sm bg-muted"></div>
               </div>
-              <div className="flex items-center space-x-1">
-                <Download className="w-3 h-3 text-green-500" />
-                <div className="h-3 bg-gray-200 rounded-sm w-8"></div>
+              <div className="flex items-center gap-1">
+                <Download className="h-3 w-3 text-emerald-500/60" />
+                <div className="h-3 w-8 rounded-sm bg-muted"></div>
               </div>
             </div>
-            <div className="w-4 h-4 bg-gray-200 rounded-sm"></div>
+            <div className="h-4 w-4 rounded-sm bg-muted"></div>
           </div>
         </div>
       </div>
     )
   }
+
+  const sortChip = (value: SortOption, label: string, icon?: React.ReactNode) => (
+    <button
+      onClick={() => handleSortChange(value)}
+      className={cn(
+        'flex items-center gap-1 rounded-md px-2 py-1 transition-colors',
+        sortBy === value
+          ? 'bg-primary/10 font-medium text-primary'
+          : 'text-muted-foreground hover:bg-muted'
+      )}
+    >
+      {icon}
+      <span>{label}</span>
+      {sortBy === value && <SortIcon sortOrder={sortOrder} />}
+    </button>
+  )
 
   return (
     <div className="relative">
@@ -295,35 +311,35 @@ function ModelSelector() {
         onChange={(model) => handleModelSelect(model)}
       >
         <div className="relative">
-          <ListboxButton className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-left flex items-center justify-between">
-            <div className="flex items-center justify-between w-full">
-              <div className="flex flex-col flex-1 min-w-0">
+          <ListboxButton className="flex w-full items-center justify-between gap-2 rounded-md border border-input bg-card px-3 py-2 text-left focus:outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50">
+            <div className="flex w-full items-center justify-between gap-2">
+              <div className="min-w-0 flex-1">
                 <Tooltip content={modelInfo?.id || 'Select a model'}>
-                  <span className="truncate font-medium block">
+                  <span className="block truncate text-sm font-medium">
                     {modelInfo?.id || 'Select a model'}
                   </span>
                 </Tooltip>
               </div>
 
-              <div className="flex items-center space-x-3">
+              <div className="flex shrink-0 items-center gap-3">
                 {selectedModel &&
                   (selectedModel.likes > 0 || selectedModel.downloads > 0) && (
-                    <div className="flex items-center space-x-3 text-xs text-gray-500">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       {selectedModel.likes > 0 && (
-                        <div className="flex items-center space-x-1">
-                          <Heart className="w-3 h-3 text-red-500" />
+                        <div className="flex items-center gap-1">
+                          <Heart className="h-3 w-3 text-destructive" />
                           <span>{formatNumber(selectedModel.likes)}</span>
                         </div>
                       )}
                       {selectedModel.downloads > 0 && (
-                        <div className="flex items-center space-x-1">
-                          <Download className="w-3 h-3 text-green-500" />
+                        <div className="flex items-center gap-1">
+                          <Download className="h-3 w-3 text-emerald-500" />
                           <span>{formatNumber(selectedModel.downloads)}</span>
                         </div>
                       )}
                     </div>
                   )}
-                <ChevronDown className="w-4 h-4 ui-open:rotate-180 transition-transform shrink-0" />
+                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform ui-open:rotate-180" />
               </div>
             </div>
           </ListboxButton>
@@ -336,123 +352,71 @@ function ModelSelector() {
             leaveFrom="transform scale-100 opacity-100"
             leaveTo="transform scale-95 opacity-0"
           >
-            <ListboxOptions className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-hidden focus:outline-hidden">
+            <ListboxOptions className="absolute z-10 mt-1 max-h-96 w-full overflow-hidden rounded-md border border-border bg-popover shadow-lg focus:outline-none">
               {/* Custom Model Input */}
               {showCustomInput ? (
-                <div className="px-3 py-3 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="text"
-                        value={customModelName}
-                        onChange={(e) => setCustomModelName(e.target.value)}
-                        onKeyDown={handleCustomInputKeyPress}
-                        placeholder="onnx-community/Qwen3-0.6B-ONNX"
-                        className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-sm focus:outline-hidden focus:ring-1 focus:ring-blue-500"
-                        autoFocus
-                      />
-                      <button
-                        onClick={handleCustomModelLoad}
-                        disabled={isLoadingCustomModel}
-                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
-                      >
-                        {isLoadingCustomModel ? (
-                          <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <Search className="w-3 h-3" />
-                        )}
-                        <span>Load</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowCustomInput(false)
-                          setCustomModelName('')
-                          setCustomModelError('')
-                        }}
-                        className="px-2 py-1 text-sm text-gray-600 hover:text-gray-800"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                    {customModelError && (
-                      <p className="text-xs text-red-600">{customModelError}</p>
-                    )}
-                    <p className="text-xs text-gray-500">
-                      Press Enter to load or Escape to cancel
-                    </p>
+                <div className="sticky top-0 z-10 space-y-2 border-b border-border bg-muted/50 px-3 py-3">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={customModelName}
+                      onChange={(e) => setCustomModelName(e.target.value)}
+                      onKeyDown={handleCustomInputKeyPress}
+                      placeholder="onnx-community/Qwen3-0.6B-ONNX"
+                      className="flex-1 rounded-sm border border-input bg-card px-2 py-1 text-sm focus:outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
+                      autoFocus
+                    />
+                    <button
+                      onClick={handleCustomModelLoad}
+                      disabled={isLoadingCustomModel}
+                      className="flex items-center gap-1 rounded-sm bg-primary px-3 py-1 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isLoadingCustomModel ? (
+                        <div className="h-3 w-3 animate-spin rounded-full border border-primary-foreground border-t-transparent" />
+                      ) : (
+                        <Search className="h-3 w-3" />
+                      )}
+                      <span>Load</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowCustomInput(false)
+                        setCustomModelName('')
+                        setCustomModelError('')
+                      }}
+                      className="px-2 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Cancel
+                    </button>
                   </div>
+                  {customModelError && (
+                    <p className="text-xs text-destructive">{customModelError}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Press Enter to load or Escape to cancel
+                  </p>
                 </div>
               ) : (
                 <>
-                  <div className="sticky top-0 z-10 bg-gray-50 border-b border-gray-200 p-3 space-y-3">
+                  <div className="sticky top-0 z-10 space-y-3 border-b border-border bg-muted/50 p-3">
                     {/* Load Custom Model Button */}
                     <button
                       onClick={() => setShowCustomInput(true)}
-                      className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-sm transition-colors"
+                      className="flex w-full items-center justify-center gap-2 rounded-sm px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
                     >
-                      <Plus className="w-4 h-4" />
+                      <Plus className="h-4 w-4" />
                       <span>Load Custom Model</span>
                     </button>
 
                     {/* Sort Controls */}
-                    <div className="flex items-center space-x-2 text-xs">
-                      <span className="text-gray-600 font-medium">
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span className="font-medium text-muted-foreground">
                         Sort by:
                       </span>
-                      <button
-                        onClick={() => handleSortChange('name')}
-                        className={`px-2 py-1 rounded flex items-center space-x-1 ${
-                          sortBy === 'name'
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'text-gray-600 hover:bg-gray-100'
-                        }`}
-                      >
-                        <span>Name</span>
-                        {sortBy === 'name' && (
-                          <SortIcon sortOrder={sortOrder} />
-                        )}
-                      </button>
-                      <button
-                        onClick={() => handleSortChange('likes')}
-                        className={`px-2 py-1 rounded flex items-center space-x-1 ${
-                          sortBy === 'likes'
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'text-gray-600 hover:bg-gray-100'
-                        }`}
-                      >
-                        <Heart className="w-3 h-3" />
-                        <span>Likes</span>
-                        {sortBy === 'likes' && (
-                          <SortIcon sortOrder={sortOrder} />
-                        )}
-                      </button>
-                      <button
-                        onClick={() => handleSortChange('downloads')}
-                        className={`px-2 py-1 rounded flex items-center space-x-1 ${
-                          sortBy === 'downloads'
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'text-gray-600 hover:bg-gray-100'
-                        }`}
-                      >
-                        <Download className="w-3 h-3" />
-                        <span>Downloads</span>
-                        {sortBy === 'downloads' && (
-                          <SortIcon sortOrder={sortOrder} />
-                        )}
-                      </button>
-                      <button
-                        onClick={() => handleSortChange('createdAt')}
-                        className={`px-2 py-1 rounded flex items-center space-x-1 ${
-                          sortBy === 'createdAt'
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'text-gray-600 hover:bg-gray-100'
-                        }`}
-                      >
-                        <span>Date</span>
-                        {sortBy === 'createdAt' && (
-                          <SortIcon sortOrder={sortOrder} />
-                        )}
-                      </button>
+                      {sortChip('name', 'Name')}
+                      {sortChip('likes', 'Likes', <Heart className="h-3 w-3" />)}
+                      {sortChip('downloads', 'Downloads', <Download className="h-3 w-3" />)}
+                      {sortChip('createdAt', 'Date')}
                     </div>
                   </div>
                 </>
@@ -460,7 +424,7 @@ function ModelSelector() {
 
               {/* Model Options - Scrollable */}
               {!showCustomInput && (
-                <div className="overflow-auto max-h-48">
+                <div className="max-h-48 overflow-auto">
                   {sortedModels.map((model) => {
                     const hasStats = model.likes > 0 || model.downloads > 0
 
@@ -469,43 +433,41 @@ function ModelSelector() {
                         key={model.id}
                         value={model}
                         className={({ active, selected }) =>
-                          `px-3 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${
-                            active ? 'bg-gray-50' : ''
-                          } ${selected ? 'bg-blue-50' : ''}`
+                          `cursor-pointer border-b border-border/50 px-3 py-3 last:border-b-0 ${
+                            active ? 'bg-muted/70' : ''
+                          } ${selected ? 'bg-primary/5' : ''}`
                         }
                       >
                         {({ selected }) => (
                           <div className="relative flex items-start py-1">
-                            <div className="flex-1 min-w-0 pr-3">
-                              <div className="flex items-center justify-between">
+                            <div className="min-w-0 flex-1 pr-3">
+                              <div className="flex items-center justify-between gap-2">
                                 <Tooltip content={model.id}>
-                                  <span className="text-sm font-medium truncate block max-w-[450px]">
+                                  <span className="block max-w-[450px] truncate text-sm font-medium">
                                     {model.id}
                                   </span>
                                 </Tooltip>
                                 {selected && (
-                                  <Check className="w-4 h-4 text-blue-600 ml-2 shrink-0" />
+                                  <Check className="ml-2 h-4 w-4 shrink-0 text-primary" />
                                 )}
                               </div>
                               {/* Stats Display */}
                               {hasStats && (
-                                <div className="flex items-center space-x-3 text-xs text-gray-500 mt-1">
+                                <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
                                   {model.likes > 0 && (
-                                    <div className="flex items-center space-x-1">
-                                      <Heart className="w-3 h-3 text-red-500" />
+                                    <div className="flex items-center gap-1">
+                                      <Heart className="h-3 w-3 text-destructive" />
                                       <span>{formatNumber(model.likes)}</span>
                                     </div>
                                   )}
                                   {model.downloads > 0 && (
-                                    <div className="flex items-center space-x-1">
-                                      <Download className="w-3 h-3 text-green-500" />
-                                      <span>
-                                        {formatNumber(model.downloads)}
-                                      </span>
+                                    <div className="flex items-center gap-1">
+                                      <Download className="h-3 w-3 text-emerald-500" />
+                                      <span>{formatNumber(model.downloads)}</span>
                                     </div>
                                   )}
                                   {model.createdAt && (
-                                    <span className="text-xs text-gray-400">
+                                    <span className="text-muted-foreground/70">
                                       {model.createdAt.split('T')[0]}
                                     </span>
                                   )}

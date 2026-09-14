@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Settings } from 'lucide-react'
+import { Bot, Settings } from 'lucide-react'
 import ZeroShotClassification from './components/pipelines/ZeroShotClassification'
 import TextClassification from './components/pipelines/TextClassification'
 import Header from './Header'
@@ -56,27 +56,37 @@ function App() {
   ])
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="relative flex h-screen flex-col overflow-hidden bg-background text-foreground">
+      <div className="app-glow pointer-events-none absolute inset-0 -z-10" />
+
       <Header />
+
       <PipelineLayout>
-        <div className=" flex h-[calc(100vh-6.6rem)]">
+        <div className="flex min-h-0 flex-1">
           {/* Main Content */}
-          <main className="flex-1 overflow-auto">
-            <div className="h-full px-4 sm:px-6 lg:px-8 py-2 lg:pr-4 max-w-none">
-              {/* Mobile menu button */}
-              <div className="absolute right-0 top-16 lg:hidden mb-4">
+          <main className="relative min-w-0 flex-1 overflow-auto">
+            <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+              {/* Mobile settings button */}
+              <div className="mb-3 flex justify-end lg:hidden">
                 <button
                   onClick={() => setIsSidebarOpen(true)}
-                  className="flex items-center px-2 py-2 bg-white border border-gray-300 rounded-l-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  className="inline-flex items-center gap-2 rounded-lg border border-border/70 bg-card px-3 py-2 text-sm font-medium text-muted-foreground shadow-sm transition-colors hover:text-foreground"
                 >
-                  <Settings className="w-5 h-5" />
+                  <Settings className="h-4 w-4" />
+                  Configure
                 </button>
               </div>
+
               {/* Pipeline Component */}
-              <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-                <p className="text-xs text-gray-400 pl-4 pt-2 mb-[-20px]">
-                  {modelInfo?.name}
-                </p>
+              <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                {modelInfo && (
+                  <div className="flex items-center gap-2 border-b border-border bg-muted/30 px-4 py-2">
+                    <Bot className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    <span className="truncate text-xs font-medium text-muted-foreground">
+                      {modelInfo.name}
+                    </span>
+                  </div>
+                )}
                 {pipeline === 'zero-shot-classification' && (
                   <ZeroShotClassification />
                 )}
@@ -88,6 +98,7 @@ function App() {
               </div>
             </div>
           </main>
+
           {/* Sidebar */}
           <Sidebar
             isOpen={isSidebarOpen}
@@ -101,6 +112,7 @@ function App() {
           />
         </div>
       </PipelineLayout>
+
       <Footer />
       {modelInfo?.readme && (
         <ModelReadme

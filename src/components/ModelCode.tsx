@@ -213,9 +213,9 @@ for i, (gs, ps, audio) in enumerate(generator):
             <div className="absolute right-0 top-0 mt-2 mr-2">
               <button
                 onClick={() => copyToClipboard(jsCode)}
-                className="text-gray-500 hover:text-gray-700 p-1 text-xs"
+                className="p-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
               >
-                <Copy className="w-4 h-4" />
+                <Copy className="h-4 w-4" />
               </button>
             </div>
             <MarkdownRenderer content={`\`\`\`javascript\n${jsCode}\n\`\`\``} />
@@ -238,9 +238,9 @@ for i, (gs, ps, audio) in enumerate(generator):
               <div className="absolute right-0 top-0 mt-2 mr-2">
                 <button
                   onClick={() => copyToClipboard(pythonCode)}
-                  className="text-gray-500 hover:text-gray-700 p-1 text-xs"
+                  className="p-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  <Copy className="w-4 h-4" />
+                  <Copy className="h-4 w-4" />
                 </button>
               </div>
               <MarkdownRenderer

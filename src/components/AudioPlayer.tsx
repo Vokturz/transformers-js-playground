@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
-import { Play, Square, Download, Eraser, Loader2, Volume2 } from 'lucide-react'
+import { Play, Square, Download } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { useTheme } from '@/contexts/ThemeContext'
 
 interface AudioPlayerProps {
   audio: Float32Array
@@ -66,6 +68,7 @@ function CustomAudioVisualizer({
 }: CustomAudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const { theme } = useTheme()
 
   // Memoize expensive calculations with smoothing
   const waveformData = useMemo(() => {
@@ -127,6 +130,13 @@ function CustomAudioVisualizer({
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
+    // Theme-aware colors (read from design tokens)
+    const css = getComputedStyle(document.documentElement)
+    const primary = css.getPropertyValue('--primary').trim() || '#6366f1'
+    const muted = css.getPropertyValue('--muted-foreground').trim() || '#9ca3af'
+    const destructive =
+      css.getPropertyValue('--destructive').trim() || '#ef4444'
+
     // Use state-tracked container width for responsive behavior
     const displayWidth = containerWidth
     const displayHeight = height
@@ -174,16 +184,20 @@ function CustomAudioVisualizer({
 
       const y = (displayHeight - barHeight) / 2
 
-      let barColor = '#6B7280'
+      let barColor = muted
+      let alpha = 0.55
       if (duration > 0) {
         const timePosition = (i / actualBars) * duration
         if (isPlaying && timePosition <= currentTime) {
-          barColor = '#3B82F6'
+          barColor = primary
+          alpha = 1
         } else if (isPlaying) {
-          barColor = '#9CA3AF'
+          barColor = muted
+          alpha = 0.3
         }
       }
 
+      ctx.globalAlpha = alpha
       ctx.fillStyle = barColor
       ctx.fillRect(x, y, effectiveBarWidth, barHeight)
 
@@ -197,34 +211,31 @@ function CustomAudioVisualizer({
       }
     }
 
-    // Draw progress line with gradient
+    // Draw progress line
     if (isPlaying && duration > 0 && currentTime >= 0) {
       const progressX = Math.min(
         (currentTime / duration) * displayWidth,
         displayWidth
       )
 
-      // Create gradient for progress line
-      const gradient = ctx.createLinearGradient(0, 0, 0, displayHeight)
-      gradient.addColorStop(0, '#EF4444')
-      gradient.addColorStop(0.5, '#DC2626')
-      gradient.addColorStop(1, '#EF4444')
-
-      ctx.strokeStyle = gradient
-      ctx.lineWidth = 3
+      ctx.globalAlpha = 1
+      ctx.strokeStyle = destructive
+      ctx.lineWidth = 2
       ctx.lineCap = 'round'
       ctx.beginPath()
       ctx.moveTo(progressX, 4)
       ctx.lineTo(progressX, displayHeight - 4)
       ctx.stroke()
     }
-  }, [waveformData, isPlaying, currentTime, duration, height, containerWidth])
+
+    ctx.globalAlpha = 1
+  }, [waveformData, isPlaying, currentTime, duration, height, containerWidth, theme])
 
   return (
     <div ref={containerRef} className="w-full">
       <canvas
         ref={canvasRef}
-        className="w-full block"
+        className="block w-full"
         style={{
           width: '100%',
           height: `${height}px`,
@@ -378,60 +389,54 @@ function AudioPlayer({
   }, [audio, samplingRate, index])
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+    <div className="rounded-xl border border-border bg-card p-4">
       <div className="mb-3">
-        <p className="text-sm text-gray-700 font-medium mb-2">
-          Prompt{voice ? ` (${voice})` : ''}:
+        <p className="mb-2 text-sm font-medium text-muted-foreground">
+          Prompt{voice ? ` (${voice})` : ''}
         </p>
-        <p className="text-sm text-gray-600 italic bg-white p-2 rounded border">
-          "{text}"
+        <p className="rounded-md border border-border bg-muted/40 p-2 text-sm italic text-foreground">
+          “{text}”
         </p>
       </div>
 
-      <div className="mb-3">
-        <div className="w-full border border-gray-200 rounded bg-gray-50 overflow-hidden">
-          {audio && audio.length > 0 ? (
-            <CustomAudioVisualizer
-              audio={audio}
-              isPlaying={isPlaying}
-              currentTime={currentTime}
-              duration={duration}
-              height={80}
-            />
-          ) : (
-            <div className="w-full h-20 flex items-center justify-center">
-              <span className="text-gray-400 text-sm">Loading waveform...</span>
-            </div>
-          )}
-        </div>
+      <div className="mb-3 overflow-hidden rounded-lg border border-border bg-muted/30">
+        {audio && audio.length > 0 ? (
+          <CustomAudioVisualizer
+            audio={audio}
+            isPlaying={isPlaying}
+            currentTime={currentTime}
+            duration={duration}
+            height={80}
+          />
+        ) : (
+          <div className="flex h-20 w-full items-center justify-center">
+            <span className="text-sm text-muted-foreground">
+              Loading waveform…
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-2">
-        <button
-          onClick={playAudio}
-          className="flex items-center gap-1 px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm transition-colors"
-        >
+        <Button onClick={playAudio} size="sm">
           {isPlaying ? (
             <>
-              <Square className="w-4 h-4" />
+              <Square className="h-4 w-4" />
               Stop
             </>
           ) : (
             <>
-              <Play className="w-4 h-4" />
+              <Play className="h-4 w-4" />
               Play
             </>
           )}
-        </button>
-        <button
-          onClick={downloadAudio}
-          className="flex items-center gap-1 px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded text-sm transition-colors"
-        >
-          <Download className="w-4 h-4" />
+        </Button>
+        <Button variant="secondary" onClick={downloadAudio} size="sm">
+          <Download className="h-4 w-4" />
           Download
-        </button>
+        </Button>
         {duration > 0 && (
-          <span className="text-xs text-gray-500 ml-2">
+          <span className="ml-2 font-mono text-xs text-muted-foreground">
             {currentTime.toFixed(1)}s / {duration.toFixed(1)}s
           </span>
         )}

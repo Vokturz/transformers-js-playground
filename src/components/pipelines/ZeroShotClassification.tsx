@@ -2,7 +2,9 @@ import { useEffect, useCallback } from 'react'
 import { WorkerMessage, ZeroShotWorkerInput } from '../../types'
 import { useModel } from '../../contexts/ModelContext'
 import { useZeroShotClassification } from '../../contexts/ZeroShotClassificationContext'
-import { Send, Loader2 } from 'lucide-react'
+import { Send, Loader2, Tags } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 
 function ZeroShotClassification() {
   const { text, setText, sections, setSections, config } =
@@ -81,79 +83,81 @@ function ZeroShotClassification() {
   const busy: boolean = status !== 'ready'
 
   return (
-    <div className="flex flex-col h-full max-h-[calc(100dvh-128px)]  w-full p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Zero-Shot Classification</h1>
+    <div className="flex h-full w-full flex-col p-4 sm:p-6">
+      {/* Header */}
+      <div className="mb-4 flex items-center gap-2">
+        <Tags className="h-5 w-5 text-primary" />
+        <h2 className="text-lg font-semibold tracking-tight">
+          Zero-Shot Classification
+        </h2>
       </div>
 
       {/* Input Text Area */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Text to classify (one item per line):
+      <div className="mb-4 space-y-2">
+        <label className="block text-sm font-medium text-muted-foreground">
+          Text to classify (one item per line)
         </label>
-        <textarea
+        <Textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Enter text items to classify, one per line..."
-          className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-          rows={12}
+          placeholder="Enter text items to classify, one per line…"
+          rows={8}
           disabled={!hasBeenLoaded || busy}
         />
       </div>
 
       {/* Classify Button */}
-      <div className="mb-4">
-        {hasBeenLoaded && (
-          <button
+      {hasBeenLoaded && (
+        <div className="mb-4">
+          <Button
             onClick={classify}
-            disabled={!text.trim() || busy || !hasBeenLoaded}
-            className="px-6 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center gap-2"
+            disabled={!text.trim() || busy}
           >
             {busy ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Processing...
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Processing…
               </>
             ) : (
               <>
-                <Send className="w-4 h-4" />
+                <Send className="h-4 w-4" />
                 Categorize
               </>
             )}
-          </button>
-        )}
-      </div>
+          </Button>
+        </div>
+      )}
 
       {/* Results Grid */}
-      <div className="flex-1 overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 h-full">
+      <div className="flex-1 overflow-y-auto">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {sections.map((section, index) => (
             <div
               key={index}
-              className="flex flex-col bg-white border border-gray-200 rounded-lg max-h-96"
+              className="flex max-h-96 flex-col overflow-hidden rounded-xl border border-border bg-card"
             >
-              <div className="px-3 py-2 bg-gray-50 border-b border-gray-200">
+              <div className="flex items-center justify-between gap-2 border-b border-border bg-muted/40 px-3 py-2">
                 <h3
-                  className="font-medium text-gray-900 text-center truncate"
+                  className="truncate text-sm font-medium"
                   title={section.title}
                 >
                   {section.title}
                 </h3>
-                <div className="text-xs text-gray-500 text-center">
+                <span className="shrink-0 text-xs text-muted-foreground">
                   {section.items.length} items
-                </div>
+                </span>
               </div>
-              <div className="flex-1 overflow-y-auto p-3 space-y-2">
+              <div className="flex-1 space-y-2 overflow-y-auto p-3">
                 {section.items.map((item, itemIndex) => (
                   <div
                     key={itemIndex}
-                    className="p-2 bg-blue-50 border border-blue-200 rounded-sm text-sm"
+                    className="rounded-md border border-border bg-muted/30 p-2 text-sm"
                   >
                     {item}
                   </div>
                 ))}
                 {section.items.length === 0 && (
-                  <div className="text-gray-400 text-sm italic text-center py-4">
+                  <div className="py-4 text-center text-sm italic text-muted-foreground">
                     No items classified here yet
                   </div>
                 )}
@@ -164,9 +168,9 @@ function ZeroShotClassification() {
       </div>
 
       {!hasBeenLoaded && (
-        <div className="text-center text-gray-500 text-sm mt-2">
-          Please load a model first to start classifying text
-        </div>
+        <p className="mt-2 text-center text-sm text-muted-foreground">
+          Load a model first to start classifying text
+        </p>
       )}
     </div>
   )

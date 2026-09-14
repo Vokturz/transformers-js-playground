@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Send, Eraser, Loader2, X } from 'lucide-react'
+import { Send, Eraser, Loader2, X, MessageSquare } from 'lucide-react'
 import {
   ChatMessage,
   TextGenerationWorkerInput,
@@ -7,6 +7,8 @@ import {
 } from '../../types'
 import { useModel } from '../../contexts/ModelContext'
 import { useTextGeneration } from '../../contexts/TextGenerationContext'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 
 function TextGeneration() {
   const { config, messages, setMessages } = useTextGeneration()
@@ -145,148 +147,157 @@ function TextGeneration() {
   const hasChatTemplate = modelInfo?.hasChatTemplate
 
   return (
-    <div className="flex flex-col min-h-[30dvh] max-h-[calc(100dvh-128px)] w-full p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">
-          Text Generation {hasChatTemplate ? '(Chat)' : ''}
-        </h1>
-        <div className="flex gap-2">
-          <button
+    <div className="flex min-h-[30dvh] w-full flex-col gap-4 p-4 sm:p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold tracking-tight">
+            Text Generation{hasChatTemplate ? ' · Chat' : ''}
+          </h2>
+        </div>
+        <div className="flex gap-1.5">
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={clearChat}
-            className="p-2 bg-red-100 hover:bg-red-200 rounded-lg transition-colors"
-            title={hasChatTemplate ? 'Clear Chat' : 'Clear Text'}
+            title={hasChatTemplate ? 'Clear chat' : 'Clear text'}
           >
-            <Eraser className="w-4 h-4" />
-          </button>
+            <Eraser className="h-4 w-4" />
+          </Button>
           {isGenerating && (
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={stopGeneration}
-              className="p-2 bg-orange-100 hover:bg-orange-200 rounded-lg transition-colors"
-              title="Stop Generation"
+              title="Stop generation"
             >
-              <X className="w-4 h-4" />
-            </button>
+              <X className="h-4 w-4" />
+            </Button>
           )}
         </div>
       </div>
 
       {hasChatTemplate ? (
         <>
-          <div className="flex-1 overflow-y-auto border border-gray-300 rounded-lg p-4 mb-4 bg-white">
-            <div className="space-y-4">
-              {messages
-                .filter((msg) => msg.role !== 'system')
-                .map((message, index) => (
+          <div className="min-h-[220px] flex-1 space-y-4 overflow-y-auto rounded-xl border border-border bg-muted/30 p-4">
+            {messages
+              .filter((msg) => msg.role !== 'system')
+              .map((message, index) => (
+                <div
+                  key={index}
+                  className={`flex ${
+                    message.role === 'user' ? 'justify-end' : 'justify-start'
+                  }`}
+                >
                   <div
-                    key={index}
-                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
+                      message.role === 'user'
+                        ? 'rounded-br-md bg-primary text-primary-foreground'
+                        : 'rounded-bl-md border border-border bg-card'
+                    }`}
                   >
                     <div
-                      className={`max-w-[80%] p-3 rounded-lg ${
+                      className={`mb-1 text-xs font-medium ${
                         message.role === 'user'
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 text-gray-800'
+                          ? 'text-primary-foreground/70'
+                          : 'text-muted-foreground'
                       }`}
                     >
-                      <div className="text-xs font-medium mb-1 opacity-70">
-                        {message.role === 'user' ? 'You' : 'Assistant'}
-                      </div>
-                      <div className="whitespace-pre-wrap">
-                        {message.content}
-                      </div>
+                      {message.role === 'user' ? 'You' : 'Assistant'}
                     </div>
-                  </div>
-                ))}
-              {isGenerating && (
-                <div className="flex justify-start">
-                  <div className="bg-gray-100 text-gray-800 p-3 rounded-lg">
-                    <div className="text-xs font-medium mb-1 opacity-70">
-                      Assistant
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <div>Loading...</div>
+                    <div className="whitespace-pre-wrap">
+                      {message.content}
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
+              ))}
+            {isGenerating && (
+              <div className="flex justify-start">
+                <div className="rounded-2xl rounded-bl-md border border-border bg-card p-3">
+                  <div className="mb-1 text-xs font-medium text-muted-foreground">
+                    Assistant
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-muted-foreground">Thinking…</span>
+                  </div>
+                </div>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
           <div className="flex gap-2">
-            <textarea
+            <Textarea
               value={currentMessage}
               onChange={(e) => setCurrentMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
-              className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              placeholder="Type your message… (Enter to send, Shift+Enter for a new line)"
               rows={2}
               disabled={!hasBeenLoaded || isGenerating}
+              className="min-h-[44px] flex-1"
             />
-            <button
+            <Button
               onClick={handleSendMessage}
               disabled={!currentMessage.trim() || busy || !hasBeenLoaded}
-              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center justify-center"
+              size="icon"
+              className="h-[44px] w-[44px] shrink-0"
+              aria-label="Send message"
             >
               {isGenerating ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Send className="w-4 h-4" />
+                <Send className="h-4 w-4" />
               )}
-            </button>
+            </Button>
           </div>
         </>
       ) : (
         <>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Enter your prompt:
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-muted-foreground">
+              Prompt
             </label>
-            <textarea
+            <Textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Enter your text prompt here... (Press Enter to generate, Shift+Enter for new line)"
-              className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              placeholder="Enter your text prompt here… (Enter to generate, Shift+Enter for a new line)"
               rows={4}
               disabled={!hasBeenLoaded || isGenerating}
             />
           </div>
-          <div className="mb-4">
-            <button
-              onClick={handleGenerateText}
-              disabled={!prompt.trim() || busy || !hasBeenLoaded}
-              className="px-6 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center gap-2"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Send className="w-4 h-4" />
-                  Generate Text
-                </>
-              )}
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto border border-gray-300 rounded-lg p-4 bg-white">
-            <div className="mb-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Generated Text:
-              </label>
-            </div>
+          <Button
+            onClick={handleGenerateText}
+            disabled={!prompt.trim() || busy || !hasBeenLoaded}
+            className="w-fit"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Generating…
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4" />
+                Generate Text
+              </>
+            )}
+          </Button>
+          <div className="min-h-[220px] flex-1 overflow-y-auto rounded-xl border border-border bg-muted/30 p-4">
+            <label className="mb-2 block text-sm font-medium text-muted-foreground">
+              Generated text
+            </label>
             {generatedText ? (
-              <div className="whitespace-pre-wrap text-gray-800 bg-gray-50 p-3 rounded-sm border">
+              <div className="whitespace-pre-wrap rounded-md border border-border bg-card p-3 text-foreground">
                 {generatedText}
               </div>
             ) : (
-              <div className="text-gray-500 italic flex items-center gap-2">
+              <div className="flex items-center gap-2 text-sm italic text-muted-foreground">
                 {isGenerating ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Generating text...
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Generating text…
                   </>
                 ) : (
                   'Generated text will appear here'
@@ -299,10 +310,10 @@ function TextGeneration() {
       )}
 
       {!hasBeenLoaded && (
-        <div className="text-center text-gray-500 text-sm mt-2">
-          Please load a model first to start{' '}
-          {hasChatTemplate ? 'chatting' : 'generating text'}
-        </div>
+        <p className="text-center text-sm text-muted-foreground">
+          Load a model first to start{' '}
+          {hasChatTemplate ? 'chatting' : 'generating'}
+        </p>
       )}
     </div>
   )

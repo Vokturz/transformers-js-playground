@@ -6,6 +6,10 @@ import {
 } from '../../types'
 import { useModel } from '../../contexts/ModelContext'
 import { useTextClassification } from '../../contexts/TextClassificationContext'
+import { BarChart3, Loader2, Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { cn } from '@/lib/utils'
 
 const PLACEHOLDER_TEXTS: string[] = [
   'I absolutely love this product! It exceeded all my expectations.',
@@ -87,63 +91,73 @@ function TextClassification() {
   }
 
   return (
-    <div className="flex flex-col h-full max-h-[calc(100dvh-148px)] w-full p-4 overflow-hidden">
-      <h1 className="text-2xl font-bold mb-4 shrink-0">Text Classification</h1>
+    <div className="flex h-full w-full flex-col overflow-hidden p-4 sm:p-6">
+      {/* Header */}
+      <div className="mb-4 flex shrink-0 items-center gap-2">
+        <BarChart3 className="h-5 w-5 text-primary" />
+        <h2 className="text-lg font-semibold tracking-tight">
+          Text Classification
+        </h2>
+      </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0 overflow-hidden">
+      <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
         {/* Input Section */}
-        <div className="flex flex-col w-full lg:w-1/2 min-h-0 overflow-hidden">
-          <label className="text-lg font-medium mb-2 shrink-0">
-            Input Text ({numberExamples} examples):
+        <div className="flex w-full min-h-0 flex-col lg:w-1/2">
+          <label className="mb-2 shrink-0 text-sm font-medium text-muted-foreground">
+            Input text ({numberExamples} examples)
           </label>
-
-          <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-            <textarea
-            
-              className="border border-gray-300 rounded-sm p-3 flex-1 resize-none overflow-y-auto min-h-[150px] lg:min-h-[250px]"
+          <div className="flex min-h-0 flex-1 flex-col">
+            <Textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Enter text to classify (one per line)..."
+              placeholder="Enter text to classify (one per line)…"
+              className="min-h-[150px] flex-1 lg:min-h-[250px]"
             />
-
-            <div className="flex gap-2 mt-4 shrink-0">
-              <button
-                className="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded-sm text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            <div className="mt-3 flex shrink-0 gap-2">
+              <Button
+                className="flex-1"
                 disabled={busy}
                 onClick={classify}
               >
-                {hasBeenLoaded
-                  ? !busy
-                    ? 'Classify Text'
-                    : 'Processing...'
-                  : 'Load model first'}
-              </button>
-              <button
-                className="py-2 px-4 bg-gray-500 hover:bg-gray-600 rounded-sm text-white font-medium transition-colors"
-                onClick={handleClear}
-              >
-                Clear Results
-              </button>
+                {hasBeenLoaded ? (
+                  busy ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Processing…
+                    </>
+                  ) : (
+                    'Classify Text'
+                  )
+                ) : (
+                  'Load model first'
+                )}
+              </Button>
+              <Button variant="secondary" onClick={handleClear}>
+                <Trash2 className="h-4 w-4" />
+                Clear
+              </Button>
             </div>
           </div>
         </div>
 
         {/* Results Section */}
-        <div className="flex flex-col w-full lg:w-1/2 min-h-0 overflow-hidden">
-          <label className="text-lg font-medium mb-2 shrink-0">
-            Classification Results ({results.length}):
+        <div className="flex w-full min-h-0 flex-col lg:w-1/2">
+          <label className="mb-2 shrink-0 text-sm font-medium text-muted-foreground">
+            Classification results ({results.length})
           </label>
-
-          <div className="border border-gray-300 rounded-sm p-3 flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto rounded-xl border border-border bg-muted/30 p-3">
             {results.length === 0 ? (
-              <div className="text-gray-500 text-center py-8">
-                No results yet. Click "Classify Text" to analyze your input.
+              <div className="py-10 text-center text-sm text-muted-foreground">
+                No results yet. Click “Classify Text” to analyze your input.
               </div>
             ) : (
               <div className="space-y-3">
                 {results.map((result, index) => (
-                  <div key={index} className="p-3 rounded-sm border-2">
-                    <div className="text-sm text-gray-700 mb-3">
+                  <div
+                    key={index}
+                    className="rounded-lg border border-border bg-card p-3"
+                  >
+                    <div className="mb-3 text-sm text-foreground">
                       {result.sequence}
                     </div>
                     <div className="space-y-2">
@@ -155,27 +169,37 @@ function TextClassification() {
                           return (
                             <div
                               key={labelIndex}
-                              className={`flex justify-between items-center p-2 rounded ${
-                                isTopPrediction
-                                  ? 'bg-blue-50 border-l-4 border-blue-500'
-                                  : 'bg-gray-50'
-                              }`}
+                              className="flex items-center gap-3"
                             >
                               <span
-                                className={`font-medium text-sm ${
+                                className={cn(
+                                  'w-28 shrink-0 truncate text-sm',
                                   isTopPrediction
-                                    ? 'text-blue-700'
-                                    : 'text-gray-700'
-                                }`}
+                                    ? 'font-medium text-foreground'
+                                    : 'text-muted-foreground'
+                                )}
+                                title={label}
                               >
                                 {label}
                               </span>
+                              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                                <div
+                                  className={cn(
+                                    'h-full rounded-full',
+                                    isTopPrediction
+                                      ? 'bg-primary'
+                                      : 'bg-muted-foreground/30'
+                                  )}
+                                  style={{ width: `${score * 100}%` }}
+                                />
+                              </div>
                               <span
-                                className={`text-sm font-mono ${
+                                className={cn(
+                                  'w-14 shrink-0 text-right font-mono text-xs',
                                   isTopPrediction
-                                    ? 'text-blue-600'
-                                    : 'text-gray-600'
-                                }`}
+                                    ? 'text-primary'
+                                    : 'text-muted-foreground'
+                                )}
                               >
                                 {(score * 100).toFixed(1)}%
                               </span>

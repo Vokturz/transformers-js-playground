@@ -25,7 +25,7 @@ const TextToSpeechConfig: React.FC<TextToSpeechConfigProps> = ({
     <div className={`space-y-4 ${className}`}>
       {modelInfo?.isStyleTTS2 ? (
         <div className="space-y-2 h-1/3">
-          <p className="text-xs text-gray-500">Style TTS2 Model</p>
+          <p className="text-xs text-muted-foreground">Style TTS2 Model</p>
           <Label htmlFor="speakerEmbeddings" className="text-sm font-medium">
             Select Voice
           </Label>
@@ -49,7 +49,7 @@ const TextToSpeechConfig: React.FC<TextToSpeechConfigProps> = ({
               ))}
             </SelectContent>
           </Select>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             Voice to use for text-to-speech synthesis.
           </p>
         </div>
@@ -71,7 +71,7 @@ const TextToSpeechConfig: React.FC<TextToSpeechConfigProps> = ({
             placeholder="https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/speaker_embeddings.bin"
             className="text-sm"
           />
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             URL to speaker embeddings file for voice characteristics
           </p>
         </div>

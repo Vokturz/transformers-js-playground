@@ -4,8 +4,8 @@ import {
   Eraser,
   Loader2,
   X,
-  Eye,
-  EyeOff,
+  Check,
+  Sparkles,
   Image as ImageIcon
 } from 'lucide-react'
 import {
@@ -15,6 +15,8 @@ import {
 } from '../../types'
 import { useModel } from '../../contexts/ModelContext'
 import { useImageClassification } from '../../contexts/ImageClassificationContext'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 // Sample images for quick testing (placeholder URLs)
 const SAMPLE_IMAGES = [
@@ -184,62 +186,68 @@ function ImageClassification() {
   const busy = status !== 'ready' || isClassifying
 
   return (
-    <div className="flex flex-col h-full max-h-[calc(100dvh-128px)]  w-full p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Image Classification</h1>
+    <div className="flex w-full flex-col p-4 sm:p-6">
+      {/* Header */}
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2">
+          <ImageIcon className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold tracking-tight">
+            Image Classification
+          </h2>
+        </div>
         <div className="flex gap-2">
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={handleLoadSampleImages}
             disabled={!hasBeenLoaded || isClassifying}
-            className="px-3 py-2 bg-purple-100 hover:bg-purple-200 disabled:bg-gray-100 disabled:cursor-not-allowed rounded-lg transition-colors text-sm"
-            title="Load Sample Images"
+            title="Load sample images"
           >
+            <Sparkles className="h-4 w-4" />
             Load Samples
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={clearExamples}
-            className="p-2 bg-red-100 hover:bg-red-200 rounded-lg transition-colors"
-            title="Clear All Images"
+            title="Clear all images"
           >
-            <Eraser className="w-4 h-4" />
-          </button>
+            <Eraser className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0  overflow-y-auto">
+      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto lg:flex-row">
         {/* Left Panel - Image Upload and List */}
-        <div className="lg:w-1/2 flex flex-col">
+        <div className="flex flex-col lg:w-1/2">
           {/* Upload Area */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Upload Images:
+            <label className="mb-2 block text-sm font-medium text-muted-foreground">
+              Upload images
             </label>
             <div
               ref={dropZoneRef}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-lg p-3 lg:p-6 text-center transition-colors cursor-pointer ${
-                dragOver
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-300 hover:border-gray-400'
-              } ${!hasBeenLoaded ? 'opacity-50 cursor-not-allowed' : ''}`}
               onClick={() => hasBeenLoaded && fileInputRef.current?.click()}
+              className={cn(
+                'cursor-pointer rounded-xl border-2 border-dashed p-6 text-center transition-colors',
+                dragOver
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border bg-muted/30 hover:border-ring/50',
+                !hasBeenLoaded && 'cursor-not-allowed opacity-50'
+              )}
             >
-              <div className="flex flex-row lg:flex-col">
-                <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                <div className='flex flex-col'>
-                <p className="text-sm text-gray-600">
-                  {dragOver
-                    ? 'Drop images here'
-                    : 'Click to upload or drag and drop images'}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
+              <Upload className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+              <p className="text-sm text-foreground">
+                {dragOver
+                  ? 'Drop images here'
+                  : 'Click to upload or drag and drop images'}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
                 Supports JPG, PNG, GIF, WebP
               </p>
-              </div>
-              </div>
-              
               <input
                 ref={fileInputRef}
                 type="file"
@@ -255,92 +263,90 @@ function ImageClassification() {
           {/* Classify Button */}
           {examples.some((ex) => !ex.predictions) && (
             <div className="mb-4">
-              <button
+              <Button
                 onClick={handleClassifyAll}
                 disabled={busy || !hasBeenLoaded}
-                className="px-6 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center gap-2"
               >
                 {isClassifying ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Classifying...
-                    {progress !== null && ` (${Math.round(progress * 100)}%)`}
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Classifying…
+                    {progress !== null &&
+                      ` (${Math.round(progress * 100)}%)`}
                   </>
                 ) : (
                   'Classify Images'
                 )}
-              </button>
+              </Button>
             </div>
           )}
 
           {/* Images List */}
-          <div className="flex-1 overflow-y-auto border border-gray-300 rounded-lg bg-white min-h-0 max-h-[30vh] sm:max-h-[20vh] lg:max-h-none">
+          <div className="max-h-[30vh] min-h-0 flex-1 overflow-y-auto rounded-xl border border-border bg-card sm:max-h-[40vh] lg:max-h-none">
             <div className="p-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-3 sticky top-0 bg-white z-10">
+              <h3 className="sticky top-0 z-10 mb-3 bg-card text-sm font-medium text-muted-foreground">
                 Images ({examples.length})
               </h3>
               {examples.length === 0 ? (
-                <div className="text-gray-500 italic text-center py-8">
+                <div className="py-8 text-center text-sm italic text-muted-foreground">
                   No images uploaded yet. Upload some images above to get
                   started.
                 </div>
               ) : (
-                <div className="overflow-y-auto max-h-[calc(100%-10rem)] grid-cols-2 grid sm:grid-cols-3 lg:grid-cols-1 gap-2 ">
-                  {examples.map((example) => (
-                    <div
-                      key={example.id}
-                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                        selectedExample?.id === example.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                      onClick={() => handleSelectExample(example)}
-                    >
-                      <div className="flex gap-3">
-                        <div className="shrink-0">
-                          <img
-                            src={example.url}
-                            alt={example.name}
-                            className="w-16 h-16 object-cover rounded-lg"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium text-gray-800 truncate">
-                                {example.name}
+                <div className="max-h-[calc(100%-3rem)] grid grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-1">
+                  {examples.map((example) => {
+                    const selected = selectedExample?.id === example.id
+                    return (
+                      <div
+                        key={example.id}
+                        onClick={() => handleSelectExample(example)}
+                        className={cn(
+                          'flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors',
+                          selected
+                            ? 'border-primary/60 bg-primary/10'
+                            : 'border-border hover:bg-muted/40'
+                        )}
+                      >
+                        <img
+                          src={example.url}
+                          alt={example.name}
+                          className="h-14 w-14 shrink-0 rounded-lg object-cover"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-medium text-foreground">
+                            {example.name}
+                          </div>
+                          <div className="mt-1 flex items-center gap-2">
+                            {example.isLoading ? (
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                                Classifying…
                               </div>
-                              <div className="flex items-center gap-2 mt-1">
-                                {example.isLoading ? (
-                                  <div className="flex items-center gap-1 text-xs text-blue-600">
-                                    <Loader2 className="w-3 h-3 animate-spin" />
-                                    Classifying...
-                                  </div>
-                                ) : example.predictions ? (
-                                  <div className="text-xs text-green-600">
-                                    ✓ Classified
-                                  </div>
-                                ) : (
-                                  <div className="text-xs text-gray-500">
-                                    Not classified
-                                  </div>
-                                )}
+                            ) : example.predictions ? (
+                              <div className="flex items-center gap-1 text-xs text-emerald-500">
+                                <Check className="h-3 w-3" />
+                                Classified
                               </div>
-                            </div>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                removeExample(example.id)
-                              }}
-                              className="ml-2 p-1 text-red-500 hover:text-red-700 transition-colors"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
+                            ) : (
+                              <div className="text-xs text-muted-foreground">
+                                Not classified
+                              </div>
+                            )}
                           </div>
                         </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            removeExample(example.id)
+                          }}
+                          className="shrink-0 rounded p-1 text-muted-foreground transition-colors hover:text-destructive"
+                          aria-label="Remove image"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </div>
@@ -348,98 +354,110 @@ function ImageClassification() {
         </div>
 
         {/* Right Panel - Preview and Results */}
-        <div className="lg:w-1/2 flex lg:flex-col flex-row space-x-4 sm:max-h-[34vh] lg:max-h-none">
+        <div className="flex flex-col lg:w-1/2">
           {/* Image Preview */}
           {selectedExample && (
             <div className="mb-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">
+              <h3 className="mb-2 text-sm font-medium text-muted-foreground">
                 Selected Image
               </h3>
-              <div className="border-none sm:border border-gray-300 rounded-lg bg-white p-4 sm:p-0">
-                <div className="flex flex-col items-center">
-                  <img
-                    src={selectedExample.url}
-                    alt={selectedExample.name}
-                    className="max-w-24 lg:max-w-full max-h-60 lg:max-h-64 object-contain rounded-lg mb-2"
-                  />
-                  <div className="text-sm text-gray-600 text-center">
-                    {selectedExample.name}
-                  </div>
+              <div className="flex flex-col items-center rounded-xl border border-border bg-card p-4">
+                <img
+                  src={selectedExample.url}
+                  alt={selectedExample.name}
+                  className="max-h-60 w-auto rounded-lg object-contain"
+                />
+                <div className="mt-2 text-sm text-muted-foreground">
+                  {selectedExample.name}
                 </div>
               </div>
             </div>
           )}
 
           {/* Classification Results */}
-          <div className="flex-1 overflow-y-auto border border-gray-300 rounded-lg bg-white  ">
+          <div className="flex-1 overflow-y-auto rounded-xl border border-border bg-card">
             <div className="p-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-3 sticky top-0 bg-white">
+              <h3 className="sticky top-0 z-10 mb-3 bg-card text-sm font-medium text-muted-foreground">
                 Classification Results
-                {selectedExample && ` - ${selectedExample.name}`}
+                {selectedExample && ` — ${selectedExample.name}`}
               </h3>
               {!selectedExample ? (
-                <div className="text-gray-500 italic text-center py-8">
-                  <ImageIcon className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                <div className="py-8 text-center text-sm italic text-muted-foreground">
+                  <ImageIcon className="mx-auto mb-2 h-8 w-8 text-muted-foreground/40" />
                   Select an image to see classification results
                 </div>
               ) : selectedExample.isLoading ? (
-                <div className="text-center py-8">
-                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-blue-500" />
-                  <div className="text-sm text-gray-600">
-                    Classifying image...
+                <div className="py-8 text-center">
+                  <Loader2 className="mx-auto mb-2 h-8 w-8 animate-spin text-primary" />
+                  <div className="text-sm text-muted-foreground">
+                    Classifying image…
                   </div>
                   {progress !== null && (
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="mt-1 text-xs text-muted-foreground">
                       {Math.round(progress * 100)}% complete
                     </div>
                   )}
                 </div>
               ) : !selectedExample.predictions ? (
-                <div className="text-gray-500 italic text-center py-8">
-                  <button
+                <div className="py-8 text-center">
+                  <Button
                     onClick={() => classifyImage(selectedExample)}
                     disabled={busy || !hasBeenLoaded}
-                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
                   >
+                    <Sparkles className="h-4 w-4" />
                     Classify This Image
-                  </button>
+                  </Button>
                 </div>
               ) : (
-                <div className="space-y-3 overflow-y-auto max-h-[calc(100%-3rem)]">
+                <div className="max-h-[calc(100%-3rem)] space-y-3 overflow-y-auto">
                   {selectedExample.predictions.map((prediction, index) => {
-                    const confidencePercent = (prediction.score * 100).toFixed(
-                      1
-                    )
+                    const confidencePercent = (
+                      prediction.score * 100
+                    ).toFixed(1)
                     const isTopPrediction = index === 0
 
                     return (
                       <div
                         key={index}
-                        className={`p-3 border rounded-lg ${
+                        className={cn(
+                          'rounded-lg border p-3',
                           isTopPrediction
-                            ? 'border-green-300 bg-green-50'
-                            : 'border-gray-200'
-                        }`}
+                            ? 'border-primary/40 bg-primary/10'
+                            : 'border-border'
+                        )}
                       >
-                        <div className="flex justify-between items-center mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-gray-800">
-                              {prediction.label}
-                            </span>
-                          </div>
-                          <span className="text-sm font-medium text-gray-600">
+                        <div className="mb-2 flex items-center justify-between">
+                          <span
+                            className={cn(
+                              'text-sm',
+                              isTopPrediction
+                                ? 'font-medium text-foreground'
+                                : 'text-muted-foreground'
+                            )}
+                          >
+                            {prediction.label}
+                          </span>
+                          <span
+                            className={cn(
+                              'font-mono text-sm',
+                              isTopPrediction
+                                ? 'font-medium text-primary'
+                                : 'text-muted-foreground'
+                            )}
+                          >
                             {confidencePercent}%
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                           <div
-                            className={`h-2 rounded-full transition-all duration-300 ${
+                            className={cn(
+                              'h-full rounded-full transition-all duration-300',
                               isTopPrediction
-                                ? 'bg-green-500'
+                                ? 'bg-primary'
                                 : prediction.score > 0.5
-                                ? 'bg-blue-500'
-                                : 'bg-gray-400'
-                            }`}
+                                ? 'bg-chart-2'
+                                : 'bg-muted-foreground/40'
+                            )}
                             style={{
                               width: `${Math.max(prediction.score * 100, 2)}%`
                             }}
@@ -456,17 +474,16 @@ function ImageClassification() {
       </div>
 
       {!hasBeenLoaded && (
-        <div className="text-center text-gray-500 text-sm mt-2">
-          Please load an image classification model first to start classifying
-          images
-        </div>
+        <p className="mt-2 text-center text-sm text-muted-foreground">
+          Load an image classification model first to start classifying images
+        </p>
       )}
 
       {hasBeenLoaded && examples.length === 0 && (
-        <div className="text-center text-blue-600 text-sm mt-2">
-          💡 Tip: Click "Load Samples" to try with example images, or upload
-          your own images above
-        </div>
+        <p className="mt-2 text-center text-sm text-muted-foreground">
+          Tip: click “Load Samples” to try example images, or upload your own
+          above.
+        </p>
       )}
     </div>
   )

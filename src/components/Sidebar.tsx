@@ -27,12 +27,15 @@ const Sidebar = ({
 }: SidebarProps) => {
   const { pipeline, setPipeline, modelInfo } = useModel()
 
+  const sectionTitle =
+    'mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground'
+
   return (
     <>
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
           onClick={onClose}
         />
       )}
@@ -40,82 +43,81 @@ const Sidebar = ({
       {/* Sidebar */}
       <div
         className={`
-        fixed top-0 right-0 h-full w-full sm:w-[600px] lg:w-1/5 2xl:w-2/5 min-w-[400px] max-w-[500px] bg-white shadow-xl z-40 transform transition-transform duration-300 ease-in-out
+        fixed top-0 right-0 z-40 h-full w-full transform transition-transform duration-300 ease-in-out
+        sm:w-[600px] sm:min-w-[400px] sm:max-w-[500px]
+        lg:w-1/5 2xl:w-2/5
+        bg-sidebar text-sidebar-foreground shadow-xl
         ${isOpen ? 'translate-x-0' : 'translate-x-full'}
-        lg:translate-x-0 lg:static lg:shadow-none lg:border-l lg:border-gray-200
+        lg:static lg:translate-x-0 lg:border-l lg:border-sidebar-border lg:shadow-none
       `}
       >
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 lg:hidden">
-            <h2 className="text-lg font-semibold text-foreground">
-              Configuration
-            </h2>
+        <div className="flex h-full flex-col">
+          {/* Header (mobile only) */}
+          <div className="flex items-center justify-between border-b border-sidebar-border p-4 lg:hidden">
+            <h2 className="text-base font-semibold">Configuration</h2>
             <button
               onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+              aria-label="Close panel"
+              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
             >
-              <X className="w-5 h-5" />
+              <X className="h-5 w-5" />
             </button>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-6">
+          <div className="flex-1 space-y-6 overflow-y-auto overflow-x-hidden p-4">
             {/* Pipeline Selection */}
-            <div className="space-x-3 flex flex-row justify-center align-center">
-              <div>
-                <h3 className="text-md xl:text-lg font-semibold text-foreground text-nowrap mt-1">
-                  Choose a Pipeline
-                </h3>
+            <section>
+              <h3 className={sectionTitle}>Pipeline</h3>
+              <div className="flex flex-col gap-2">
+                <PipelineSelector pipeline={pipeline} setPipeline={setPipeline} />
                 {(pipeline === 'feature-extraction' ||
                   pipeline === 'image-classification') && (
-                  <span className="flex text-xs text-red-500 justify-center text-center">
-                    WebGPU disabled{' '}
+                  <div className="flex items-center gap-1 text-xs text-destructive">
+                    <span>WebGPU is required for this pipeline</span>
                     <Tooltip
                       content="onnxruntime-web seems not to support this pipeline"
-                      className="transform -translate-x-1/3 break-keep max-w-12"
+                      className="max-w-12 -translate-x-1/3"
                     >
-                      <CircleQuestionMark className="inline w-4 h-4 ml-1" />
+                      <CircleQuestionMark className="h-3.5 w-3.5" />
                     </Tooltip>
-                  </span>
+                  </div>
                 )}
               </div>
-              <PipelineSelector pipeline={pipeline} setPipeline={setPipeline} />
-            </div>
+            </section>
 
             {/* Model Selection */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-foreground">
-                Select Model
-              </h3>
+            <section>
+              <h3 className={sectionTitle}>Model</h3>
               <ModelSelector />
-            </div>
+            </section>
 
             {/* Model Info */}
-            <div className="flex flex-col items-center justify-center">
+            <section className="flex flex-col items-stretch gap-3">
               <ModelInfo />
-              {/* Model README Button */}
-              <div className="flex flex-row mt-2 space-x-4 ">
+              <div className="flex flex-row gap-2">
                 <Button
                   variant="outline"
+                  className="flex-1"
                   onClick={() => setIsModalOpen(true)}
                   disabled={!modelInfo}
                 >
-                  <FileText className="w-4 h-4 flex-shrink-0" />
-                  <span>View README.md</span>
+                  <FileText className="h-4 w-4 flex-shrink-0" />
+                  <span>README</span>
                 </Button>
                 <Button
                   variant="outline"
+                  className="flex-1"
                   onClick={() => setIsCodeModalOpen(true)}
                   disabled={!modelInfo}
                 >
-                  <Code2 className="w-4 h-4 flex-shrink-0" />
-                  <span>See Code</span>
+                  <Code2 className="h-4 w-4 flex-shrink-0" />
+                  <span>Code</span>
                 </Button>
               </div>
-            </div>
+            </section>
 
-            <hr className="border-gray-200" />
+            <hr className="border-border" />
             {pipeline === 'text-generation' && <TextGenerationConfig />}
             {pipeline === 'feature-extraction' && <FeatureExtractionConfig />}
             {pipeline === 'zero-shot-classification' && (

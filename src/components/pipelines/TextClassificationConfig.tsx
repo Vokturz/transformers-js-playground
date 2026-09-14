@@ -1,4 +1,5 @@
 import React from 'react'
+import { Lightbulb } from 'lucide-react'
 import { useTextClassification } from '../../contexts/TextClassificationContext'
 import { Slider } from '../ui/slider'
 
@@ -35,9 +36,12 @@ const TextClassificationConfig = () => {
           </p>
         </div>
 
-        <div className="p-3 bg-chart-4/10 border border-chart-4/20 rounded-lg">
-          <h4 className="text-sm font-medium text-chart-4 mb-2">💡 Tips</h4>
-          <div className="text-xs text-chart-4 space-y-1">
+        <div className="rounded-lg border border-border bg-muted/40 p-3">
+          <h4 className="mb-2 flex items-center gap-1.5 text-sm font-medium text-foreground">
+            <Lightbulb className="h-3.5 w-3.5 text-primary" />
+            Tips
+          </h4>
+          <div className="space-y-1 text-xs text-muted-foreground">
             <p>• Use Top K = 1-3 for most cases</p>
             <p>• Higher values show more detailed rankings</p>
             <p>• Try quantized models for faster processing</p>

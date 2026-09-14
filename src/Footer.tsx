@@ -1,29 +1,21 @@
 function Footer() {
   return (
-    <footer className="bg-white w-full mt-auto">
-      <div className="max-w-7xl flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 py-4 mx-auto h-10">
-        <div className="flex flex-row items-center space-x-2 text-sm text-gray-500">
-          {/*<a
-            href="https://vnavarro.dev"
+    <footer className="z-20 shrink-0 border-t border-border/60 bg-background/80 backdrop-blur-xl">
+      <div className="mx-auto flex h-12 w-full max-w-[1600px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <p className="text-xs text-muted-foreground">
+          Powered by{' '}
+          <a
+            href="https://huggingface.co/docs/transformers.js"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-lg tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300 "
+            className="inline-flex items-center gap-1 font-medium text-foreground/80 transition-colors hover:text-primary"
           >
-            vnavarro.dev
+            <span>🤗 Transformers.js</span>
           </a>
-          <div className="w-[1px] h-4 bg-gray-500" />*/}
-          <div className="flex flex-row space-x-2">
-            <span>Powered by</span>
-            <a
-              href="https://huggingface.co/docs/transformers.js"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center space-x-1 text-blue-600 hover:text-blue-800 font-medium"
-            >
-              <span>🤗 Transformers.js</span>
-            </a>
-          </div>
-        </div>
+        </p>
+        <p className="hidden text-xs text-muted-foreground/70 sm:block">
+          Runs locally · no data leaves your browser
+        </p>
       </div>
     </footer>
   )

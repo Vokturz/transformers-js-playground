@@ -1,9 +1,10 @@
 import { useEffect, useCallback, useState } from 'react'
-import { ChevronDown, Loader2, X } from 'lucide-react'
+import { ChevronDown, Loader2 } from 'lucide-react'
 import { QuantizationType, WorkerMessage } from '../types'
 import { useModel } from '../contexts/ModelContext'
 import { getWorker, terminateWorker } from '../lib/workerManager'
 import { Alert, AlertDescription } from './ui/alert'
+import { Button } from '@/components/ui/button'
 
 const ModelLoader = () => {
   const [showAlert, setShowAlert] = useState(false)
@@ -151,13 +152,15 @@ const ModelLoader = () => {
 
   return (
     <div className="space-y-3">
-      <hr className="border-gray-200" />
+      <hr className="border-border" />
 
-      <div className="flex items-center justify-between space-x-4">
-        <div className="flex items-center space-x-2">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
           {modelInfo.supportedQuantizations.length >= 1 ? (
             <>
-              <span className="text-xs text-gray-600 font-medium">Quant:</span>
+              <span className="text-xs font-medium text-muted-foreground">
+                Quant:
+              </span>
 
               <div className="relative">
                 <select
@@ -165,7 +168,7 @@ const ModelLoader = () => {
                   onChange={(e) =>
                     setSelectedQuantization(e.target.value as QuantizationType)
                   }
-                  className="appearance-none bg-white border border-gray-300 rounded-md px-3 py-1 pr-8 text-xs text-gray-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="appearance-none rounded-md border border-input bg-card py-1 pl-3 pr-8 text-xs text-foreground focus:outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
                 >
                   {modelInfo.supportedQuantizations.map((quant) => (
                     <option key={quant} value={quant}>
@@ -173,11 +176,11 @@ const ModelLoader = () => {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
+                <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
               </div>
             </>
           ) : (
-            <span className="text-xs text-gray-600 font-medium white-space-break-spaces">
+            <span className="whitespace-break-spaces text-xs font-medium text-muted-foreground">
               No quantization available. Using fp32
             </span>
           )}
@@ -185,8 +188,9 @@ const ModelLoader = () => {
 
         {selectedQuantization && (
           <div className="flex justify-center">
-            <button
-              className={`w-32 py-2 px-4 ${status !== 'error' ? 'bg-green-500 hover:bg-green-600 cursor-pointer' : 'bg-red-500 hover:bg-red-600'} rounded-sm text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm inline-flex items-center text-center justify-center space-x-2`}
+            <Button
+              variant={status === 'error' ? 'destructive' : 'default'}
+              className="w-32"
               disabled={
                 hasBeenLoaded || status === 'loading' || status === 'error'
               }
@@ -194,7 +198,7 @@ const ModelLoader = () => {
             >
               {status === 'loading' && !hasBeenLoaded ? (
                 <>
-                  <Loader2 className="animate-spin h-4 w-4" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   <span>{progress.toFixed(0)}%</span>
                 </>
               ) : status !== 'error' ? (
@@ -202,7 +206,7 @@ const ModelLoader = () => {
               ) : (
                 <span>Error</span>
               )}
-            </button>
+            </Button>
           </div>
         )}
       </div>

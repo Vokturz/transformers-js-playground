@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
-import { Play, Square, Download, Eraser, Loader2, Volume2 } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Eraser, Loader2, Volume2, Mic } from 'lucide-react'
 import { TextToSpeechWorkerInput, WorkerMessage } from '../../types'
 import { useModel } from '../../contexts/ModelContext'
 import {
@@ -7,7 +7,8 @@ import {
   AudioResult
 } from '../../contexts/TextToSpeechContext'
 import AudioPlayer from '../AudioPlayer'
-import { preview } from 'vite'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 
 const SAMPLE_TEXTS = [
   'Hello, this is a sample text for text-to-speech synthesis.',
@@ -105,75 +106,79 @@ function TextToSpeech() {
   const busy = status !== 'ready' || isSynthesizing
 
   return (
-    <div className="flex flex-col min-h-[30dvh] max-h-[calc(100dvh-128px)] w-full p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Text to Speech</h1>
-        <button
+    <div className="flex w-full flex-col p-4 sm:p-6">
+      {/* Header */}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Mic className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold tracking-tight">
+            Text to Speech
+          </h2>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={clearAudioResults}
-          className="p-2 bg-red-100 hover:bg-red-200 rounded-lg transition-colors"
-          title="Clear All Audio"
+          title="Clear all audio"
         >
-          <Eraser className="w-4 h-4" />
-        </button>
+          <Eraser className="h-4 w-4" />
+        </Button>
       </div>
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Enter text to synthesize:
+      <div className="mb-4 space-y-2">
+        <label className="block text-sm font-medium text-muted-foreground">
+          Text to synthesize
         </label>
-        <textarea
+        <Textarea
           value={currentText}
           onChange={(e) => setCurrentText(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="Enter your text here... (Press Enter to synthesize, Shift+Enter for new line)"
-          className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+          placeholder="Enter your text here… (Enter to synthesize, Shift+Enter for a new line)"
           rows={4}
           disabled={!hasBeenLoaded || isSynthesizing}
         />
       </div>
 
-      <div className="mb-4">
-        <div className="flex flex-wrap gap-2 mb-2">
-          <span className="text-sm font-medium text-gray-700">
-            Quick samples:
-          </span>
-          {SAMPLE_TEXTS.map((sampleText, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentText(sampleText)}
-              disabled={!hasBeenLoaded || isSynthesizing}
-              className="px-2 py-1 bg-gray-100 hover:bg-gray-200 disabled:bg-gray-50 disabled:cursor-not-allowed text-gray-700 text-xs rounded transition-colors"
-            >
-              Sample {index + 1}
-            </button>
-          ))}
-        </div>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="text-sm font-medium text-muted-foreground">
+          Quick samples:
+        </span>
+        {SAMPLE_TEXTS.map((sampleText, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentText(sampleText)}
+            disabled={!hasBeenLoaded || isSynthesizing}
+            className="rounded-md border border-border bg-muted/40 px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-ring/50 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Sample {index + 1}
+          </button>
+        ))}
       </div>
 
       <div className="mb-4">
-        <button
+        <Button
           onClick={handleSynthesize}
           disabled={!currentText.trim() || busy || !hasBeenLoaded}
-          className="px-6 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center gap-2"
+          className="w-fit"
         >
           {isSynthesizing ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Synthesizing...
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Synthesizing…
             </>
           ) : (
             <>
-              <Volume2 className="w-4 h-4" />
+              <Volume2 className="h-4 w-4" />
               Synthesize Speech
             </>
           )}
-        </button>
+        </Button>
       </div>
 
       <div className="flex-1 overflow-y-auto">
         <div className="mb-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Generated Audio ({audioResults.length}):
+          <label className="block text-sm font-medium text-muted-foreground">
+            Generated audio ({audioResults.length})
           </label>
         </div>
         {audioResults.length > 0 ? (
@@ -190,18 +195,18 @@ function TextToSpeech() {
             ))}
           </div>
         ) : (
-          <div className="text-gray-500 italic flex flex-col items-center gap-3 p-8 border border-gray-200 rounded-lg bg-gray-50">
+          <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-muted/30 p-8 text-muted-foreground">
             {isSynthesizing ? (
               <>
-                <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-                <span>Synthesizing speech...</span>
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <span>Synthesizing speech…</span>
               </>
             ) : (
               <>
-                <Volume2 className="w-8 h-8 text-gray-400" />
+                <Volume2 className="h-8 w-8 text-muted-foreground/50" />
                 <span>Generated audio will appear here</span>
-                <span className="text-xs text-gray-400">
-                  Enter text and click "Synthesize Speech" to get started
+                <span className="text-xs text-muted-foreground/70">
+                  Enter text and click “Synthesize Speech” to get started
                 </span>
               </>
             )}
@@ -210,9 +215,9 @@ function TextToSpeech() {
       </div>
 
       {!hasBeenLoaded && (
-        <div className="text-center text-gray-500 text-sm mt-2">
-          Please load a model first to start synthesizing speech
-        </div>
+        <p className="mt-2 text-center text-sm text-muted-foreground">
+          Load a model first to start synthesizing speech
+        </p>
       )}
     </div>
   )

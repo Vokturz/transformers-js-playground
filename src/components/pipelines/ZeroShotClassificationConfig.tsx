@@ -2,6 +2,7 @@ import React from 'react'
 import { Plus, Minus, Eraser } from 'lucide-react'
 import { useZeroShotClassification } from '../../contexts/ZeroShotClassificationContext'
 import { Slider } from '@/components/ui/slider'
+import { Button } from '@/components/ui/button'
 
 const ZeroShotClassificationConfig = () => {
   const {
@@ -66,32 +67,37 @@ const ZeroShotClassificationConfig = () => {
             ))}
           </div>
 
-          <div className="flex gap-2 mt-3">
-            <button
+          <div className="mt-3 flex gap-2">
+            <Button
+              size="sm"
+              className="h-7 gap-1.5 px-2.5 text-xs"
               onClick={addCategory}
-              className="cursor-pointer flex items-center gap-1 px-3 py-1 text-xs bg-chart-2 hover:bg-chart-2/80 text-white rounded-sm transition-colors"
               title="Add Category"
             >
-              <Plus className="w-3 h-3" />
+              <Plus className="h-3 w-3" />
               Add
-            </button>
-            <button
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              className="h-7 gap-1.5 px-2.5 text-xs"
               onClick={removeCategory}
               disabled={sections.length <= 1}
-              className="cursor-pointer flex items-center gap-1 px-3 py-1 text-xs bg-destructive hover:bg-destructive/80 disabled:bg-muted disabled:cursor-not-allowed text-white rounded-sm transition-colors"
               title="Remove Category"
             >
-              <Minus className="w-3 h-3" />
+              <Minus className="h-3 w-3" />
               Remove
-            </button>
-            <button
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="h-7 gap-1.5 px-2.5 text-xs"
               onClick={clearResults}
-              className="cursor-pointer flex items-center gap-1 px-3 py-1 text-xs bg-chart-5 hover:bg-chart-5 text-white rounded-sm transition-colors"
               title="Clear Results"
             >
-              <Eraser className="w-3 h-3" />
+              <Eraser className="h-3 w-3" />
               Clear
-            </button>
+            </Button>
           </div>
         </div>
       </div>
