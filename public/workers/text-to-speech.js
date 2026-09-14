@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@latest'
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0'
 import { KokoroTTS } from 'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js'
 
 class MyTextToSpeechPipeline {
@@ -12,8 +12,7 @@ class MyTextToSpeechPipeline {
       this.instance = await pipeline(this.task, model, {
         dtype,
         device: 'webgpu',
-        progress_callback,
-        quantized: false
+        progress_callback
       })
       return this.instance
     } catch (webgpuError) {
@@ -28,8 +27,7 @@ class MyTextToSpeechPipeline {
         this.instance = await pipeline(this.task, model, {
           dtype,
           device: 'wasm',
-          progress_callback,
-          quantized: false
+          progress_callback
         })
         return this.instance
       } catch (wasmError) {

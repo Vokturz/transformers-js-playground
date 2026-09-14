@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@latest'
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0'
 
 class MyTextGenerationPipeline {
   static task = 'text-generation'
@@ -113,18 +113,21 @@ self.addEventListener('message', async (event) => {
           signal: abortController.signal
         })
 
+        // v4 returns a single object for non-batched inputs and an array for batched ones
+        const result = Array.isArray(output) ? output[0] : output
+
         if (hasChatTemplate) {
           // For chat mode, extract only the assistant's response
           self.postMessage({
             status: 'output',
-            output: output[0].generated_text.slice(-1)[0]
+            output: result.generated_text.slice(-1)[0]
           })
         } else {
           self.postMessage({
             status: 'output',
             output: {
               role: 'assistant',
-              content: output[0].generated_text
+              content: result.generated_text
             }
           })
         }

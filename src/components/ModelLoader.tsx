@@ -73,6 +73,11 @@ const ModelLoader = () => {
       } else if (status === 'loading' && output && !hasBeenLoaded) {
         setStatus('loading')
         if (
+          output.status === 'progress_total' &&
+          typeof output.progress === 'number'
+        ) {
+          setProgress(output.progress)
+        } else if (
           output.progress &&
           typeof output.file === 'string' &&
           output.file.startsWith('onnx')

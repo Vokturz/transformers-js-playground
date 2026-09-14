@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@latest'
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0'
 
 class MyZeroShotClassificationPipeline {
   static task = 'zero-shot-classification'
