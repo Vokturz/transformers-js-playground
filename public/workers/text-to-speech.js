@@ -1,104 +1,25 @@
 /* eslint-disable no-restricted-globals */
 import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0'
-import { KokoroTTS } from 'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js'
 
-class MyTextToSpeechPipeline {
-  static task = 'text-to-speech'
-  static instance = null
+import { createPipelineFactory, listen } from './runtime.js'
 
-  static async getInstance(model, dtype = 'fp32', progress_callback = null) {
-    try {
-      // Try WebGPU first
-      this.instance = await pipeline(this.task, model, {
-        dtype,
-        device: 'webgpu',
-        progress_callback
-      })
-      return this.instance
-    } catch (webgpuError) {
-      // Fallback to WASM if WebGPU fails
-      if (progress_callback) {
-        progress_callback({
-          status: 'fallback',
-          message: 'WebGPU failed, falling back to WASM'
-        })
-      }
-      try {
-        this.instance = await pipeline(this.task, model, {
-          dtype,
-          device: 'wasm',
-          progress_callback
-        })
-        return this.instance
-      } catch (wasmError) {
-        throw new Error(
-          `Both WebGPU and WASM failed. WebGPU error: ${webgpuError.message}. WASM error: ${wasmError.message}`
-        )
-      }
-    }
-  }
-}
+const MyTextToSpeechPipeline = createPipelineFactory(
+  (model, options) => pipeline('text-to-speech', model, options),
+  { report: (message) => self.postMessage(message) }
+)
 
-class MyKokoroTTSPipeline {
-  static instance = null
+const MyKokoroTTSPipeline = createPipelineFactory(
+  async (model, options) => {
+    const { KokoroTTS } =
+      await import('https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js')
+    return KokoroTTS.from_pretrained(model, options)
+  },
+  { report: (message) => self.postMessage(message) }
+)
 
-  static async getInstance(model, dtype = 'fp32', progress_callback = null) {
-    try {
-      const device = 'webgpu'
-      if (progress_callback) {
-        progress_callback({
-          status: 'loading',
-          message: `Loading Kokoro TTS model with ${device} device`
-        })
-      }
-
-      this.instance = await KokoroTTS.from_pretrained(model, {
-        dtype,
-        device,
-        progress_callback: progress_callback
-          ? (data) => {
-              progress_callback({
-                status: 'loading',
-                ...data
-              })
-            }
-          : null
-      })
-      return this.instance
-    } catch (webgpuError) {
-      // Fallback to WASM if WebGPU fails
-      if (progress_callback) {
-        progress_callback({
-          status: 'fallback',
-          message: 'WebGPU failed, falling back to WASM'
-        })
-      }
-      try {
-        this.instance = await KokoroTTS.from_pretrained(model, {
-          dtype,
-          device: 'wasm',
-          progress_callback: progress_callback
-            ? (data) => {
-                progress_callback({
-                  status: 'loading',
-                  ...data
-                })
-              }
-            : null
-        })
-        return this.instance
-      } catch (wasmError) {
-        throw new Error(
-          `Both WebGPU and WASM failed for Kokoro TTS. WebGPU error: ${webgpuError.message}. WASM error: ${wasmError.message}`
-        )
-      }
-    }
-  }
-}
-
-self.addEventListener('message', async (event) => {
+listen(async (event) => {
   try {
-    const { type, model, dtype, text, isStyleTTS2, config } = event.data
+    const { type, model, dtype, text, isStyleTTS2, config = {} } = event.data
 
     if (!model) {
       self.postMessage({
@@ -116,7 +37,8 @@ self.addEventListener('message', async (event) => {
         dtype || 'q8',
         (x) => {
           self.postMessage({ status: 'loading', output: x })
-        }
+        },
+        event.data.device
       )
     } else {
       // Use standard transformers pipeline
@@ -125,7 +47,8 @@ self.addEventListener('message', async (event) => {
         dtype || 'fp32',
         (x) => {
           self.postMessage({ status: 'loading', output: x })
-        }
+        },
+        event.data.device
       )
     }
 
@@ -152,7 +75,7 @@ self.addEventListener('message', async (event) => {
         if (isStyleTTS2) {
           const options = {}
 
-          options.voice = config.voice
+          options.voice = config.voice || 'af_heart'
           const audioResult = await synthesizer.generate(text.trim(), options)
 
           output = {
@@ -163,15 +86,14 @@ self.addEventListener('message', async (event) => {
           const options = {}
 
           if (config?.speakerEmbeddings) {
-            try {
-              const response = await fetch(config.speakerEmbeddings)
-              if (response.ok) {
-                const embeddings = await response.arrayBuffer()
-                options.speaker_embeddings = new Float32Array(embeddings)
-              }
-            } catch (error) {
-              console.warn('Failed to load speaker embeddings:', error)
-            }
+            const response = await fetch(config.speakerEmbeddings)
+            if (!response.ok)
+              throw new Error(
+                `Failed to load speaker embeddings: ${response.status}`
+              )
+            options.speaker_embeddings = new Float32Array(
+              await response.arrayBuffer()
+            )
           }
 
           const result = await synthesizer(text.trim(), options)

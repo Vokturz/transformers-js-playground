@@ -63,8 +63,8 @@ function ZeroShotClassification() {
         // Threshold for classification
         const label = scores[0] > config.threshold ? labels[0] : 'Other'
 
-        const sectionID =
-          sections.map((x) => x.title).indexOf(label) ?? sections.length - 1
+        const match = sections.findIndex((section) => section.title === label)
+        const sectionID = match >= 0 ? match : sections.length - 1
         setSections((sections) => {
           const newSections = [...sections]
           newSections[sectionID] = {
@@ -109,10 +109,7 @@ function ZeroShotClassification() {
       {/* Classify Button */}
       {hasBeenLoaded && (
         <div className="mb-4">
-          <Button
-            onClick={classify}
-            disabled={!text.trim() || busy}
-          >
+          <Button onClick={classify} disabled={!text.trim() || busy}>
             {busy ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />

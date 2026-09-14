@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Bot, Settings } from 'lucide-react'
 import ZeroShotClassification from './components/pipelines/ZeroShotClassification'
 import TextClassification from './components/pipelines/TextClassification'
@@ -14,9 +14,11 @@ import ModelReadme from './components/ModelReadme'
 import { PipelineLayout } from './components/PipelineLayout'
 import Footer from './Footer'
 import ModelCode from './components/ModelCode'
+import { TaskNavigation } from './components/TaskNavigation'
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const closeSidebar = useCallback(() => setIsSidebarOpen(false), [])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isCodeModalOpen, setIsCodeModalOpen] = useState(false)
   const {
@@ -26,7 +28,11 @@ function App() {
     modelInfo,
     setIsFetching,
     setErrorText,
-    setStatus
+    setStatus,
+    hasBeenLoaded,
+    status,
+    backend,
+    errorText
   } = useModel()
 
   useEffect(() => {
@@ -36,16 +42,26 @@ function App() {
     setStatus('initiate')
     setErrorText('')
 
+    let cancelled = false
     const fetchModels = async () => {
       try {
         const fetchedModels = await getModelsByPipeline(pipeline)
-        setModels(fetchedModels)
+        if (!cancelled) setModels(fetchedModels)
+        if (!cancelled) setIsFetching(false)
       } catch (error) {
         console.error('Error fetching models:', error)
-        setIsFetching(false)
+        if (!cancelled) {
+          setIsFetching(false)
+          setErrorText(
+            'Could not reach Hugging Face. Check your connection, then choose a task to retry or enter a custom model.'
+          )
+        }
       }
     }
     fetchModels()
+    return () => {
+      cancelled = true
+    }
   }, [
     setModels,
     setModelInfo,
@@ -56,7 +72,7 @@ function App() {
   ])
 
   return (
-    <div className="relative flex h-screen flex-col overflow-hidden bg-background text-foreground">
+    <div className="relative flex h-dvh flex-col overflow-hidden bg-background text-foreground">
       <div className="app-glow pointer-events-none absolute inset-0 -z-10" />
 
       <Header />
@@ -66,6 +82,43 @@ function App() {
           {/* Main Content */}
           <main className="relative min-w-0 flex-1 overflow-auto">
             <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+              <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                    Local AI lab
+                  </p>
+                  <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                    What will you try today?
+                  </h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Choose a task, load a model, and make it your own.
+                  </p>
+                </div>
+                <span
+                  role="status"
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground"
+                >
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${hasBeenLoaded ? 'bg-emerald-500' : status === 'error' ? 'bg-destructive' : 'bg-muted-foreground'}`}
+                  />
+                  {status === 'error'
+                    ? 'Needs attention'
+                    : status === 'loading'
+                      ? 'Loading model'
+                      : hasBeenLoaded
+                        ? backend || 'Model ready'
+                        : 'No model loaded'}
+                </span>
+              </div>
+              <TaskNavigation />
+              {errorText && (
+                <div
+                  role="alert"
+                  className="mb-4 break-words rounded-xl border border-destructive/25 bg-destructive/5 p-4 text-sm text-destructive"
+                >
+                  {errorText}
+                </div>
+              )}
               {/* Mobile settings button */}
               <div className="mb-3 flex justify-end lg:hidden">
                 <button
@@ -77,6 +130,23 @@ function App() {
                 </button>
               </div>
 
+              {!hasBeenLoaded && status !== 'loading' && (
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed border-primary/25 bg-primary/5 px-4 py-3 text-sm">
+                  <p className="text-muted-foreground">
+                    Start with a model in{' '}
+                    <span className="font-medium text-foreground">
+                      Configuration
+                    </span>
+                    . Downloads stay cached for your next visit.
+                  </p>
+                  <button
+                    onClick={() => setIsSidebarOpen(true)}
+                    className="font-medium text-primary lg:hidden"
+                  >
+                    Choose a model →
+                  </button>
+                </div>
+              )}
               {/* Pipeline Component */}
               <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                 {modelInfo && (
@@ -102,7 +172,7 @@ function App() {
           {/* Sidebar */}
           <Sidebar
             isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
+            onClose={closeSidebar}
             setIsModalOpen={setIsModalOpen}
             setIsCodeModalOpen={setIsCodeModalOpen}
           />

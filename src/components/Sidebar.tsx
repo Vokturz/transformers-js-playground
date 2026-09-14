@@ -1,4 +1,5 @@
-import { CircleQuestionMark, Code2, FileText, X } from 'lucide-react'
+import { useEffect, useRef } from 'react'
+import { Code2, FileText, X } from 'lucide-react'
 import PipelineSelector from './PipelineSelector'
 import ModelSelector from './ModelSelector'
 import ModelInfo from './ModelInfo'
@@ -10,7 +11,6 @@ import ImageClassificationConfig from './pipelines/ImageClassificationConfig'
 import TextClassificationConfig from './pipelines/TextClassificationConfig'
 import TextToSpeechConfig from './pipelines/TextToSpeechConfig'
 import { Button } from '@/components/ui/button'
-import Tooltip from './Tooltip'
 
 interface SidebarProps {
   isOpen: boolean
@@ -25,6 +25,20 @@ const Sidebar = ({
   setIsModalOpen,
   setIsCodeModalOpen
 }: SidebarProps) => {
+  const closeButton = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (!isOpen) return
+    const previous = document.activeElement as HTMLElement | null
+    closeButton.current?.focus()
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !event.defaultPrevented) onClose()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      previous?.focus()
+    }
+  }, [isOpen, onClose])
   const { pipeline, setPipeline, modelInfo } = useModel()
 
   const sectionTitle =
@@ -41,24 +55,25 @@ const Sidebar = ({
       )}
 
       {/* Sidebar */}
-      <div
+      <aside
+        aria-label="Configuration"
         className={`
         fixed top-0 right-0 z-40 h-full w-full transform transition-transform duration-300 ease-in-out
-        sm:w-[600px] sm:min-w-[400px] sm:max-w-[500px]
-        lg:w-1/5 2xl:w-2/5
+        sm:w-[380px] lg:w-[360px] xl:w-[380px] lg:shrink-0
         bg-sidebar text-sidebar-foreground shadow-xl
-        ${isOpen ? 'translate-x-0' : 'translate-x-full'}
+        ${isOpen ? 'visible translate-x-0' : 'invisible translate-x-full lg:visible'}
         lg:static lg:translate-x-0 lg:border-l lg:border-sidebar-border lg:shadow-none
       `}
       >
         <div className="flex h-full flex-col">
           {/* Header (mobile only) */}
-          <div className="flex items-center justify-between border-b border-sidebar-border p-4 lg:hidden">
+          <div className="flex items-center justify-between border-b border-sidebar-border p-4">
             <h2 className="text-base font-semibold">Configuration</h2>
             <button
+              ref={closeButton}
               onClick={onClose}
               aria-label="Close panel"
-              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
+              className="rounded-lg p-2 lg:hidden text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
             >
               <X className="h-5 w-5" />
             </button>
@@ -70,19 +85,10 @@ const Sidebar = ({
             <section>
               <h3 className={sectionTitle}>Pipeline</h3>
               <div className="flex flex-col gap-2">
-                <PipelineSelector pipeline={pipeline} setPipeline={setPipeline} />
-                {(pipeline === 'feature-extraction' ||
-                  pipeline === 'image-classification') && (
-                  <div className="flex items-center gap-1 text-xs text-destructive">
-                    <span>WebGPU is required for this pipeline</span>
-                    <Tooltip
-                      content="onnxruntime-web seems not to support this pipeline"
-                      className="max-w-12 -translate-x-1/3"
-                    >
-                      <CircleQuestionMark className="h-3.5 w-3.5" />
-                    </Tooltip>
-                  </div>
-                )}
+                <PipelineSelector
+                  pipeline={pipeline}
+                  setPipeline={setPipeline}
+                />
               </div>
             </section>
 
@@ -130,7 +136,7 @@ const Sidebar = ({
             {pipeline === 'text-to-speech' && <TextToSpeechConfig />}
           </div>
         </div>
-      </div>
+      </aside>
     </>
   )
 }

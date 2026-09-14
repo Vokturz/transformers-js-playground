@@ -1,14 +1,11 @@
-import { useEffect, useCallback, useState } from 'react'
-import { ChevronDown, Loader2 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Check, Download, Loader2, RotateCcw } from 'lucide-react'
 import { QuantizationType, WorkerMessage } from '../types'
-import { useModel } from '../contexts/ModelContext'
+import { DevicePreference, useModel } from '../contexts/ModelContext'
 import { getWorker, terminateWorker } from '../lib/workerManager'
-import { Alert, AlertDescription } from './ui/alert'
 import { Button } from '@/components/ui/button'
 
 const ModelLoader = () => {
-  const [showAlert, setShowAlert] = useState(false)
-  const [alertMessage, setAlertMessage] = useState<React.ReactNode>('')
   const {
     modelInfo,
     selectedQuantization,
@@ -17,210 +14,223 @@ const ModelLoader = () => {
     progress,
     setStatus,
     setProgress,
-    activeWorker,
     setActiveWorker,
     pipeline,
     hasBeenLoaded,
     setHasBeenLoaded,
-    setErrorText
+    setErrorText,
+    device,
+    setDevice,
+    backend,
+    setBackend,
+    runtimeVersion
   } = useModel()
+  const [detail, setDetail] = useState('')
+  const [attempt, setAttempt] = useState(0)
+  const workerRef = useRef<Worker | null>(null)
+  const loadingRef = useRef(false)
+  const retryPending = useRef(false)
 
   useEffect(() => {
     setHasBeenLoaded(false)
-  }, [selectedQuantization, setHasBeenLoaded])
-
-  useEffect(() => {
-    if (!modelInfo) return
-
-    if (modelInfo.isCompatible) {
-      const quantizations = modelInfo.supportedQuantizations
-      let defaultQuant: QuantizationType = 'fp32'
-
-      if (quantizations.includes('int8')) {
-        defaultQuant = 'int8'
-      } else if (quantizations.includes('q8')) {
-        defaultQuant = 'q8'
-      } else if (quantizations.includes('q4')) {
-        defaultQuant = 'q4'
-      }
-
-      setSelectedQuantization(defaultQuant)
+    setStatus('initiate')
+    setProgress(0)
+    setErrorText('')
+    setBackend('')
+    setDetail('')
+    loadingRef.current = false
+    if (!modelInfo?.isCompatible) return
+    const worker = getWorker(pipeline)
+    if (!worker) return
+    workerRef.current = worker
+    setActiveWorker(worker)
+    const fail = (message: string) => {
+      loadingRef.current = false
+      setHasBeenLoaded(false)
+      setStatus('error')
+      setErrorText(message)
     }
-
-    setHasBeenLoaded(false)
-  }, [modelInfo, setSelectedQuantization, setHasBeenLoaded])
-
-  useEffect(() => {
-    if (!modelInfo) return
-
-    const newWorker = getWorker(pipeline)
-    if (!newWorker) {
-      return
-    }
-
-    if (!hasBeenLoaded) {
-      setErrorText('')
-      setStatus('initiate')
-      setActiveWorker(newWorker)
-      setProgress(0)
-    }
-
-    const onMessageReceived = (e: MessageEvent<WorkerMessage>) => {
-      const { status, output } = e.data
-      if (status === 'ready') {
+    const onMessage = ({ data }: MessageEvent<WorkerMessage>) => {
+      const { status, output } = data
+      if (status === 'runtime') {
+        setBackend(output.device === 'webgpu' ? 'WebGPU' : 'CPU (WASM)')
+        if (output.fallback)
+          setDetail('Using CPU after WebGPU could not load this model.')
+      } else if (status === 'ready') {
+        loadingRef.current = false
         setStatus('ready')
-        if (e.data.output) console.log(e.data.output)
         setHasBeenLoaded(true)
-      } else if (status === 'loading' && output && !hasBeenLoaded) {
+        setProgress(100)
+      } else if (status === 'running') {
+        setStatus('running')
+      } else if (status === 'loading') {
         setStatus('loading')
-        if (
-          output.status === 'progress_total' &&
-          typeof output.progress === 'number'
-        ) {
-          setProgress(output.progress)
-        } else if (
-          output.progress &&
-          typeof output.file === 'string' &&
-          output.file.startsWith('onnx')
-        ) {
-          setProgress(output.progress)
-        }
+        if (typeof output?.progress === 'number')
+          setProgress(Math.min(100, Math.max(0, output.progress)))
+        if (output?.message) setDetail(output.message)
+        else if (output?.file) setDetail(`Downloading ${output.file}`)
       } else if (status === 'error') {
-        setStatus('error')
-        const error = e.data.output
-        console.error(error)
-        const errText = error.split(' WASM error: ')[1]
-        setErrorText(errText)
-        setShowAlert(true)
-        let time = 3000
-        if (!hasBeenLoaded)
-          setAlertMessage(error.split('.')[0] + '. See console for details.')
-        else {
-          setAlertMessage(`${errText}. Refresh the page and try again.`)
-          time = 5000
-        }
-        setTimeout(() => {
-          setShowAlert(false)
-          setAlertMessage('')
-        }, time)
+        fail(
+          String(
+            output ||
+              data.error ||
+              'The model could not run. Retry or choose another model.'
+          )
+        )
       }
     }
-
-    newWorker.addEventListener('message', onMessageReceived)
-
+    const onError = (event: ErrorEvent) =>
+      fail(
+        event.message ||
+          'The worker could not start. Check your connection and retry.'
+      )
+    worker.addEventListener('message', onMessage)
+    worker.addEventListener('error', onError)
+    if (retryPending.current) {
+      retryPending.current = false
+      loadingRef.current = true
+      setStatus('loading')
+      setDetail('Preparing model…')
+      worker.postMessage({
+        type: 'load',
+        model: modelInfo.name,
+        dtype: selectedQuantization,
+        device,
+        isStyleTTS2: modelInfo.isStyleTTS2
+      })
+    }
     return () => {
-      newWorker.removeEventListener('message', onMessageReceived)
-      // terminateWorker(pipeline)
+      worker.removeEventListener('message', onMessage)
+      worker.removeEventListener('error', onError)
+      terminateWorker(pipeline)
+      workerRef.current = null
+      setActiveWorker(null)
+      setHasBeenLoaded(false)
     }
   }, [
     pipeline,
-    modelInfo,
+    modelInfo?.name,
+    modelInfo?.isCompatible,
     selectedQuantization,
+    device,
+    attempt,
+    runtimeVersion,
     setActiveWorker,
     setStatus,
     setProgress,
-    hasBeenLoaded,
     setHasBeenLoaded,
-    setErrorText
+    setErrorText,
+    setBackend
   ])
 
-  useEffect(() => {
-    if (progress === 100) {
-      setTimeout(() => {
-        setShowAlert(false)
-        setAlertMessage('')
-      }, 2000)
-    }
-  }, [progress])
-
-  const loadModel = useCallback(() => {
-    if (!modelInfo || !selectedQuantization) return
-
-    const message = {
-      type: 'load',
-      model: modelInfo.name,
-      dtype: selectedQuantization ?? 'fp32',
-      isStyleTTS2:
-        modelInfo.isStyleTTS2 || modelInfo.name.includes('kitten-tts') || false // text-to-speech only
-    }
-    activeWorker?.postMessage(message)
-  }, [modelInfo, selectedQuantization, activeWorker])
-
-  if (!modelInfo?.isCompatible) {
-    return null
-  }
-
+  if (!modelInfo?.isCompatible) return null
+  const loading = status === 'loading'
+  const busy = loading || status === 'running' || status === 'output'
   return (
-    <div className="space-y-3">
-      <hr className="border-border" />
-
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          {modelInfo.supportedQuantizations.length >= 1 ? (
-            <>
-              <span className="text-xs font-medium text-muted-foreground">
-                Quant:
-              </span>
-
-              <div className="relative">
-                <select
-                  value={selectedQuantization || ''}
-                  onChange={(e) =>
-                    setSelectedQuantization(e.target.value as QuantizationType)
-                  }
-                  className="appearance-none rounded-md border border-input bg-card py-1 pl-3 pr-8 text-xs text-foreground focus:outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
-                >
-                  {modelInfo.supportedQuantizations.map((quant) => (
-                    <option key={quant} value={quant}>
-                      {quant}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
-              </div>
-            </>
-          ) : (
-            <span className="whitespace-break-spaces text-xs font-medium text-muted-foreground">
-              No quantization available. Using fp32
-            </span>
-          )}
-        </div>
-
-        {selectedQuantization && (
-          <div className="flex justify-center">
-            <Button
-              variant={status === 'error' ? 'destructive' : 'default'}
-              className="w-32"
-              disabled={
-                hasBeenLoaded || status === 'loading' || status === 'error'
-              }
-              onClick={loadModel}
-            >
-              {status === 'loading' && !hasBeenLoaded ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>{progress.toFixed(0)}%</span>
-                </>
-              ) : status !== 'error' ? (
-                <span>{!hasBeenLoaded ? 'Load Model' : 'Model Ready'}</span>
-              ) : (
-                <span>Error</span>
-              )}
-            </Button>
-          </div>
-        )}
-      </div>
-      {showAlert && (
-        <div className="fixed bottom-0 right-0 m-2">
-          <Alert
-            variant={`${typeof alertMessage === 'string' ? 'destructive' : 'default'}`}
+    <div className="space-y-3 border-t border-border pt-3">
+      <div className="grid grid-cols-2 gap-3">
+        <label className="space-y-1.5 text-xs font-medium text-muted-foreground">
+          <span>Run on</span>
+          <select
+            aria-label="Run on"
+            value={device}
+            disabled={busy}
+            onChange={(event) =>
+              setDevice(event.target.value as DevicePreference)
+            }
+            className="h-9 w-full rounded-lg border border-input bg-card px-2 text-foreground"
           >
-            <AlertDescription>{alertMessage}</AlertDescription>
-          </Alert>
+            <option value="auto">Auto</option>
+            <option value="wasm">CPU (WASM)</option>
+            <option value="webgpu">WebGPU</option>
+          </select>
+        </label>
+        <label className="space-y-1.5 text-xs font-medium text-muted-foreground">
+          <span>Precision</span>
+          <select
+            aria-label="Precision"
+            value={selectedQuantization}
+            disabled={busy}
+            onChange={(event) =>
+              setSelectedQuantization(event.target.value as QuantizationType)
+            }
+            className="h-9 w-full rounded-lg border border-input bg-card px-2 text-foreground"
+          >
+            {modelInfo.supportedQuantizations.map((quant) => (
+              <option key={quant} value={quant}>
+                {quant}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <Button
+        className="w-full"
+        disabled={hasBeenLoaded || busy}
+        onClick={() => {
+          if (status === 'error') {
+            retryPending.current = true
+            setAttempt((value) => value + 1)
+            return
+          }
+          if (!workerRef.current || loadingRef.current) return
+          loadingRef.current = true
+          setStatus('loading')
+          setProgress(0)
+          setErrorText('')
+          setDetail('Preparing model…')
+          workerRef.current.postMessage({
+            type: 'load',
+            model: modelInfo.name,
+            dtype: selectedQuantization,
+            device,
+            isStyleTTS2: modelInfo.isStyleTTS2
+          })
+        }}
+      >
+        {loading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : hasBeenLoaded ? (
+          <Check className="h-4 w-4" />
+        ) : status === 'error' ? (
+          <RotateCcw className="h-4 w-4" />
+        ) : (
+          <Download className="h-4 w-4" />
+        )}
+        {loading
+          ? `Loading · ${progress.toFixed(0)}%`
+          : hasBeenLoaded
+            ? `Ready · ${backend}`
+            : status === 'error'
+              ? 'Retry load'
+              : 'Load model'}
+      </Button>
+      {loading && (
+        <div
+          role="progressbar"
+          aria-label="Model download"
+          aria-valuenow={Math.round(progress)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          className="h-1.5 overflow-hidden rounded-full bg-muted"
+        >
+          <div
+            className="h-full bg-primary transition-all"
+            style={{ width: `${progress}%` }}
+          />
         </div>
       )}
+      <p
+        className="break-words text-xs leading-relaxed text-muted-foreground"
+        role="status"
+      >
+        {loading
+          ? detail
+          : hasBeenLoaded
+            ? 'Model loaded. Your inputs are processed in this browser.'
+            : 'Auto tries WebGPU when available, then CPU. Support varies by model and precision.'}
+      </p>
     </div>
   )
 }
-
 export default ModelLoader

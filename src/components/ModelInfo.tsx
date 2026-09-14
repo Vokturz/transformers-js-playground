@@ -69,9 +69,11 @@ const ModelInfo = () => {
     </div>
   )
 
-  if (!modelInfo || isFetching || models.length === 0) {
+  if (isFetching) {
     return <ModelInfoSkeleton />
   }
+
+  if (!modelInfo) return null
 
   return (
     <div className="relative w-full space-y-3 rounded-xl border border-border bg-gradient-to-br from-card to-accent/20 p-3">
@@ -107,8 +109,8 @@ const ModelInfo = () => {
               className="mt-1 block truncate text-xs text-muted-foreground hover:underline"
               title={`Base model: ${modelInfo.baseId}`}
             >
-              <ExternalLink className="mr-1 inline-block h-3 w-3" />
-              ({modelInfo.baseId})
+              <ExternalLink className="mr-1 inline-block h-3 w-3" />(
+              {modelInfo.baseId})
             </a>
           )}
         </div>
@@ -163,8 +165,7 @@ const ModelInfo = () => {
       <ModelLoader />
 
       {/* Incompatibility Message */}
-      {((modelInfo.isCompatible === false &&
-        modelInfo.incompatibilityReason) ||
+      {((modelInfo.isCompatible === false && modelInfo.incompatibilityReason) ||
         errorText) && (
         <div className="rounded-md border border-destructive/20 bg-destructive/10 px-2 py-2">
           <p className="whitespace-break-spaces text-xs text-destructive">

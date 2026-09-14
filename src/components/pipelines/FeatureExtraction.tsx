@@ -46,6 +46,8 @@ const SAMPLE_TEXTS = [
 function FeatureExtraction() {
   const {
     examples,
+    setExamples,
+    setSimilarities,
     selectedExample,
     setSelectedExample,
     similarities,
@@ -268,6 +270,23 @@ function FeatureExtraction() {
   const points2D = reduceTo2D(
     examples.filter((ex) => ex.embedding).map((ex) => ex.embedding!)
   )
+  useEffect(() => {
+    setIsExtracting(false)
+    setProgress(null)
+    setExamples((items) =>
+      items.map((item) => ({ ...item, embedding: undefined, isLoading: false }))
+    )
+    setSelectedExample(null)
+    setSimilarities([])
+  }, [
+    activeWorker,
+    config.pooling,
+    config.normalize,
+    setExamples,
+    setSelectedExample,
+    setSimilarities
+  ])
+
   const busy = status !== 'ready' || isExtracting
 
   return (
@@ -597,14 +616,14 @@ function FeatureExtraction() {
                       sim.similarity > 0.8
                         ? 'text-emerald-500'
                         : sim.similarity > 0.5
-                        ? 'text-amber-500'
-                        : 'text-destructive'
+                          ? 'text-amber-500'
+                          : 'text-destructive'
                     const barColor =
                       sim.similarity > 0.8
                         ? 'bg-chart-3'
                         : sim.similarity > 0.5
-                        ? 'bg-chart-5'
-                        : 'bg-destructive'
+                          ? 'bg-chart-5'
+                          : 'bg-destructive'
 
                     return (
                       <div

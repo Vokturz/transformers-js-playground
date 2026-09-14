@@ -74,6 +74,7 @@ function ImageClassification() {
       setProgress(0)
       const message: ImageClassificationWorkerInput = {
         type: 'classify',
+        exampleId: example.id,
         image: example.url,
         model: modelInfo.id,
         dtype: selectedQuantization ?? 'fp32',
@@ -158,14 +159,18 @@ function ImageClassification() {
         setProgress(workerProgress)
       } else if (status === 'output' && output?.predictions) {
         // Find the example that was being processed
-        const processingExample = examples.find((ex) => ex.isLoading)
+        const processingExample = examples.find(
+          (ex) => ex.id === output.exampleId
+        )
         if (processingExample) {
           updateExample(processingExample.id, {
             predictions: output.predictions,
             isLoading: false
           })
         }
-        setIsClassifying(false)
+        setIsClassifying(
+          examples.some((ex) => ex.isLoading && ex.id !== output.exampleId)
+        )
         setProgress(null)
       } else if (status === 'error') {
         // Clear loading state for all examples
@@ -182,6 +187,10 @@ function ImageClassification() {
     activeWorker.addEventListener('message', onMessageReceived)
     return () => activeWorker.removeEventListener('message', onMessageReceived)
   }, [activeWorker, examples, updateExample])
+
+  useEffect(() => {
+    setIsClassifying(false)
+  }, [activeWorker])
 
   const busy = status !== 'ready' || isClassifying
 
@@ -271,8 +280,7 @@ function ImageClassification() {
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Classifying…
-                    {progress !== null &&
-                      ` (${Math.round(progress * 100)}%)`}
+                    {progress !== null && ` (${Math.round(progress * 100)}%)`}
                   </>
                 ) : (
                   'Classify Images'
@@ -411,9 +419,9 @@ function ImageClassification() {
               ) : (
                 <div className="max-h-[calc(100%-3rem)] space-y-3 overflow-y-auto">
                   {selectedExample.predictions.map((prediction, index) => {
-                    const confidencePercent = (
-                      prediction.score * 100
-                    ).toFixed(1)
+                    const confidencePercent = (prediction.score * 100).toFixed(
+                      1
+                    )
                     const isTopPrediction = index === 0
 
                     return (
@@ -455,8 +463,8 @@ function ImageClassification() {
                               isTopPrediction
                                 ? 'bg-primary'
                                 : prediction.score > 0.5
-                                ? 'bg-chart-2'
-                                : 'bg-muted-foreground/40'
+                                  ? 'bg-chart-2'
+                                  : 'bg-muted-foreground/40'
                             )}
                             style={{
                               width: `${Math.max(prediction.score * 100, 2)}%`

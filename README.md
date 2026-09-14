@@ -44,3 +44,6 @@ To get a local copy up and running, follow these simple steps.
 ### Prerequisites
 
 You'll need to have Node.js and npm (or pnpm) installed on your machine.
+## Validation
+
+Run `npm test` for the pipeline regression suite and `npm run build` for TypeScript and the production build. See [pipeline validation](docs/pipeline-validation.md) for the small-model browser checks, backend behavior, and unverified paths.

@@ -15,7 +15,8 @@ const ModelCode = ({ isCodeModalOpen, setIsCodeModalOpen }: ModelCodeProps) => {
   const [showAlert, setShowAlert] = useState(false)
   const [animateAlert, setAnimateAlert] = useState(false)
 
-  const { modelInfo, pipeline, selectedQuantization } = useModel()
+  const { modelInfo, pipeline, selectedQuantization, device, backend } =
+    useModel()
 
   useEffect(() => {
     if (isCopied) {
@@ -70,7 +71,7 @@ const ModelCode = ({ isCodeModalOpen, setIsCodeModalOpen }: ModelCodeProps) => {
         exampleData = 'Once upon a time, there was'
       }
       config = {
-        max_length: 50,
+        max_new_tokens: 50,
         do_sample: true,
         temperature: 0.7,
         top_p: 0.9,
@@ -80,10 +81,8 @@ const ModelCode = ({ isCodeModalOpen, setIsCodeModalOpen }: ModelCodeProps) => {
 
     case 'zero-shot-classification':
       classType = 'classifier'
-      exampleData = "I love this product!, ['positive', 'neutral', 'negative']"
-      config = {
-        threshold: 0.5
-      }
+      exampleData = 'I love this product!'
+      config = { multi_label: true }
       break
     case 'feature-extraction':
       classType = 'generator'
@@ -117,13 +116,23 @@ const ModelCode = ({ isCodeModalOpen, setIsCodeModalOpen }: ModelCodeProps) => {
       break
   }
 
+  const input = modelInfo.hasChatTemplate
+    ? exampleData
+    : JSON.stringify(exampleData)
+  const labels =
+    pipeline === 'zero-shot-classification'
+      ? ', ["positive", "neutral", "negative"]'
+      : ''
+  const executionDevice =
+    device === 'auto' ? (backend === 'WebGPU' ? 'webgpu' : 'wasm') : device
+
   let jsCode = `import { pipeline } from '@huggingface/transformers';
 
-const ${classType} = pipeline('${pipeline}', '${modelInfo.name}', {
+const ${classType} = await pipeline('${pipeline}', '${modelInfo.name}', {
   dtype: '${selectedQuantization}',
-  device: 'webgpu' // 'wasm'
+  device: '${executionDevice}'
 });
-const result = await ${classType}(${modelInfo.hasChatTemplate ? exampleData : "'" + exampleData + "'"}, ${JSON.stringify(config, null, 2)});
+const result = await ${classType}(${input}${labels}, ${JSON.stringify(config, null, 2)});
 ${pipeline === 'text-to-speech' ? "result.save('audio.wav')" : 'console.log(result);'}
 `
 
@@ -136,8 +145,8 @@ ${pipeline === 'text-to-speech' ? "result.save('audio.wav')" : 'console.log(resu
 
   let pythonCode = `from transformers import pipeline
 
-${classType} = pipeline("${pipeline}", model="${modelInfo.name}")
-result = ${classType}(${modelInfo.hasChatTemplate ? exampleData : '"' + exampleData + '"'}, ${configPython})
+${classType} = pipeline("${pipeline}", model="${modelInfo.baseId || modelInfo.name}")
+result = ${classType}(${input}${labels}, ${configPython})
 ${pipeline === 'text-to-speech' ? 'audio = result["audio"]' : 'print(result)'}
 `
 
@@ -146,7 +155,7 @@ ${pipeline === 'text-to-speech' ? 'audio = result["audio"]' : 'print(result)'}
 import { KokoroTTS } from "kokoro-js";
 const tts = await KokoroTTS.from_pretrained('${modelInfo.name}', {
   dtype: '${selectedQuantization}',
-  device: 'webgpu' // 'wasm'
+  device: '${executionDevice}'
 });
 
 const audio = await tts.generate("${exampleData}", ${JSON.stringify(config, null, 2)});

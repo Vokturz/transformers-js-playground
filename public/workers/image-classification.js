@@ -1,68 +1,22 @@
 /* eslint-disable no-restricted-globals */
 import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0'
 
-class MyImageClassificationPipeline {
-  static task = 'image-classification'
-  static instance = null
-  static modelId = null
+import { createPipelineFactory, listen } from './runtime.js'
 
-  static async getInstance(model, dtype = 'fp32', progress_callback = null) {
-    if (this.modelId !== model) {
-      // Dispose of previous pipeline if model changed
-      if (this.instance && this.instance.dispose) {
-        this.instance.dispose()
-      }
-      this.instance = null
-      this.modelId = null
-    }
+const MyImageClassificationPipeline = createPipelineFactory(
+  (model, options) => pipeline('image-classification', model, options),
+  { report: (message) => self.postMessage(message) }
+)
 
-    if (!this.instance) {
-      try {
-        // Try WebGPU first
-        this.instance = await pipeline(this.task, model, {
-          dtype,
-          device: 'webgpu',
-          progress_callback
-        })
-      } catch (webgpuError) {
-        // Fallback to WASM if WebGPU fails
-        if (progress_callback) {
-          progress_callback({
-            status: 'fallback',
-            message: 'WebGPU failed, falling back to WASM'
-          })
-        }
-        try {
-          this.instance = await pipeline(this.task, model, {
-            dtype,
-            device: 'wasm',
-            progress_callback
-          })
-        } catch (wasmError) {
-          throw new Error(
-            `Both WebGPU and WASM failed. WebGPU error: ${webgpuError.message}. WASM error: ${wasmError.message}`
-          )
-        }
-      }
-      this.modelId = model
-    }
-
-    return this.instance
-  }
-
-  static dispose() {
-    if (this.instance && this.instance.dispose) {
-      this.instance.dispose()
-    }
-    this.instance = null
-    this.modelId = null
-  }
-}
-
-// Listen for messages from the main thread
-self.addEventListener('message', async (event) => {
+listen(async (event) => {
   try {
     const { type, image, model, dtype, config } = event.data
+
+    if (type === 'dispose') {
+      await MyImageClassificationPipeline.dispose()
+      self.postMessage({ status: 'disposed' })
+      return
+    }
 
     if (!model) {
       self.postMessage({
@@ -78,7 +32,8 @@ self.addEventListener('message', async (event) => {
       dtype,
       (x) => {
         self.postMessage({ status: 'loading', output: x })
-      }
+      },
+      event.data.device
     )
 
     if (type === 'load') {
@@ -111,20 +66,15 @@ self.addEventListener('message', async (event) => {
         self.postMessage({
           status: 'output',
           output: {
-            predictions
+            predictions,
+            exampleId: event.data.exampleId
           }
         })
       } catch (error) {
-        self.postMessage({
-          status: 'error',
-          output:
-            error.message || 'An error occurred during image classification'
-        })
+        throw error
       }
-    } else if (type === 'dispose') {
-      MyImageClassificationPipeline.dispose()
-      self.postMessage({ status: 'disposed' })
     }
+    self.postMessage({ status: 'ready' })
   } catch (error) {
     self.postMessage({
       status: 'error',
@@ -133,6 +83,3 @@ self.addEventListener('message', async (event) => {
     })
   }
 })
-
-// Handle initialization
-self.postMessage({ status: 'ready' })

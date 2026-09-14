@@ -20,6 +20,7 @@ function TextGeneration() {
 
   const {
     activeWorker,
+    resetRuntime,
     status,
     modelInfo,
     hasBeenLoaded,
@@ -37,10 +38,12 @@ function TextGeneration() {
 
   const stopGeneration = useCallback(() => {
     if (activeWorker && isGenerating) {
-      activeWorker.postMessage({ type: 'stop' })
+      // WASM can monopolize the worker event loop, so a stop message may never run.
+      // Resetting the runtime terminates the worker and cancels inference immediately.
+      resetRuntime()
       setIsGenerating(false)
     }
-  }, [activeWorker, isGenerating])
+  }, [activeWorker, isGenerating, resetRuntime])
 
   const handleSendMessage = useCallback(() => {
     if (!currentMessage.trim() || !modelInfo || !activeWorker || isGenerating)
@@ -143,6 +146,10 @@ function TextGeneration() {
     }
   }
 
+  useEffect(() => {
+    setIsGenerating(false)
+  }, [activeWorker])
+
   const busy = status !== 'ready' || isGenerating
   const hasChatTemplate = modelInfo?.hasChatTemplate
 
@@ -170,7 +177,7 @@ function TextGeneration() {
               variant="ghost"
               size="icon"
               onClick={stopGeneration}
-              title="Stop generation"
+              title="Stop generation and unload model"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -206,9 +213,7 @@ function TextGeneration() {
                     >
                       {message.role === 'user' ? 'You' : 'Assistant'}
                     </div>
-                    <div className="whitespace-pre-wrap">
-                      {message.content}
-                    </div>
+                    <div className="whitespace-pre-wrap">{message.content}</div>
                   </div>
                 </div>
               ))}

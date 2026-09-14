@@ -1,9 +1,6 @@
+import { getQuantizations } from './modelFiles'
 import { supportedPipelines } from '../components/PipelineSelector'
-import {
-  allQuantizationTypes,
-  ModelInfoResponse,
-  QuantizationType
-} from '../types'
+import { ModelInfoResponse, QuantizationType } from '../types'
 
 const getModelInfo = async (
   modelName: string,
@@ -36,13 +33,19 @@ const getModelInfo = async (
     (file) => file.endsWith('.onnx') && file.startsWith('onnx/')
   )
 
+  const uniqueSupportedQuantizations = getQuantizations(siblingFiles)
+  const taskTags = [...(modelData.tags || []), modelData.pipeline_tag].filter(
+    (tag) => supportedPipelines.includes(tag)
+  )
+  const matchesTask = taskTags.length === 0 || taskTags.includes(pipeline)
   const isCompatible =
     missingFiles.length === 0 &&
     hasOnnxFolder &&
-    modelData.tags.includes(pipeline)
+    uniqueSupportedQuantizations.length > 0 &&
+    matchesTask
 
   let incompatibilityReason = ''
-  if (!modelData.tags.includes(pipeline)) {
+  if (!matchesTask) {
     const expectedPipelines = modelData.tags
       .filter((tag) => supportedPipelines.includes(tag))
       .join(', ')
@@ -57,29 +60,9 @@ const getModelInfo = async (
   } else if (!hasOnnxFolder) {
     incompatibilityReason += '- Folder onnx/ is missing\n'
   }
-  const supportedQuantizations = hasOnnxFolder
-    ? siblingFiles
-        .filter((file) => file.endsWith('.onnx') && file.includes('_'))
-        .map((file) => file.split('/')[1].split('_')[1].split('.')[0])
-        .filter((q) => q !== 'quantized')
-        .filter((q) => allQuantizationTypes.includes(q as QuantizationType))
-    : []
-  const uniqueSupportedQuantizations = Array.from(
-    new Set(supportedQuantizations)
-  )
-  uniqueSupportedQuantizations.sort((a, b) => {
-    const getNumericValue = (str: string) => {
-      const match = str.match(/(\d+)/)
-      return match ? parseInt(match[1]) : Infinity
-    }
-    return getNumericValue(a) - getNumericValue(b)
-  })
-
-  if (
-    uniqueSupportedQuantizations.length === 0 &&
-    siblingFiles.some((file) => file.endsWith('_quantized.onnx'))
-  ) {
-    uniqueSupportedQuantizations.push('q8')
+  if (hasOnnxFolder && !uniqueSupportedQuantizations.length) {
+    incompatibilityReason +=
+      '- No shared supported precision found. This export may need custom file names or per-component settings.\n'
   }
 
   const voices: string[] = []
@@ -104,7 +87,8 @@ const getModelInfo = async (
     return ''
   }
 
-  const baseModel = modelData.cardData?.base_model ?? modelData.modelId
+  const base = modelData.cardData?.base_model
+  const baseModel = (Array.isArray(base) ? base[0] : base) ?? modelData.modelId
   if (baseModel && !modelData.safetensors) {
     const baseModelResponse = await fetch(
       `https://huggingface.co/api/models/${baseModel}`,
@@ -118,7 +102,8 @@ const getModelInfo = async (
       const readme = await fetchReadme(baseModel)
 
       return {
-        ...baseModelData,
+        ...modelData,
+        safetensors: baseModelData.safetensors,
         id: modelData.id,
         baseId: baseModel,
         isCompatible,
@@ -162,12 +147,12 @@ const getModelsByPipeline = async (
 
   // First search with filter=onnx
   const response2 = await fetch(
-    `https://huggingface.co/api/models?filter=${pipelineTag}${pipelineTag === 'feature-extraction' ? '&library=sentence-transformers' : '&filter=onnx'}&sort=downloads&limit=50`,
+    `https://huggingface.co/api/models?pipeline_tag=${pipelineTag}&filter=transformers.js&sort=downloads&limit=50`,
     {
       method: 'GET'
     }
   )
-  if (!response1.ok) {
+  if (!response2.ok) {
     throw new Error(
       `Failed to fetch models for pipeline: ${response2.statusText}`
     )
@@ -176,7 +161,7 @@ const getModelsByPipeline = async (
 
   // Combine and deduplicate models based on id
   const combinedModels = [...models1, ...models2].filter(
-    (m: ModelInfoResponse) => m.createdAt > '2022/02/03'
+    (m: ModelInfoResponse) => !m.createdAt || m.createdAt > '2022-02-03'
   )
   const uniqueModels = combinedModels.filter(
     (model, index, self) => index === self.findIndex((m) => m.id === model.id)
@@ -188,8 +173,7 @@ const getModelsByPipeline = async (
         (model: ModelInfoResponse) =>
           !model.tags.includes('reranker') &&
           !model.id.includes('reranker') &&
-          !model.id.includes('ms-marco') &&
-          !model.id.includes('MiniLM')
+          !model.id.includes('ms-marco')
       )
       .slice(0, 30)
   } else if (pipelineTag === 'text-to-speech') {
@@ -224,7 +208,7 @@ const getModelsByPipelineCustom = async (
   const models = await response.json()
 
   const uniqueModels = models.filter(
-    (m: ModelInfoResponse) => m.createdAt > '2022/02/03'
+    (m: ModelInfoResponse) => !m.createdAt || m.createdAt > '2022-02-03'
   )
   if (pipelineTag === 'text-classification') {
     return uniqueModels
@@ -232,8 +216,7 @@ const getModelsByPipelineCustom = async (
         (model: ModelInfoResponse) =>
           !model.tags.includes('reranker') &&
           !model.id.includes('reranker') &&
-          !model.id.includes('ms-marco') &&
-          !model.id.includes('MiniLM')
+          !model.id.includes('ms-marco')
       )
       .slice(0, 20)
   }
@@ -256,10 +239,17 @@ function getModelSize(
       bytesPerParameter = 2
       break
     case 'int8':
-    case 'bnb8':
     case 'uint8':
     case 'q8':
       bytesPerParameter = 1
+      break
+    case 'q1':
+    case 'q1f16':
+      bytesPerParameter = 0.125
+      break
+    case 'q2':
+    case 'q2f16':
+      bytesPerParameter = 0.25
       break
     case 'bnb4':
     case 'q4':

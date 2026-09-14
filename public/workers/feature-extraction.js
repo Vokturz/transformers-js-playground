@@ -1,45 +1,14 @@
 /* eslint-disable no-restricted-globals */
 import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0'
 
-class MyFeatureExtractionPipeline {
-  static task = 'feature-extraction'
-  static instance = null
+import { createPipelineFactory, listen } from './runtime.js'
 
-  static async getInstance(model, dtype = 'fp32', progress_callback = null) {
-      try {
-        // Try WebGPU first
-        this.instance = await pipeline(this.task, model, {
-          dtype,
-          device: 'webgpu',
-          progress_callback
-        })
-        return this.instance
-      } catch (webgpuError) {
-      // Fallback to WASM if WebGPU fails
-      if (progress_callback) {
-        progress_callback({
-          status: 'fallback',
-          message: 'WebGPU failed, falling back to WASM'
-        })
-      }
-      try {
-        this.instance = await pipeline(this.task, model, {
-          dtype,
-          device: 'wasm',
-          progress_callback
-        })
-        return this.instance
-      } catch (wasmError) {
-        throw new Error(
-          `Both WebGPU and WASM failed. WebGPU error: ${webgpuError.message}. WASM error: ${wasmError.message}`
-        )
-      }
-    }
-  }
-}
+const MyFeatureExtractionPipeline = createPipelineFactory(
+  (model, options) => pipeline('feature-extraction', model, options),
+  { report: (message) => self.postMessage(message) }
+)
 
-// Listen for messages from the main thread
-self.addEventListener('message', async (event) => {
+listen(async (event) => {
   try {
     const { type, model, dtype, texts, config } = event.data
 
@@ -57,7 +26,8 @@ self.addEventListener('message', async (event) => {
       dtype,
       (x) => {
         self.postMessage({ status: 'loading', output: x })
-      }
+      },
+      event.data.device
     )
 
     if (type === 'load') {
@@ -145,7 +115,15 @@ self.addEventListener('message', async (event) => {
         }
       })
 
-      self.postMessage({ status: 'ready' })
+      const failures = embeddings.filter((item) => item.error)
+      if (failures.length) {
+        self.postMessage({
+          status: 'error',
+          output: `${failures.length} text(s) could not be embedded: ${failures[0].error}`
+        })
+      } else {
+        self.postMessage({ status: 'ready' })
+      }
     }
   } catch (error) {
     self.postMessage({

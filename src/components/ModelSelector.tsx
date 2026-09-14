@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { defaultQuantization } from '../lib/modelFiles'
+import React, { useCallback, useEffect, useState, useRef } from 'react'
 import {
   Listbox,
   ListboxButton,
@@ -32,15 +33,25 @@ function ModelSelector() {
     modelInfo,
     pipeline,
     isFetching,
-    setIsFetching
+    setIsFetching,
+    setSelectedQuantization,
+    setErrorText
   } = useModel()
-  const [sortBy, setSortBy] = useState<SortOption>('createdAt')
+  const [sortBy, setSortBy] = useState<SortOption>('downloads')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [showCustomInput, setShowCustomInput] = useState(false)
   const [customModelName, setCustomModelName] = useState('')
   const [isLoadingCustomModel, setIsLoadingCustomModel] = useState(false)
   const [customModelError, setCustomModelError] = useState('')
   const [isCustomModel, setIsCustomModel] = useState(false)
+
+  const requestId = useRef(0)
+  useEffect(() => {
+    requestId.current += 1
+    return () => {
+      requestId.current += 1
+    }
+  }, [pipeline])
 
   const formatNumber = (num: number) => {
     if (num >= 1000000000) {
@@ -83,9 +94,13 @@ function ModelSelector() {
   // Function to fetch detailed model info and set as selected
   const fetchAndSetModelInfo = useCallback(
     async (model: ModelInfoResponse, isCustom: boolean = false) => {
+      const request = ++requestId.current
+      setIsFetching(true)
+      setErrorText('')
       try {
         const modelInfoResponse = await getModelInfo(model.id, pipeline)
 
+        if (request !== requestId.current) return
         let parameters = 0
         if (modelInfoResponse.safetensors) {
           const safetensors = modelInfoResponse.safetensors
@@ -96,8 +111,6 @@ function ModelSelector() {
             safetensors.parameters.total ||
             0
         }
-
-        const allTags = [...model.tags, ...modelInfoResponse.tags]
 
         const modelInfo = {
           id: model.id,
@@ -116,20 +129,31 @@ function ModelSelector() {
           hasChatTemplate: Boolean(
             modelInfoResponse.config?.tokenizer_config?.chat_template
           ),
-          isStyleTTS2: Boolean(allTags.includes('style_text_to_speech_2')),
+          isStyleTTS2: /kokoro/i.test(model.id),
           widgetData: modelInfoResponse.widgetData,
           voices: modelInfoResponse.voices
         }
+        setSelectedQuantization(
+          defaultQuantization(modelInfo.supportedQuantizations)
+        )
         setModelInfo(modelInfo)
         setIsCustomModel(isCustom)
         setIsFetching(false)
       } catch (error) {
+        if (request !== requestId.current) return
+        setErrorText('Could not fetch model details. Select a model to retry.')
         console.error('Error fetching model info:', error)
         setIsFetching(false)
         throw error
       }
     },
-    [setModelInfo, pipeline, setIsFetching]
+    [
+      setModelInfo,
+      pipeline,
+      setIsFetching,
+      setSelectedQuantization,
+      setErrorText
+    ]
   )
 
   useEffect(() => {
@@ -149,12 +173,12 @@ function ModelSelector() {
   useEffect(() => {
     if (models.length > 0 && !isCustomModel && !modelInfo) {
       const firstModel = sortedModels[0]
-      fetchAndSetModelInfo(firstModel, false)
+      fetchAndSetModelInfo(firstModel, false).catch(() => {})
     }
   }, [models, sortedModels, fetchAndSetModelInfo, isCustomModel, modelInfo])
 
   const handleModelSelect = (model: ModelInfoResponse) => {
-    fetchAndSetModelInfo(model, false)
+    fetchAndSetModelInfo(model, false).catch(() => {})
   }
 
   const handleSortChange = (newSortBy: SortOption) => {
@@ -198,7 +222,7 @@ function ModelSelector() {
     setIsCustomModel(false)
     // Load the first model from the list
     if (sortedModels.length > 0) {
-      fetchAndSetModelInfo(sortedModels[0], false)
+      fetchAndSetModelInfo(sortedModels[0], false).catch(() => {})
     }
   }
 
@@ -212,8 +236,7 @@ function ModelSelector() {
     }
   }
 
-  const selectedModel =
-    models.find((model) => model.id === modelInfo?.id) || models[0]
+  const selectedModel = models.find((model) => model.id === modelInfo?.id)
 
   const SortIcon = ({ sortOrder }: { sortOrder: 'asc' | 'desc' }) => {
     return sortOrder === 'asc' ? (
@@ -263,7 +286,7 @@ function ModelSelector() {
     )
   }
 
-  if (isFetching || models.length === 0) {
+  if (isFetching) {
     return (
       <div className="relative">
         <div className="flex h-10 w-full animate-pulse items-center justify-between gap-3 rounded-md border border-input bg-card px-3 py-2">
@@ -288,7 +311,11 @@ function ModelSelector() {
     )
   }
 
-  const sortChip = (value: SortOption, label: string, icon?: React.ReactNode) => (
+  const sortChip = (
+    value: SortOption,
+    label: string,
+    icon?: React.ReactNode
+  ) => (
     <button
       onClick={() => handleSortChange(value)}
       className={cn(
@@ -390,7 +417,9 @@ function ModelSelector() {
                     </button>
                   </div>
                   {customModelError && (
-                    <p className="text-xs text-destructive">{customModelError}</p>
+                    <p className="text-xs text-destructive">
+                      {customModelError}
+                    </p>
                   )}
                   <p className="text-xs text-muted-foreground">
                     Press Enter to load or Escape to cancel
@@ -414,8 +443,16 @@ function ModelSelector() {
                         Sort by:
                       </span>
                       {sortChip('name', 'Name')}
-                      {sortChip('likes', 'Likes', <Heart className="h-3 w-3" />)}
-                      {sortChip('downloads', 'Downloads', <Download className="h-3 w-3" />)}
+                      {sortChip(
+                        'likes',
+                        'Likes',
+                        <Heart className="h-3 w-3" />
+                      )}
+                      {sortChip(
+                        'downloads',
+                        'Downloads',
+                        <Download className="h-3 w-3" />
+                      )}
                       {sortChip('createdAt', 'Date')}
                     </div>
                   </div>
@@ -463,7 +500,9 @@ function ModelSelector() {
                                   {model.downloads > 0 && (
                                     <div className="flex items-center gap-1">
                                       <Download className="h-3 w-3 text-emerald-500" />
-                                      <span>{formatNumber(model.downloads)}</span>
+                                      <span>
+                                        {formatNumber(model.downloads)}
+                                      </span>
                                     </div>
                                   )}
                                   {model.createdAt && (

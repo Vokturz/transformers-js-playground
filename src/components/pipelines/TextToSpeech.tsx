@@ -103,6 +103,10 @@ function TextToSpeech() {
     }
   }
 
+  useEffect(() => {
+    setIsSynthesizing(false)
+  }, [activeWorker])
+
   const busy = status !== 'ready' || isSynthesizing
 
   return (

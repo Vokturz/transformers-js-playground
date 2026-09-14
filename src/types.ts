@@ -20,6 +20,8 @@ export interface GenerationOutput {
 }
 
 export type WorkerStatus =
+  | 'runtime'
+  | 'running'
   | 'initiate'
   | 'ready'
   | 'output'
@@ -93,6 +95,7 @@ export interface TextToSpeechWorkerInput {
 }
 
 export interface ImageClassificationWorkerInput {
+  exampleId: string
   type: 'classify'
   image: string | ImageData | HTMLImageElement | HTMLCanvasElement
   model: string
@@ -128,8 +131,8 @@ export interface SimilarityResult {
   similarity: number
 }
 
-const q8Types = ['q8', 'int8', 'bnb8', 'uint8'] as const
-const q4Types = ['q4', 'bnb4', 'q4f16'] as const
+const q8Types = ['q8', 'int8', 'uint8'] as const
+const q4Types = ['q4', 'bnb4', 'q4f16', 'q2', 'q2f16', 'q1', 'q1f16'] as const
 const fp16Types = ['fp16'] as const
 const fp32Types = ['fp32'] as const
 

@@ -1,60 +1,32 @@
 /* eslint-disable no-restricted-globals */
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0'
+import {
+  pipeline,
+  InterruptableStoppingCriteria
+} from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0'
 
-class MyTextGenerationPipeline {
-  static task = 'text-generation'
-  static instance = null
-  static currentGeneration = null
+import { createPipelineFactory, listen } from './runtime.js'
 
-  static async getInstance(model, dtype = 'fp32', progress_callback = null) {
-    try {
-      // Try WebGPU first
-      this.instance = await pipeline(this.task, model, {
-        dtype,
-        device: 'webgpu',
-        progress_callback
-      })
-      return this.instance
-    } catch (webgpuError) {
-      // Fallback to WASM if WebGPU fails
-      if (progress_callback) {
-        progress_callback({
-          status: 'fallback',
-          message: 'WebGPU failed, falling back to WASM'
-        })
-      }
-      try {
-        this.instance = await pipeline(this.task, model, {
-          dtype,
-          device: 'wasm',
-          progress_callback
-        })
-        return this.instance
-      } catch (wasmError) {
-        throw new Error(
-          `Both WebGPU and WASM failed. WebGPU error: ${webgpuError.message}. WASM error: ${wasmError.message}`
-        )
-      }
-    }
-  }
+const MyTextGenerationPipeline = createPipelineFactory(
+  (model, options) => pipeline('text-generation', model, options),
+  { report: (message) => self.postMessage(message) }
+)
 
-  static stopGeneration() {
-    if (this.currentGeneration) {
-      this.currentGeneration.abort()
-      this.currentGeneration = null
-    }
-  }
-}
+const stoppingCriteria = new InterruptableStoppingCriteria()
 
-// Listen for messages from the main thread
-self.addEventListener('message', async (event) => {
+listen(async (event) => {
   try {
-    const { type, model, dtype, messages, prompt, hasChatTemplate, config } =
-      event.data
+    const {
+      type,
+      model,
+      dtype,
+      messages,
+      prompt,
+      hasChatTemplate,
+      config = {}
+    } = event.data
 
     if (type === 'stop') {
-      MyTextGenerationPipeline.stopGeneration()
-      self.postMessage({ status: 'ready' })
+      stoppingCriteria.interrupt()
       return
     }
 
@@ -72,7 +44,8 @@ self.addEventListener('message', async (event) => {
       dtype,
       (x) => {
         self.postMessage({ status: 'loading', output: x })
-      }
+      },
+      event.data.device
     )
 
     if (type === 'load') {
@@ -96,21 +69,19 @@ self.addEventListener('message', async (event) => {
       }
 
       const options = {
-        max_new_tokens: config.max_new_tokens || 100,
-        temperature: config.temperature || 0.7,
+        max_new_tokens: config.max_new_tokens ?? 100,
+        temperature: config.temperature ?? 0.7,
         do_sample: config.do_sample !== false,
-        ...(config.top_p && { top_p }),
-        ...(config.top_k && { top_k })
+        ...(config.top_p != null && { top_p: config.top_p }),
+        ...(config.top_k != null && { top_k: config.top_k })
       }
 
-      // Create an AbortController for this generation
-      const abortController = new AbortController()
-      MyTextGenerationPipeline.currentGeneration = abortController
+      stoppingCriteria.reset()
 
       try {
         const output = await generator(inputText, {
           ...options,
-          signal: abortController.signal
+          stopping_criteria: stoppingCriteria
         })
 
         // v4 returns a single object for non-batched inputs and an array for batched ones
@@ -140,7 +111,7 @@ self.addEventListener('message', async (event) => {
           throw error
         }
       } finally {
-        MyTextGenerationPipeline.currentGeneration = null
+        stoppingCriteria.reset()
       }
     }
   } catch (error) {

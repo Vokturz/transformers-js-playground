@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback
+} from 'react'
 import {
   ModelInfo,
   ModelInfoResponse,
@@ -6,7 +12,15 @@ import {
   WorkerStatus
 } from '../types'
 
+export type DevicePreference = 'auto' | 'wasm' | 'webgpu'
+
 interface ModelContextType {
+  runtimeVersion: number
+  resetRuntime: () => void
+  device: DevicePreference
+  setDevice: (device: DevicePreference) => void
+  backend: string
+  setBackend: (backend: string) => void
   status: WorkerStatus
   setStatus: (status: WorkerStatus) => void
   progress: number
@@ -32,6 +46,13 @@ interface ModelContextType {
 const ModelContext = createContext<ModelContextType | undefined>(undefined)
 
 export function ModelProvider({ children }: { children: React.ReactNode }) {
+  const [runtimeVersion, setRuntimeVersion] = useState(0)
+  const resetRuntime = useCallback(
+    () => setRuntimeVersion((value) => value + 1),
+    []
+  )
+  const [device, setDevice] = useState<DevicePreference>('auto')
+  const [backend, setBackend] = useState('')
   const [progress, setProgress] = useState<number>(0)
   const [status, setStatus] = useState<WorkerStatus>('initiate')
   const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null)
@@ -54,6 +75,12 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
   return (
     <ModelContext.Provider
       value={{
+        runtimeVersion,
+        resetRuntime,
+        device,
+        setDevice,
+        backend,
+        setBackend,
         progress,
         setProgress,
         status,
