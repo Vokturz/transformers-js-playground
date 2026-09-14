@@ -1,15 +1,6 @@
----
-title: Transformers.js Playground
-emoji: 🌍
-colorFrom: indigo
-colorTo: blue
-sdk: static
-pinned: false
-app_build_command: npm run build
-app_file: dist/index.html
----
+# Transformers.js Playground
 
-# In-Browser AI with Hugging Face Transformers.js
+## In-Browser AI with Hugging Face Transformers.js
 
 This project is a web-based application built with React and TypeScript that demonstrates how to run Hugging Face Transformers models directly in the browser. It leverages the power of the `transformers.js` library to perform various NLP tasks like text generation, text classification, and zero-shot classification without any server-side backend for the model inference.
 
